@@ -118,7 +118,7 @@ const API = 'https://script.google.com/macros/s/AKfycbytPwCL-MZPwtpr3swxDePb4oKk
 const tg = window.Telegram && Telegram.WebApp;
 if (tg) { tg.ready(); tg.expand(); try { tg.setHeaderColor('#01825F'); } catch (e) {} }
 
-let D = null, ekran = null, seg = {}, qidir = '', davr = 'oy', F = null, natija = null, MOL = {}, moliyaOy = null;
+let D = null, ekran = null, seg = {}, qidir = '', davr = 'oy', F = null, natija = null, MOL = {}, moliyaOy = null, bT = '', bF = '';
 const $ = id => document.getElementById(id);
 const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const pul = n => n == null || n === '' || isNaN(n) ? '' : String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, ' ') + " so'm";
@@ -149,8 +149,8 @@ async function yukla(jim) {
 function menyu() {
   const r = D.rol;
   if (r.admin) return [['stat', '📊', 'Statistika'], ['ishlar', '📋', 'Ishlar'], ['ustalar', '👷', 'Ustalar'], ['moliya', '💰', 'Moliya'], ['yangi', '➕', 'Yangi']];
-  if (r.xodim) return [['yangi', '➕', 'Yangi ish'], ['mening', '📋', 'Bergan ishlarim'], ['ustalar', '👷', 'Ustalar']].concat(r.usta ? [['usta', '🔧', 'Usta ishlarim']] : []);
-  return [['usta', '🔧', 'Ishlarim'], ['bajarilgan', '✅', 'Bajarilgan'], ['moliya', '💰', 'Balans']];
+  if (r.xodim) return [['yangi', '➕', 'Yangi ish'], ['mening', '📋', 'Bergan ishlarim'], ['ustalar', '👷', 'Ustalar']].concat(r.usta ? [['usta', '🔧', 'Usta ishlarim'], ['bosh', '🆓', 'Bo\'sh ishlar']] : []);
+  return [['usta', '🔧', 'Ishlarim'], ['bosh', '🆓', 'Bo\'sh ishlar'], ['bajarilgan', '✅', 'Bajarilgan'], ['moliya', '💰', 'Balans']];
 }
 function chiz() {
   const r = D.rol;
@@ -166,7 +166,7 @@ function chiz() {
   $('nav').innerHTML = M.map(m => '<button data-e="' + m[0] + '" class="' + (m[0] === ekran ? 'on' : '') + '"><span class="ic">' + m[1] + '</span>' + m[2] + '</button>').join('');
   [...$('nav').children].forEach(b => b.onclick = () => { ekran = b.dataset.e; natija = null; hap('sel'); chiz(); window.scrollTo(0, 0); });
   $('ref').hidden = ekran === 'yangi';
-  ({ stat: ekStat, ishlar: ekIshlar, ustalar: ekUstalar, yangi: ekYangi, mening: ekMening, usta: ekUsta, bajarilgan: ekBajarilgan, moliya: ekMoliya })[ekran]();
+  ({ stat: ekStat, ishlar: ekIshlar, ustalar: ekUstalar, yangi: ekYangi, mening: ekMening, usta: ekUsta, bajarilgan: ekBajarilgan, moliya: ekMoliya, bosh: ekBosh })[ekran]();
 }
 
 /* ---------- Umumiy: ish kartasi va ro'yxat ---------- */
@@ -325,6 +325,33 @@ function ekBajarilgan() {
     '<div class="kpi"><b>' + o.length + '</b><span>bu oy</span></div><div class="kpi"><b>' + dav(ort(o.map(i => i.ustaMin).filter(x => x != null))) + '</b><span>bu oy o\'rtacha ish vaqti</span></div></div>';
   h += '<h2>Bajarilgan ishlar</h2>' + (L.length ? L.slice(0, 50).map(i => karta(i, false)).join('') : bosh('📭', 'Hali yopilgan ish yo\'q'));
   $('main').innerHTML = h;
+}
+
+/* ---------- Usta uchun bo'sh ishlar (mijoz ma'lumoti yashirilgan) ---------- */
+function ekBosh() {
+  const L = D.boshIshlar || [];
+  const turlar = [...new Set([].concat(...L.map(i => i.ishlar.map(x => x.turi))))];
+  const filiallar = [...new Set(L.map(i => i.filial).filter(Boolean))].sort();
+  if (bT && !turlar.includes(bT)) bT = ''; if (bF && !filiallar.includes(bF)) bF = '';
+  const R = L.filter(i => (!bT || i.ishlar.some(x => x.turi === bT)) && (!bF || i.filial === bF));
+  const chip = (v, cur, k, n) => '<button class="chip' + (v === cur ? ' on' : '') + '" data-' + k + '="' + esc(v) + '">' + (v ? esc(v) : 'Hammasi') + (n != null ? ' · ' + n : '') + '</button>';
+  let h = '<label class="f">🛠 Ish turi</label><div class="chips">' + chip('', bT, 'bt', L.length) + turlar.map(t => chip(t, bT, 'bt', L.filter(i => i.ishlar.some(x => x.turi === t)).length)).join('') + '</div>';
+  if (filiallar.length > 1) h += '<label class="f">🏢 Filial</label><div class="chips">' + chip('', bF, 'bf') + filiallar.map(f => chip(f, bF, 'bf')).join('') + '</div>';
+  const io = String(D.meta.ishOlish || ''), tel = (io.match(/\+?\d[\d\s]{8,}/) || [''])[0].replace(/\s/g, '');
+  h += R.length ? '<h2>Bo\'sh ishlar · ' + R.length + '</h2>' + R.map(i => {
+    const jami = i.ishlar.reduce((s, x) => s + (x.summa || 0), 0);
+    return '<div class="card"><div class="row"><div><div class="name">' + esc(i.mijoz) + '</div><span class="pill wait">⏳ ' + dav(i.tushganMin) + 'dan beri bo\'sh</span></div>' +
+      '<div class="time">' + esc(i.sana) + '<br>' + esc(i.vaqt) + '</div></div>' +
+      '<div class="jobs">' + i.ishlar.map(x => '<div class="job"><span><b>' + esc(x.turi) + '</b> × ' + x.soni + '</span><span>' + pul(x.summa) + '</span></div>').join('') +
+        (i.ishlar.length > 1 && jami ? '<div class="job" style="border-top:1px solid var(--mist);margin-top:4px;padding-top:6px"><b>Jami</b><b>' + pul(jami) + '</b></div>' : '') + '</div>' +
+      '<div class="line muted"><span class="i">📞</span><span>' + esc(i.tel) + '</span></div>' +
+      '<div class="line muted"><span class="i">🏢</span><span>' + esc(i.filial || '—') + '</span></div>' +
+      (io ? '<div class="line"><span class="i">📲</span><span>Ishni olish uchun: ' + (tel ? '<a class="tel" style="font-size:14px" href="tel:' + esc(tel) + '">' + esc(io) + '</a>' : esc(io)) + '</span></div>' : '') +
+      '</div>'; }).join('') : bosh('✨', L.length ? 'Bu filtrda bo\'sh ish yo\'q' : 'Hozircha bo\'sh ish yo\'q');
+  h += '<p class="muted small" style="margin:12px 4px">Mijoz ismi va telefoni yashirilgan. Ish sizga biriktirilgach, to\'liq ma\'lumot «Ishlarim»da va botdagi xabarda chiqadi.</p>';
+  $('main').innerHTML = h;
+  document.querySelectorAll('[data-bt]').forEach(b => b.onclick = () => { bT = b.dataset.bt; hap('sel'); chiz(); });
+  document.querySelectorAll('[data-bf]').forEach(b => b.onclick = () => { bF = b.dataset.bf; hap('sel'); chiz(); });
 }
 
 /* ---------- Ustalar holati ---------- */
