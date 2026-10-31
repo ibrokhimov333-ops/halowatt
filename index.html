@@ -412,7 +412,7 @@ function ekBosh() {
         (i.ishlar.length > 1 && jami ? '<div class="job" style="border-top:1px solid var(--mist);margin-top:4px;padding-top:6px"><b>Jami</b><b>' + pul(jami) + '</b></div>' : '') + '</div>' +
       '<div class="line muted"><span class="i">📞</span><span>' + esc(i.tel) + '</span></div>' +
       '<div class="line muted"><span class="i">🏢</span><span>' + esc(i.filial || '—') + '</span></div>' +
-      (D.rol.usta ? (i.sorov ? '<button class="btn ghost" disabled>⏳ So\'rov yuborildi — rahbar javobini kuting</button>'
+      (D.rol.usta ? (i.sorov ? '<button class="btn ghost" disabled>⏳ So\'rov yuborildi — Nematilloning javobini kuting</button>'
         : menBand ? '<button class="btn ghost" disabled>🔒 Avval ochiq ishingizni yoping</button>'
         : '<button class="btn" data-ol="' + esc(i.h) + '">🙋 Ishni olaman</button>') : '') +
       '</div>'; }).join('') : bosh('✨', L.length ? 'Bu filtrda bo\'sh ish yo\'q' : 'Hozircha bo\'sh ish yo\'q');
