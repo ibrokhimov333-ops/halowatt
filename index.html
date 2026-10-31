@@ -197,6 +197,8 @@ function amallar(i) {
   if (ochiq && (r.admin || (r.xodim && i.shaxs === r.xodim))) b.push(['usta', i.usta ? '🔁 Ustani almashtirish' : '👷 Usta biriktirish', '']);
   if (ochiq && r.admin) { b.push(['tahrir', '✏️ Tahrirlash', '']); b.push(['otkaz', '❌ Otkaz', 'red']); }
   if (i.otkaz && r.admin) b.push(['sabab', !i.sabab || /ko.rsatilmagan/i.test(i.sabab) ? '📝 Otkaz sababini belgilash' : '📝 Sababni o\'zgartirish', !i.sabab || /ko.rsatilmagan/i.test(i.sabab) ? 'red' : '']);
+  if (i.rasm && r.admin) b.push(['rasm', '📸 Rasmlar · ' + i.rasm, '']);
+  if (i.tarixN && ochiq && r.usta && i.usta === r.usta) b.push(['utarix', '📞 Mijoz tarixi · ' + i.tarixN, '']);
   if (r.admin && D.barcha && i.tel) { const n = D.barcha.filter(x => x.tel === i.tel && x.h !== i.h).length; if (n) b.push(['tarix', '📞 Mijoz tarixi · ' + n, '']); }
   return b.length ? '<div class="acts">' + b.map(x => '<button class="act ' + x[2] + '" data-act="' + x[0] + '" data-h="' + esc(i.h) + '">' + x[1] + '</button>').join('') + '</div>' : '';
 }
@@ -264,10 +266,41 @@ function amalBos(act, h) {
     document.querySelectorAll('[data-sb]').forEach(b => b.onclick = () => { tanlov = b.dataset.sb; document.querySelectorAll('[data-sb]').forEach(x => x.classList.toggle('on', x === b)); $('s_sabab').value = ''; hap('sel'); });
     $('s_ok').onclick = () => { const s = $('s_sabab').value.trim() || tanlov; if (!s) return xabar('Sababni tanlang yoki yozing.'); amal({ api: 'sabab', h, sabab: s }, $('s_ok')); };
   }
+  if (act === 'rasm') rasmKor(h, i.rasm, esc(i.mijoz) + ' · ' + esc(i.usta || ''));
+  if (act === 'utarix') {
+    oyna('📞 Mijoz tarixi', '<p class="muted small" style="margin:0 2px 8px">' + esc(i.mijoz) + ' · ' + esc(i.tel) + '</p><div id="ut"><div class="spin"></div></div>');
+    (async () => {
+      try {
+        const r = await api({ api: 'tarix', h }); if (!r.ok) throw new Error(r.xato);
+        const el = $('ut'); if (!el) return;
+        el.innerHTML = r.ishlar.length ? r.ishlar.map(x => '<div class="card"><div class="row"><div><div class="name">' + esc(x.ishlar.map(y => y.turi + ' × ' + y.soni).join(', ')) + '</div>' +
+          (x.otkaz ? '<span class="pill otk">❌ Otkaz' + (x.sabab ? ' · ' + esc(x.sabab) : '') + '</span>' : x.yopildi ? '<span class="pill done">✅ ' + esc(x.yopVaqt) + '</span>' : '<span class="pill work">🔧 Ochiq</span>') +
+          '</div><div class="time">' + esc(x.sana) + '<br>' + esc(x.vaqt) + '</div></div>' +
+          '<div class="line muted"><span class="i">👷</span><span>' + esc(x.usta || '—') + '</span></div>' +
+          (x.manzil ? '<div class="line"><span class="i">📍</span><span>' + esc(x.manzil) + '</span></div>' : '') +
+          (x.izoh ? '<div class="line"><span class="i">📝</span><span>' + esc(x.izoh) + '</span></div>' : '') +
+          (x.rasm ? '<div class="acts"><button class="act" data-rk="' + esc(x.h) + '" data-n="' + x.rasm + '">📸 Rasmlar · ' + x.rasm + '</button></div>' : '') + '</div>').join('')
+          : bosh('📭', 'Bu mijozning oldingi ishlari yo\'q');
+        document.querySelectorAll('[data-rk]').forEach(b => b.onclick = () => rasmKor(b.dataset.rk, +b.dataset.n, esc(i.mijoz), () => amalBos('utarix', h)));
+      } catch (e) { const el = $('ut'); if (el) el.innerHTML = '<div class="err">⚠️ ' + esc(e.message) + '</div>'; }
+    })();
+  }
   if (act === 'tarix') {
     const L = D.barcha.filter(x => x.tel === i.tel && x.h !== i.h);
     oyna('📞 ' + i.tel + ' — oldingi ishlar', L.map(x => karta(x, false).replace(/<div class="acts">[\s\S]*?<\/div>(?=<\/div>$)/, '')).join(''));
   }
+}
+/* Rasmlarni ko'rsatish (ruxsat serverda tekshiriladi) */
+function rasmKor(h, n, sub, orqaga) {
+  oyna('📸 Ish rasmlari', (orqaga ? '<button class="act" id="rorqa" style="margin-bottom:8px">← Tarixga qaytish</button>' : '') +
+    '<p class="muted small" style="margin:0 2px 8px">' + sub + '</p>' + Array.from({ length: n }, (_, k) => '<div class="spin" id="rs' + k + '"></div>').join(''));
+  if (orqaga) $('rorqa').onclick = orqaga;
+  (async () => { for (let k = 0; k < n; k++) {
+    const el = $('rs' + k); if (!el) return;
+    try { const r = await api({ api: 'rasm', h, k }); if (!r.ok) throw new Error(r.xato);
+      const e2 = $('rs' + k); if (e2) e2.outerHTML = '<img src="' + r.rasm + '" style="width:100%;border-radius:12px;margin-bottom:10px;display:block">';
+    } catch (e) { const e2 = $('rs' + k); if (e2) e2.outerHTML = '<div class="err">⚠️ ' + esc(e.message) + '</div>'; }
+  } })();
 }
 function segChiz(kalit, variantlar) {
   if (!seg[kalit] || !variantlar.some(v => v[0] === seg[kalit])) seg[kalit] = variantlar[0][0];
@@ -496,16 +529,39 @@ function ekYangi() {
 
 /* ---------- Ishni tugatdim ---------- */
 function tugat(h, btn) {
-  const ok = async () => {
-    btn.disabled = true; btn.textContent = 'Yopilmoqda…';
-    try {
-      const r = await api({ api: 'tugatdim', h });
-      if (!r.ok) throw new Error(r.xato);
-      hap('success'); btn.textContent = '✅ Yopildi'; await yukla(true);
-    } catch (e) { btn.disabled = false; btn.textContent = '✅ Ishni tugatdim'; xabar('⚠️ ' + e.message); }
+  const R = [];   // tayyor JPEG (dataURL)
+  oyna('✅ Ishni tugatish', '<p class="muted small" style="margin:0 2px 10px">📸 Bajarilgan ish rasmini yuklang (1–3 ta). <b>Rasmsiz ish yopilmaydi.</b></p>' +
+    '<div id="rp" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px"></div>' +
+    '<label class="btn ghost" id="rl" style="display:block;text-align:center;cursor:pointer">📷 Rasm qo\'shish<input type="file" accept="image/*" multiple id="rf" style="display:none"></label>' +
+    '<button class="btn" id="r_ok" disabled>✅ Ishni yopish</button>');
+  const chizR = () => {
+    $('rp').innerHTML = R.map((d, k) => '<div style="position:relative"><img src="' + d + '" style="width:100%;aspect-ratio:1;object-fit:cover;border-radius:10px;display:block">' +
+      '<button data-rx="' + k + '" style="position:absolute;top:4px;right:4px;border:0;border-radius:50%;width:24px;height:24px;background:rgba(0,0,0,.6);color:#fff">✕</button></div>').join('');
+    document.querySelectorAll('[data-rx]').forEach(b => b.onclick = () => { R.splice(+b.dataset.rx, 1); chizR(); });
+    $('r_ok').disabled = !R.length; $('rl').style.display = R.length >= 3 ? 'none' : 'block';
   };
-  if (tg && tg.showConfirm) tg.showConfirm('Ishni tugatdingizmi? Ish yopiladi va guruhga xabar ketadi.', y => y && ok());
-  else if (confirm('Ishni tugatdingizmi?')) ok();
+  const kichrayt = f => new Promise((ok, no) => {
+    const u = URL.createObjectURL(f), im = new Image();
+    im.onload = () => { const k = Math.min(1, 1280 / Math.max(im.width, im.height)), c = document.createElement('canvas');
+      c.width = Math.round(im.width * k); c.height = Math.round(im.height * k);
+      c.getContext('2d').drawImage(im, 0, 0, c.width, c.height); URL.revokeObjectURL(u); ok(c.toDataURL('image/jpeg', 0.75)); };
+    im.onerror = () => { URL.revokeObjectURL(u); no(new Error('Rasmni o\'qib bo\'lmadi')); };
+    im.src = u;
+  });
+  $('rf').onchange = async e => {
+    for (const f of [...e.target.files].slice(0, 3 - R.length)) { try { R.push(await kichrayt(f)); } catch (x) { xabar('⚠️ ' + x.message); } }
+    e.target.value = ''; hap('sel'); chizR();
+  };
+  $('r_ok').onclick = async () => {
+    if (!R.length) return xabar('📸 Kamida 1 ta rasm yuklang.');
+    const b = $('r_ok'); b.disabled = true; b.textContent = 'Yuklanmoqda…';
+    try {
+      const r = await api({ api: 'tugatdim', h, rasmlar: R });
+      if (!r.ok) throw new Error(r.xato);
+      hap('success'); yop(); if (btn) { btn.disabled = true; btn.textContent = '✅ Yopildi'; }
+      xabar(r.oldin ? '✅ Bu ish allaqachon yopilgan.' : '✅ Ish yopildi — ' + r.vaqt + '\n📸 ' + r.rasm + ' ta rasm saqlandi.'); await yukla(true);
+    } catch (x) { b.disabled = false; b.textContent = '✅ Ishni yopish'; hap('error'); xabar('⚠️ ' + x.message); }
+  };
 }
 
 $('ref').onclick = () => { hap('sel'); MOL = {}; yukla(); };
