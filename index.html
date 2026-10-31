@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<title>Halowatt Servis</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --teal:#01825F; --green:#42C970; --mint:#98CF8A; --gray:#6A8D88; --mist:#CFDBD9;
+    --ice:#E7F2F3; --charcoal:#30403F; --slate:#1F2D2D; --red:#9B1C1C; --orange:#C26A12;
+    --bg:#F4F8F8; --card:#FFFFFF; --text:var(--slate); --muted:var(--gray); --line:#E1EBEA;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{ --bg:#141E1E; --card:#1F2D2D; --text:#EAF2F1; --muted:#98B0AC; --line:#2C3D3C; --ice:#22403A; }
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;background:var(--bg);color:var(--text);font-family:Manrope,system-ui,sans-serif}
+  body{padding:0 0 calc(24px + env(safe-area-inset-bottom))}
+  header{background:var(--teal);color:#fff;padding:18px 16px 14px}
+  header .t{font-weight:800;font-size:19px;letter-spacing:.2px}
+  header .s{opacity:.85;font-size:13px;margin-top:3px}
+  .tabs{display:flex;gap:6px;padding:10px 12px;position:sticky;top:0;background:var(--bg);z-index:5}
+  .tab{flex:1;border:0;border-radius:12px;padding:10px 6px;font:600 14px Manrope,sans-serif;background:var(--card);color:var(--muted);box-shadow:0 0 0 1px var(--line) inset}
+  .tab.on{background:var(--teal);color:#fff;box-shadow:none}
+  .tab .n{display:inline-block;min-width:20px;padding:0 6px;margin-left:4px;border-radius:10px;background:rgba(0,0,0,.08);font-size:12px}
+  .tab.on .n{background:rgba(255,255,255,.25)}
+  main{padding:0 12px}
+  .card{background:var(--card);border-radius:16px;padding:14px;margin:10px 0;box-shadow:0 1px 0 var(--line),0 0 0 1px var(--line) inset}
+  .row{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+  .name{font-weight:800;font-size:17px}
+  .time{font-size:12px;color:var(--muted);white-space:nowrap;text-align:right}
+  .pill{display:inline-block;font-size:12px;font-weight:700;border-radius:20px;padding:3px 9px;margin-top:6px}
+  .pill.wait{background:#FDF0E2;color:var(--orange)}
+  .pill.work{background:var(--ice);color:var(--teal)}
+  .pill.done{background:var(--ice);color:var(--gray)}
+  .jobs{margin:10px 0 4px;padding:10px 12px;border-radius:12px;background:var(--ice)}
+  .job{display:flex;justify-content:space-between;font-size:14px;padding:2px 0}
+  .job b{font-weight:700}
+  .line{display:flex;gap:8px;font-size:14px;padding:5px 0;align-items:flex-start}
+  .line .i{width:20px;text-align:center;flex:none}
+  a.tel{color:var(--teal);font-weight:800;text-decoration:none;font-size:16px}
+  a.map{color:var(--teal);text-decoration:none}
+  .muted{color:var(--muted)}
+  .btn{display:block;width:100%;margin-top:12px;border:0;border-radius:12px;padding:13px;font:800 15px Manrope,sans-serif;background:var(--teal);color:#fff}
+  .btn:active{opacity:.8}
+  .btn[disabled]{opacity:.5}
+  .empty{text-align:center;padding:48px 20px;color:var(--muted)}
+  .empty .e{font-size:40px;margin-bottom:8px}
+  .u{display:flex;justify-content:space-between;align-items:center;padding:12px 2px;border-bottom:1px solid var(--line)}
+  .u:last-child{border-bottom:0}
+  .u .nm{font-weight:700}
+  .u .st{font-size:13px;font-weight:700}
+  .st.free{color:var(--green)} .st.busy{color:var(--orange)}
+  .sum{display:flex;gap:8px;margin:4px 0 2px}
+  .sum div{flex:1;background:var(--card);border-radius:14px;padding:12px;text-align:center;box-shadow:0 0 0 1px var(--line) inset}
+  .sum b{display:block;font-size:22px;font-weight:800}
+  .sum span{font-size:12px;color:var(--muted)}
+  .refresh{position:fixed;right:16px;bottom:calc(16px + env(safe-area-inset-bottom));width:48px;height:48px;border-radius:24px;border:0;background:var(--teal);color:#fff;font-size:20px;box-shadow:0 4px 14px rgba(0,0,0,.18)}
+  .err{background:#FBEAEA;color:var(--red);border-radius:12px;padding:12px;margin:12px;font-size:14px}
+  .spin{width:28px;height:28px;border:3px solid var(--mist);border-top-color:var(--teal);border-radius:50%;animation:s 0.8s linear infinite;margin:60px auto}
+  @keyframes s{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<header><div class="t">Halowatt · Servis</div><div class="s" id="sub">Yuklanmoqda…</div></header>
+<div class="tabs" id="tabs" hidden></div>
+<main id="main"><div class="spin"></div></main>
+<button class="refresh" id="ref" title="Yangilash" hidden>⟳</button>
+
+<script>
+const API = 'https://script.google.com/macros/s/AKfycbytPwCL-MZPwtpr3swxDePb4oKkduTxQmbasS2ZC251Wr2sI0lDcvwIHyBYCd1LJEyeSg/exec';
+const tg = window.Telegram && Telegram.WebApp;
+if (tg) { tg.ready(); tg.expand(); try { tg.setHeaderColor('#01825F'); tg.setBackgroundColor('#F4F8F8'); } catch (e) {} }
+
+let D = null, tab = null;
+const $ = id => document.getElementById(id);
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const pul = n => n == null || n === '' || isNaN(n) ? '' : String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, ' ') + " so'm";
+const dav = m => { if (m == null) return ''; const k = Math.floor(m / 1440), s = Math.floor(m % 1440 / 60), d = m % 60;
+  return k ? k + ' kun ' + (s ? s + ' soat' : '') : s ? s + ' soat ' + (d ? d + ' daq' : '') : (d || 1) + ' daq'; };
+
+async function api(body) {
+  const r = await fetch(API, { method: 'POST', body: JSON.stringify(Object.assign({ initData: tg ? tg.initData : '' }, body)) });
+  return r.json();
+}
+
+async function yukla() {
+  $('ref').disabled = true;
+  try {
+    D = await api({ api: 'ishlar' });
+    if (!D.ok) throw new Error(D.xato || 'Xatolik');
+    chiz();
+  } catch (e) {
+    $('main').innerHTML = '<div class="err">⚠️ ' + esc(e.message) + '</div>';
+    $('sub').textContent = 'Ulanib bo\'lmadi';
+  }
+  $('ref').disabled = false;
+}
+
+function chiz() {
+  const r = D.rol;
+  if (!D.ruxsat) {
+    $('sub').textContent = r.ism;
+    $('tabs').hidden = true; $('ref').hidden = true;
+    $('main').innerHTML = '<div class="empty"><div class="e">🔒</div><b>Ruxsat yo\'q</b><br><br>Botga /start yozing — so\'rovingiz adminga boradi. Ruxsat berilgach shu yerdan foydalanasiz.</div>';
+    return;
+  }
+  const rollar = [r.admin ? 'Admin' : '', r.xodim ? r.xodim + (r.filial ? ' · ' + r.filial : '') : '', r.usta ? '👷 ' + r.usta : ''].filter(Boolean);
+  $('sub').textContent = rollar.join(' · ') || r.ism;
+  $('ref').hidden = false;
+
+  const usta = !!r.usta && !r.admin && !r.xodim;
+  const T = usta
+    ? [['ochiq', 'Mening ishlarim', D.ochiq.length], ['yopilgan', 'Bajarilgan', D.yopilgan.length]]
+    : [['ochiq', 'Ochiq ishlar', D.ochiq.length], ['ustalar', 'Ustalar', D.ustalar.filter(u => !u.band).length + ' bo\'sh'], ['yopilgan', 'Yopilgan', D.yopilgan.length]];
+  if (!tab || !T.some(t => t[0] === tab)) tab = 'ochiq';
+  $('tabs').hidden = false;
+  $('tabs').innerHTML = T.map(t => '<button class="tab' + (t[0] === tab ? ' on' : '') + '" data-t="' + t[0] + '">' + esc(t[1]) + ' <span class="n">' + esc(t[2]) + '</span></button>').join('');
+  [...$('tabs').children].forEach(b => b.onclick = () => { tab = b.dataset.t; chiz(); if (tg) tg.HapticFeedback.selectionChanged(); });
+
+  let h = '';
+  if (tab === 'ustalar') {
+    const bosh = D.ustalar.filter(u => !u.band).length;
+    h += '<div class="sum"><div><b style="color:var(--green)">' + bosh + '</b><span>bo\'sh</span></div><div><b style="color:var(--orange)">' + (D.ustalar.length - bosh) + '</b><span>band</span></div></div>';
+    h += '<div class="card">' + D.ustalar.map(u => '<div class="u"><div><div class="nm">' + esc(u.nom) + '</div>' +
+      (u.band ? '<div class="muted" style="font-size:12px">' + esc(u.mijoz) + ' · ' + esc(u.qachon) + ' dan</div>' : '') +
+      '</div><div class="st ' + (u.band ? 'busy">🔒 Band' : 'free">🟢 Bo\'sh') + '</div></div>').join('') + '</div>';
+  } else {
+    const L = tab === 'ochiq' ? D.ochiq : D.yopilgan;
+    if (!L.length) h = '<div class="empty"><div class="e">' + (tab === 'ochiq' ? '✨' : '📭') + '</div>' + (tab === 'ochiq' ? (usta ? 'Hozircha sizga biriktirilgan ish yo\'q' : 'Ochiq ish yo\'q') : 'Hali yopilgan ish yo\'q') + '</div>';
+    L.forEach(i => h += karta(i, usta || (r.usta && i.usta === r.usta)));
+  }
+  $('main').innerHTML = h;
+  document.querySelectorAll('[data-yop]').forEach(b => b.onclick = () => tugat(b.dataset.yop, b));
+}
+
+function karta(i, meniki) {
+  const jami = i.ishlar.reduce((s, x) => s + (x.summa || 0), 0);
+  let holat;
+  if (i.yopildi) holat = '<span class="pill done">✅ Yopildi · ' + esc(i.yopVaqt) + '</span>';
+  else if (!i.usta) holat = '<span class="pill wait">⏳ Usta kutilmoqda · ' + dav(i.tushganMin) + '</span>';
+  else holat = '<span class="pill work">🔧 ' + esc(i.usta) + (i.ustadaMin != null ? ' · ' + dav(i.ustadaMin) : '') + '</span>';
+  const map = i.manzil ? 'https://yandex.uz/maps/?text=' + encodeURIComponent(i.manzil + ", Qo'qon") : '';
+  return '<div class="card">' +
+    '<div class="row"><div><div class="name">' + esc(i.mijoz || '—') + '</div>' + holat + '</div>' +
+    '<div class="time">' + esc(i.sana) + '<br>' + esc(i.vaqt) + '</div></div>' +
+    '<div class="jobs">' + i.ishlar.map(x => '<div class="job"><span><b>' + esc(x.turi) + '</b> × ' + x.soni + '</span><span>' + pul(x.summa) + '</span></div>').join('') +
+      (i.ishlar.length > 1 && jami ? '<div class="job" style="border-top:1px solid var(--mist);margin-top:4px;padding-top:6px"><b>Jami</b><b>' + pul(jami) + '</b></div>' : '') + '</div>' +
+    (i.tel ? '<div class="line"><span class="i">📞</span><a class="tel" href="tel:' + esc(i.tel) + '">' + esc(i.tel) + '</a></div>' : '') +
+    (i.manzil ? '<div class="line"><span class="i">📍</span><a class="map" href="' + map + '" target="_blank">' + esc(i.manzil) + '</a></div>' : '') +
+    (i.izoh ? '<div class="line"><span class="i">📝</span><span>' + esc(i.izoh) + '</span></div>' : '') +
+    '<div class="line muted"><span class="i">🏢</span><span>' + esc(i.filial || '—') + (i.shaxs ? ' · ' + esc(i.shaxs) : '') + '</span></div>' +
+    (meniki && !i.yopildi ? '<button class="btn" data-yop="' + esc(i.h) + '">✅ Ishni tugatdim</button>' : '') +
+    '</div>';
+}
+
+function tugat(h, btn) {
+  const ok = async () => {
+    btn.disabled = true; btn.textContent = 'Yopilmoqda…';
+    try {
+      const r = await api({ api: 'tugatdim', h });
+      if (!r.ok) throw new Error(r.xato);
+      if (tg) tg.HapticFeedback.notificationOccurred('success');
+      btn.textContent = '✅ Yopildi';
+      await yukla();
+    } catch (e) {
+      btn.disabled = false; btn.textContent = '✅ Ishni tugatdim';
+      tg ? tg.showAlert('⚠️ ' + e.message) : alert(e.message);
+    }
+  };
+  if (tg && tg.showConfirm) tg.showConfirm('Ishni tugatdingizmi? Ish yopiladi va guruhga xabar ketadi.', y => y && ok());
+  else if (confirm('Ishni tugatdingizmi?')) ok();
+}
+
+$('ref').onclick = () => { $('main').innerHTML = '<div class="spin"></div>'; yukla(); };
+if (!tg || !tg.initData) {
+  $('sub').textContent = '';
+  $('main').innerHTML = '<div class="empty"><div class="e">📱</div>Bu sahifa faqat Telegram ichida ishlaydi.<br><br>@halowatt_servis_bot ni oching va «📱 Ochish» tugmasini bosing.</div>';
+} else yukla();
+</script>
+</body>
+</html>
