@@ -189,6 +189,8 @@ function karta(i, tugma) {
     '<div class="line muted"><span class="i">🏢</span><span>' + esc(i.filial || '—') + (i.shaxs ? ' · ' + esc(i.shaxs) : '') + '</span></div>' +
     (i.otkaz ? '<div class="line" style="color:var(--red)"><span class="i">❌</span><span>' + (!i.sabab || /ko.rsatilmagan/i.test(i.sabab) ? '<b>Otkaz sababi belgilanmagan</b>' : 'Otkaz sababi: <b>' + esc(i.sabab) + '</b>') + '</span></div>' : '') +
     (i.yopildi && i.kutishMin != null ? '<div class="line muted small"><span class="i">⏱</span><span>Ustaga berilguncha ' + dav(i.kutishMin) + ' · usta ' + dav(i.ustaMin) + '</span></div>' : '') +
+    (i.yopildi && !i.otkaz && i.tolov ? '<div class="line small" style="color:' + (i.tolov.holat === 'Tasdiqlandi' ? 'var(--teal)' : 'var(--orange)') + '"><span class="i">💵</span><span>' +
+      (i.tolov.holat === 'Tasdiqlandi' ? 'To\'lov tasdiqlangan' : 'To\'lov tasdiq kutmoqda') + ': <b>' + pul(i.tolov.summa) + '</b> · ' + esc(i.tolov.usul) + '</span></div>' : '') +
     (tugma && !i.yopildi && !i.otkaz ? '<button class="btn" data-yop="' + esc(i.h) + '">✅ Ishni tugatdim</button>' : '') + amallar(i) + '</div>';
 }
 /* Ish kartasidagi amallar — huquqqa qarab */
@@ -198,6 +200,7 @@ function amallar(i) {
   if (ochiq && r.admin) { b.push(['tahrir', '✏️ Tahrirlash', '']); b.push(['otkaz', '❌ Otkaz', 'red']); }
   if (i.otkaz && r.admin) b.push(['sabab', !i.sabab || /ko.rsatilmagan/i.test(i.sabab) ? '📝 Otkaz sababini belgilash' : '📝 Sababni o\'zgartirish', !i.sabab || /ko.rsatilmagan/i.test(i.sabab) ? 'red' : '']);
   if (i.rasm && r.admin) b.push(['rasm', '📸 Rasmlar · ' + i.rasm, '']);
+  if (i.yopildi && !i.otkaz && !i.tolov && r.usta && i.usta === r.usta) b.push(['tolov', '💵 To\'lovni kiritish', 'red']);
   if (i.tarixN && ochiq && r.usta && i.usta === r.usta) b.push(['utarix', '📞 Mijoz tarixi · ' + i.tarixN, '']);
   if (r.admin && D.barcha && i.tel) { const n = D.barcha.filter(x => x.tel === i.tel && x.h !== i.h).length; if (n) b.push(['tarix', '📞 Mijoz tarixi · ' + n, '']); }
   return b.length ? '<div class="acts">' + b.map(x => '<button class="act ' + x[2] + '" data-act="' + x[0] + '" data-h="' + esc(i.h) + '">' + x[1] + '</button>').join('') + '</div>' : '';
@@ -218,7 +221,7 @@ async function amal(body, btn, matn) {
   try {
     const r = await api(body);
     if (!r.ok) throw new Error(r.xato || 'Xatolik');
-    hap('success'); yop(); xabar((r.natija || ['✅ Bajarildi']).join('\n')); await yukla(true);
+    hap('success'); yop(); xabar((r.natija || ['✅ Bajarildi']).join('\n')); MOL = {}; await yukla(true);
   } catch (e) { if (btn) { btn.disabled = false; btn.textContent = btn.dataset.t; } hap('error'); xabar('⚠️ ' + e.message); }
 }
 function amalBos(act, h) {
@@ -266,6 +269,11 @@ function amalBos(act, h) {
     document.querySelectorAll('[data-sb]').forEach(b => b.onclick = () => { tanlov = b.dataset.sb; document.querySelectorAll('[data-sb]').forEach(x => x.classList.toggle('on', x === b)); $('s_sabab').value = ''; hap('sel'); });
     $('s_ok').onclick = () => { const s = $('s_sabab').value.trim() || tanlov; if (!s) return xabar('Sababni tanlang yoki yozing.'); amal({ api: 'sabab', h, sabab: s }, $('s_ok')); };
   }
+  if (act === 'tolov') {
+    oyna('💵 Mijozdan olingan to\'lov', '<p class="muted small" style="margin:0 2px 8px">' + esc(i.mijoz) + '</p>' + tolovMaydon(i) + '<button class="btn" id="tl_ok">💾 Yuborish</button>');
+    tolovUlash();
+    $('tl_ok').onclick = () => { const t = tolovOl(); if (!t) return; amal(Object.assign({ api: 'tolov', h }, t), $('tl_ok'), 'Yuborilmoqda…'); };
+  }
   if (act === 'rasm') rasmKor(h, i.rasm, esc(i.mijoz) + ' · ' + esc(i.usta || ''));
   if (act === 'utarix') {
     oyna('📞 Mijoz tarixi', '<p class="muted small" style="margin:0 2px 8px">' + esc(i.mijoz) + ' · ' + esc(i.tel) + '</p><div id="ut"><div class="spin"></div></div>');
@@ -289,6 +297,24 @@ function amalBos(act, h) {
     const L = D.barcha.filter(x => x.tel === i.tel && x.h !== i.h);
     oyna('📞 ' + i.tel + ' — oldingi ishlar', L.map(x => karta(x, false).replace(/<div class="acts">[\s\S]*?<\/div>(?=<\/div>$)/, '')).join(''));
   }
+}
+/* 💵 To'lov maydonlari: har bir ish turi uchun summa + usul (naqd/karta) */
+let TU = '';
+const fmtSon = v => { const r = String(v == null ? '' : v).replace(/\D/g, ''); return r ? r.replace(/\B(?=(\d{3})+(?!\d))/g, ' ') : ''; };
+function tolovMaydon(i) {
+  TU = '';
+  return i.ishlar.map((x, k) => '<label class="f">💰 ' + esc(x.turi) + ' × ' + x.soni + ' — mijozdan olingan</label><input class="in" inputmode="numeric" data-tsm="' + k + '" value="' + fmtSon(x.summa) + '" placeholder="Summa, so\'m">').join('') +
+    '<label class="f">To\'lov usuli *</label><div class="chips"><button class="chip" data-tu="naqd">💵 Naqd</button><button class="chip" data-tu="karta">💳 Karta</button></div>';
+}
+function tolovUlash() {
+  document.querySelectorAll('[data-tsm]').forEach(e => e.oninput = () => { e.value = fmtSon(e.value); });
+  document.querySelectorAll('[data-tu]').forEach(b => b.onclick = () => { TU = b.dataset.tu; document.querySelectorAll('[data-tu]').forEach(x => x.classList.toggle('on', x === b)); hap('sel'); });
+}
+function tolovOl() {
+  const summalar = [...document.querySelectorAll('[data-tsm]')].map(e => e.value.replace(/\D/g, '') || '0');
+  if (!summalar.some(x => +x > 0)) { xabar('💰 Mijozdan olingan summani kiriting.'); return null; }
+  if (!TU) { xabar('To\'lov usulini tanlang: naqd yoki karta.'); return null; }
+  return { summalar, usul: TU };
 }
 /* Rasmlarni ko'rsatish (ruxsat serverda tekshiriladi) */
 function rasmKor(h, n, sub, orqaga) {
@@ -453,9 +479,19 @@ async function ekMoliya() {
   $('m_p').onclick = () => { moliyaOy = oySur(oy, -1); chiz(); };
   $('m_n').onclick = () => { if (oy < D.meta.bugun.slice(0, 7)) { moliyaOy = oySur(oy, 1); chiz(); } };
   try {
-    if (!MOL[oy]) { const r = await api({ api: 'moliya', oy }); if (!r.ok) throw new Error(r.xato); MOL[oy] = r.moliya; }
+    if (!MOL[oy]) { const r = await api({ api: 'moliya', oy }); if (!r.ok) throw new Error(r.xato); MOL[oy] = r; }
     if (ekran !== 'moliya' || moliyaOy !== oy) return;
-    const M = MOL[oy], j = k => M.reduce((s, x) => s + (x[k] || 0), 0);
+    const MR = MOL[oy], M = MR.moliya, j = k => M.reduce((s, x) => s + (x[k] || 0), 0);
+    const KT = MR.kutish || [], TR = MR.tarix || [];
+    const tlKarta = (t, tug) => '<div class="card"><div class="row"><div><div class="name">' + (t.turi === 'ish' ? '💵 Ish to\'lovi' : '🏦 Depozit') + ' · ' + esc(t.usta) + '</div>' +
+      '<span class="pill ' + (t.holat === 'Tasdiqlandi' ? 'done' : t.holat === 'Rad etildi' ? 'otk' : 'wait') + '">' + (t.holat === 'Tasdiqlandi' ? '✅' : t.holat === 'Rad etildi' ? '❌' : '⏳') + ' ' + esc(t.holat) + '</span></div>' +
+      '<div class="time">' + esc(t.vaqt) + '</div></div>' +
+      '<div class="mrow"><span>' + (t.mijoz ? esc(t.mijoz) : 'Summa') + '</span><b>' + pul(t.summa) + ' · ' + (t.usul === 'karta' ? '💳 karta' : '💵 naqd') + '</b></div>' +
+      (t.izoh ? '<div class="line small"><span class="i">📝</span><span>' + esc(t.izoh) + '</span></div>' : '') +
+      (t.kim ? '<div class="line muted small"><span class="i">👤</span><span>' + esc(t.kim) + ' · ' + esc(t.tvaqt) + '</span></div>' : '') +
+      (tug ? '<div class="acts"><button class="act" data-tq="1" data-id="' + esc(t.id) + '">✅ Tasdiqlash</button><button class="act red" data-tq="0" data-id="' + esc(t.id) + '">❌ Rad etish</button></div>' : '') + '</div>';
+    if (D.rol.admin && KT.length) h += '<h2>⏳ Tasdiq kutayotganlar · ' + KT.length + '</h2>' + KT.map(t => tlKarta(t, true)).join('');
+    if (!D.rol.admin && D.rol.usta) h += '<button class="btn" id="dp_yangi">🏦 Depozit kiritish</button>' + (KT.length ? '<h2>⏳ Tasdiq kutilmoqda</h2>' + KT.map(t => tlKarta(t, false)).join('') : '');
     if (D.rol.admin) h += '<div class="kpis"><div class="kpi"><b>' + j('oyIsh') + '</b><span>ish (usta varaqlari)</span></div><div class="kpi"><b>' + mln(j('oySumma')) + '</b><span>ishga olingan summa</span></div>' +
       '<div class="kpi"><b>' + mln(j('oyServis')) + '</b><span>servis daromadi 10%</span></div><div class="kpi"><b>' + mln(j('oyDepozit')) + '</b><span>depozit</span></div></div>';
     h += M.slice().sort((a, b) => b.oySumma - a.oySumma).map(x => '<div class="card"><div class="row"><div class="name">' + esc(x.nom) + '</div><div class="time">' + x.oyIsh + ' ta ish</div></div>' +
@@ -464,7 +500,28 @@ async function ekMoliya() {
       '<div class="mrow"><span>Depozit (shu oy)</span><b>' + pul(x.oyDepozit) + '</b></div>' +
       '<div class="mrow" style="border-top:1px solid var(--line);margin-top:4px;padding-top:8px"><span>Umumiy balans</span><b class="' + (x.balans < 0 ? 'neg' : 'pos') + '">' + pul(x.balans) + '</b></div></div>').join('');
     h += '<p class="muted small" style="margin:12px 4px">Balans = barcha depozitlar − barcha servis daromadi (10%), ustaning varag\'idagi hamma qatorlar bo\'yicha. Manfiy bo\'lsa — usta qarzdor.</p>';
+    if (TR.length) h += '<h2>So\'nggi to\'lov va depozitlar</h2>' + TR.slice(0, 15).map(t => tlKarta(t, false)).join('');
     $('main').innerHTML = h;
+    document.querySelectorAll('[data-tq]').forEach(b => b.onclick = () => {
+      const ok = b.dataset.tq === '1', id = b.dataset.id;
+      const go = () => amal({ api: 'tasdiq', id, ok }, b, ok ? 'Tasdiqlanmoqda…' : 'Bajarilmoqda…');
+      tg && tg.showConfirm ? tg.showConfirm(ok ? 'Tasdiqlansinmi? Usta balansi yangilanadi.' : 'Rad etilsinmi?', y => y && go()) : go();
+    });
+    if ($('dp_yangi')) $('dp_yangi').onclick = () => {
+      TU = '';
+      oyna('🏦 Depozit kiritish', '<label class="f">💰 Summa *</label><input class="in" inputmode="numeric" id="dp_s" placeholder="Summa, so\'m">' +
+        '<label class="f">To\'lov usuli *</label><div class="chips"><button class="chip" data-tu="naqd">💵 Naqd</button><button class="chip" data-tu="karta">💳 Karta</button></div>' +
+        '<label class="f">📝 Izoh</label><input class="in" id="dp_i" placeholder="Kimga topshirildi va h.k.">' +
+        '<button class="btn" id="dp_ok">💾 Yuborish</button><p class="muted small" style="margin:8px 2px">Rahbar tasdiqlagach balansga qo\'shiladi.</p>');
+      tolovUlash();
+      $('dp_s').oninput = () => { $('dp_s').value = fmtSon($('dp_s').value); };
+      $('dp_ok').onclick = () => {
+        const sm = $('dp_s').value.replace(/\D/g, '');
+        if (!(+sm > 0)) return xabar('💰 Summani kiriting.');
+        if (!TU) return xabar('To\'lov usulini tanlang.');
+        amal({ api: 'depozit', summa: sm, usul: TU, izoh: $('dp_i').value }, $('dp_ok'), 'Yuborilmoqda…');
+      };
+    };
     $('m_p').onclick = () => { moliyaOy = oySur(oy, -1); chiz(); };
     $('m_n').onclick = () => { if (oy < D.meta.bugun.slice(0, 7)) { moliyaOy = oySur(oy, 1); chiz(); } };
   } catch (e) { $('main').innerHTML = h + '<div class="err">⚠️ ' + esc(e.message) + '</div>'; }
@@ -533,7 +590,9 @@ function tugat(h, btn) {
   oyna('✅ Ishni tugatish', '<p class="muted small" style="margin:0 2px 10px">📸 Bajarilgan ish rasmini yuklang (1–3 ta). <b>Rasmsiz ish yopilmaydi.</b></p>' +
     '<div id="rp" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px"></div>' +
     '<label class="btn ghost" id="rl" style="display:block;text-align:center;cursor:pointer">📷 Rasm qo\'shish<input type="file" accept="image/*" multiple id="rf" style="display:none"></label>' +
+    (ishTop(h) ? tolovMaydon(ishTop(h)) : '') +
     '<button class="btn" id="r_ok" disabled>✅ Ishni yopish</button>');
+  tolovUlash();
   const chizR = () => {
     $('rp').innerHTML = R.map((d, k) => '<div style="position:relative"><img src="' + d + '" style="width:100%;aspect-ratio:1;object-fit:cover;border-radius:10px;display:block">' +
       '<button data-rx="' + k + '" style="position:absolute;top:4px;right:4px;border:0;border-radius:50%;width:24px;height:24px;background:rgba(0,0,0,.6);color:#fff">✕</button></div>').join('');
@@ -554,12 +613,13 @@ function tugat(h, btn) {
   };
   $('r_ok').onclick = async () => {
     if (!R.length) return xabar('📸 Kamida 1 ta rasm yuklang.');
+    const tl = ishTop(h) ? tolovOl() : {}; if (!tl) return;
     const b = $('r_ok'); b.disabled = true; b.textContent = 'Yuklanmoqda…';
     try {
-      const r = await api({ api: 'tugatdim', h, rasmlar: R });
+      const r = await api(Object.assign({ api: 'tugatdim', h, rasmlar: R }, tl));
       if (!r.ok) throw new Error(r.xato);
       hap('success'); yop(); if (btn) { btn.disabled = true; btn.textContent = '✅ Yopildi'; }
-      xabar(r.oldin ? '✅ Bu ish allaqachon yopilgan.' : '✅ Ish yopildi — ' + r.vaqt + '\n📸 ' + r.rasm + ' ta rasm saqlandi.'); await yukla(true);
+      xabar(r.oldin ? '✅ Bu ish allaqachon yopilgan.' : '✅ Ish yopildi — ' + r.vaqt + '\n📸 ' + r.rasm + ' ta rasm saqlandi.' + (r.tolov ? '\n💵 To\'lov rahbar tasdig\'iga yuborildi.' : r.tolovXato ? '\n⚠️ To\'lov: ' + r.tolovXato : '')); MOL = {}; await yukla(true);
     } catch (x) { b.disabled = false; b.textContent = '✅ Ishni yopish'; hap('error'); xabar('⚠️ ' + x.message); }
   };
 }
