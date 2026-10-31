@@ -11,84 +11,114 @@
   :root{
     --teal:#01825F; --green:#42C970; --mint:#98CF8A; --gray:#6A8D88; --mist:#CFDBD9;
     --ice:#E7F2F3; --charcoal:#30403F; --slate:#1F2D2D; --red:#9B1C1C; --orange:#C26A12;
-    --bg:#F4F8F8; --card:#FFFFFF; --text:var(--slate); --muted:var(--gray); --line:#E1EBEA;
+    --bg:#F4F8F8; --card:#FFFFFF; --text:var(--slate); --muted:var(--gray); --line:#E1EBEA; --input:#FFFFFF;
   }
   @media (prefers-color-scheme: dark){
-    :root{ --bg:#141E1E; --card:#1F2D2D; --text:#EAF2F1; --muted:#98B0AC; --line:#2C3D3C; --ice:#22403A; }
+    :root{ --bg:#141E1E; --card:#1F2D2D; --text:#EAF2F1; --muted:#98B0AC; --line:#2C3D3C; --ice:#22403A; --input:#182525; }
   }
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
   html,body{margin:0;background:var(--bg);color:var(--text);font-family:Manrope,system-ui,sans-serif}
-  body{padding:0 0 calc(24px + env(safe-area-inset-bottom))}
-  header{background:var(--teal);color:#fff;padding:18px 16px 14px}
-  header .t{font-weight:800;font-size:19px;letter-spacing:.2px}
+  body{padding-bottom:calc(76px + env(safe-area-inset-bottom))}
+  header{background:var(--teal);color:#fff;padding:16px 16px 14px}
+  header .t{font-weight:800;font-size:19px}
   header .s{opacity:.85;font-size:13px;margin-top:3px}
-  .tabs{display:flex;gap:6px;padding:10px 12px;position:sticky;top:0;background:var(--bg);z-index:5}
-  .tab{flex:1;border:0;border-radius:12px;padding:10px 6px;font:600 14px Manrope,sans-serif;background:var(--card);color:var(--muted);box-shadow:0 0 0 1px var(--line) inset}
-  .tab.on{background:var(--teal);color:#fff;box-shadow:none}
-  .tab .n{display:inline-block;min-width:20px;padding:0 6px;margin-left:4px;border-radius:10px;background:rgba(0,0,0,.08);font-size:12px}
-  .tab.on .n{background:rgba(255,255,255,.25)}
-  main{padding:0 12px}
-  .card{background:var(--card);border-radius:16px;padding:14px;margin:10px 0;box-shadow:0 1px 0 var(--line),0 0 0 1px var(--line) inset}
+  main{padding:0 12px 12px}
+  h2{font-size:15px;margin:18px 4px 8px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.4px}
+  nav{position:fixed;left:0;right:0;bottom:0;display:flex;background:var(--card);border-top:1px solid var(--line);padding:6px 4px calc(6px + env(safe-area-inset-bottom));z-index:20}
+  nav button{flex:1;border:0;background:none;color:var(--muted);font:600 11px Manrope,sans-serif;padding:6px 2px;border-radius:12px}
+  nav button .ic{display:block;font-size:20px;margin-bottom:2px}
+  nav button.on{color:var(--teal);background:var(--ice)}
+  .seg{display:flex;gap:6px;margin:12px 0 4px;overflow-x:auto;scrollbar-width:none}
+  .seg::-webkit-scrollbar{display:none}
+  .seg button{flex:none;border:0;border-radius:20px;padding:8px 14px;font:700 13px Manrope,sans-serif;background:var(--card);color:var(--muted);box-shadow:0 0 0 1px var(--line) inset;white-space:nowrap}
+  .seg button.on{background:var(--teal);color:#fff;box-shadow:none}
+  .seg .n{opacity:.75;margin-left:4px}
+  .search{width:100%;margin:8px 0 2px;border:0;border-radius:12px;padding:11px 14px;font:500 15px Manrope,sans-serif;background:var(--input);color:var(--text);box-shadow:0 0 0 1px var(--line) inset}
+  .card{background:var(--card);border-radius:16px;padding:14px;margin:10px 0;box-shadow:0 0 0 1px var(--line) inset}
   .row{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
   .name{font-weight:800;font-size:17px}
   .time{font-size:12px;color:var(--muted);white-space:nowrap;text-align:right}
   .pill{display:inline-block;font-size:12px;font-weight:700;border-radius:20px;padding:3px 9px;margin-top:6px}
-  .pill.wait{background:#FDF0E2;color:var(--orange)}
-  .pill.work{background:var(--ice);color:var(--teal)}
-  .pill.done{background:var(--ice);color:var(--gray)}
+  .pill.wait{background:#FDF0E2;color:var(--orange)} .pill.work{background:var(--ice);color:var(--teal)}
+  .pill.done{background:var(--ice);color:var(--gray)} .pill.otk{background:#FBEAEA;color:var(--red)}
   .jobs{margin:10px 0 4px;padding:10px 12px;border-radius:12px;background:var(--ice)}
-  .job{display:flex;justify-content:space-between;font-size:14px;padding:2px 0}
-  .job b{font-weight:700}
+  .job{display:flex;justify-content:space-between;font-size:14px;padding:2px 0;gap:8px}
   .line{display:flex;gap:8px;font-size:14px;padding:5px 0;align-items:flex-start}
   .line .i{width:20px;text-align:center;flex:none}
   a.tel{color:var(--teal);font-weight:800;text-decoration:none;font-size:16px}
   a.map{color:var(--teal);text-decoration:none}
-  .muted{color:var(--muted)}
-  .btn{display:block;width:100%;margin-top:12px;border:0;border-radius:12px;padding:13px;font:800 15px Manrope,sans-serif;background:var(--teal);color:#fff}
-  .btn:active{opacity:.8}
-  .btn[disabled]{opacity:.5}
+  .muted{color:var(--muted)} .small{font-size:12px}
+  .btn{display:block;width:100%;margin-top:12px;border:0;border-radius:12px;padding:14px;font:800 15px Manrope,sans-serif;background:var(--teal);color:#fff}
+  .btn:active{opacity:.8} .btn[disabled]{opacity:.5}
+  .btn.ghost{background:var(--ice);color:var(--teal)}
   .empty{text-align:center;padding:48px 20px;color:var(--muted)}
   .empty .e{font-size:40px;margin-bottom:8px}
   .u{display:flex;justify-content:space-between;align-items:center;padding:12px 2px;border-bottom:1px solid var(--line)}
   .u:last-child{border-bottom:0}
-  .u .nm{font-weight:700}
-  .u .st{font-size:13px;font-weight:700}
-  .st.free{color:var(--green)} .st.busy{color:var(--orange)}
-  .sum{display:flex;gap:8px;margin:4px 0 2px}
-  .sum div{flex:1;background:var(--card);border-radius:14px;padding:12px;text-align:center;box-shadow:0 0 0 1px var(--line) inset}
-  .sum b{display:block;font-size:22px;font-weight:800}
-  .sum span{font-size:12px;color:var(--muted)}
-  .refresh{position:fixed;right:16px;bottom:calc(16px + env(safe-area-inset-bottom));width:48px;height:48px;border-radius:24px;border:0;background:var(--teal);color:#fff;font-size:20px;box-shadow:0 4px 14px rgba(0,0,0,.18)}
-  .err{background:#FBEAEA;color:var(--red);border-radius:12px;padding:12px;margin:12px;font-size:14px}
-  .spin{width:28px;height:28px;border:3px solid var(--mist);border-top-color:var(--teal);border-radius:50%;animation:s 0.8s linear infinite;margin:60px auto}
+  .st{font-size:13px;font-weight:700;white-space:nowrap} .st.free{color:var(--green)} .st.busy{color:var(--orange)}
+  .kpis{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+  .kpi{background:var(--card);border-radius:14px;padding:12px;box-shadow:0 0 0 1px var(--line) inset}
+  .kpi b{display:block;font-size:24px;font-weight:800;line-height:1.1}
+  .kpi span{font-size:12px;color:var(--muted)}
+  .kpi.wide{grid-column:1/-1}
+  .bar{display:grid;grid-template-columns:minmax(90px,38%) 1fr auto;gap:8px;align-items:center;font-size:13px;padding:6px 0}
+  .bar .tr{height:8px;border-radius:4px;background:var(--ice);overflow:hidden}
+  .bar .fl{height:100%;background:var(--teal);border-radius:4px}
+  .bar .v{font-weight:700;white-space:nowrap}
+  .tbl{width:100%;border-collapse:collapse;font-size:13px}
+  .tbl th{font-size:11px;color:var(--muted);text-align:right;font-weight:700;padding:4px 2px}
+  .tbl th:first-child,.tbl td:first-child{text-align:left}
+  .tbl td{padding:8px 2px;border-top:1px solid var(--line);text-align:right;white-space:nowrap}
+  .tbl td:first-child{font-weight:700;white-space:normal}
+  label.f{display:block;font-size:13px;font-weight:700;color:var(--muted);margin:14px 2px 6px}
+  .in{width:100%;border:0;border-radius:12px;padding:12px 14px;font:500 16px Manrope,sans-serif;background:var(--input);color:var(--text);box-shadow:0 0 0 1px var(--line) inset;-webkit-appearance:none}
+  .in:focus{outline:none;box-shadow:0 0 0 2px var(--teal) inset}
+  textarea.in{min-height:70px;resize:vertical}
+  .chips{display:flex;flex-wrap:wrap;gap:6px}
+  .chip{border:0;border-radius:20px;padding:9px 13px;font:600 13px Manrope,sans-serif;background:var(--card);color:var(--text);box-shadow:0 0 0 1px var(--line) inset}
+  .chip.on{background:var(--teal);color:#fff;box-shadow:none}
+  .chip[disabled]{opacity:.45}
+  .tur{background:var(--ice);border-radius:12px;padding:10px 12px;margin-top:8px}
+  .tur .tn{font-weight:800;font-size:14px;margin-bottom:8px}
+  .tur .g{display:grid;grid-template-columns:auto 1fr;gap:10px;align-items:center}
+  .step{display:flex;align-items:center;background:var(--input);border-radius:10px;box-shadow:0 0 0 1px var(--line) inset}
+  .step button{border:0;background:none;font:800 18px Manrope;color:var(--teal);width:36px;height:40px}
+  .step span{min-width:28px;text-align:center;font-weight:800}
+  .ok{background:var(--ice);border-radius:14px;padding:14px;margin-top:12px;font-size:14px;line-height:1.6}
+  .refresh{position:fixed;right:14px;bottom:calc(84px + env(safe-area-inset-bottom));width:44px;height:44px;border-radius:22px;border:0;background:var(--teal);color:#fff;font-size:19px;box-shadow:0 4px 14px rgba(0,0,0,.18);z-index:15}
+  .err{background:#FBEAEA;color:var(--red);border-radius:12px;padding:12px;margin:12px 0;font-size:14px}
+  .spin{width:28px;height:28px;border:3px solid var(--mist);border-top-color:var(--teal);border-radius:50%;animation:s .8s linear infinite;margin:60px auto}
   @keyframes s{to{transform:rotate(360deg)}}
 </style>
 </head>
 <body>
 <header><div class="t">Halowatt · Servis</div><div class="s" id="sub">Yuklanmoqda…</div></header>
-<div class="tabs" id="tabs" hidden></div>
 <main id="main"><div class="spin"></div></main>
 <button class="refresh" id="ref" title="Yangilash" hidden>⟳</button>
+<nav id="nav" hidden></nav>
 
 <script>
 const API = 'https://script.google.com/macros/s/AKfycbytPwCL-MZPwtpr3swxDePb4oKkduTxQmbasS2ZC251Wr2sI0lDcvwIHyBYCd1LJEyeSg/exec';
 const tg = window.Telegram && Telegram.WebApp;
-if (tg) { tg.ready(); tg.expand(); try { tg.setHeaderColor('#01825F'); tg.setBackgroundColor('#F4F8F8'); } catch (e) {} }
+if (tg) { tg.ready(); tg.expand(); try { tg.setHeaderColor('#01825F'); } catch (e) {} }
 
-let D = null, tab = null;
+let D = null, ekran = null, seg = {}, qidir = '', davr = 'oy', F = null, natija = null;
 const $ = id => document.getElementById(id);
 const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const pul = n => n == null || n === '' || isNaN(n) ? '' : String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, ' ') + " so'm";
-const dav = m => { if (m == null) return ''; const k = Math.floor(m / 1440), s = Math.floor(m % 1440 / 60), d = m % 60;
-  return k ? k + ' kun ' + (s ? s + ' soat' : '') : s ? s + ' soat ' + (d ? d + ' daq' : '') : (d || 1) + ' daq'; };
+const mln = n => n >= 1e6 ? (n / 1e6).toFixed(1).replace('.0', '') + ' mln' : pul(n);
+const dav = m => { if (m == null || isNaN(m)) return '—'; m = Math.round(m); const k = Math.floor(m / 1440), s = Math.floor(m % 1440 / 60), d = m % 60;
+  return k ? k + ' kun' + (s ? ' ' + s + ' soat' : '') : s ? s + ' soat' + (d ? ' ' + d + ' daq' : '') : (d || 1) + ' daq'; };
+const ort = a => a.length ? a.reduce((s, x) => s + x, 0) / a.length : null;
+const hap = t => { try { tg && tg.HapticFeedback[t === 'sel' ? 'selectionChanged' : 'notificationOccurred'](t === 'sel' ? undefined : t); } catch (e) {} };
+const xabar = m => tg && tg.showAlert ? tg.showAlert(m) : alert(m);
 
 async function api(body) {
   const r = await fetch(API, { method: 'POST', body: JSON.stringify(Object.assign({ initData: tg ? tg.initData : '' }, body)) });
   return r.json();
 }
-
-async function yukla() {
-  $('ref').disabled = true;
+async function yukla(jim) {
+  if (!jim) $('main').innerHTML = '<div class="spin"></div>';
   try {
     D = await api({ api: 'ishlar' });
     if (!D.ok) throw new Error(D.xato || 'Xatolik');
@@ -97,55 +127,43 @@ async function yukla() {
     $('main').innerHTML = '<div class="err">⚠️ ' + esc(e.message) + '</div>';
     $('sub').textContent = 'Ulanib bo\'lmadi';
   }
-  $('ref').disabled = false;
 }
 
+/* ---------- Rol va menyu ---------- */
+function menyu() {
+  const r = D.rol;
+  if (r.admin) return [['stat', '📊', 'Statistika'], ['ishlar', '📋', 'Ishlar'], ['ustalar', '👷', 'Ustalar'], ['yangi', '➕', 'Yangi ish']];
+  if (r.xodim) return [['yangi', '➕', 'Yangi ish'], ['mening', '📋', 'Bergan ishlarim'], ['ustalar', '👷', 'Ustalar']].concat(r.usta ? [['usta', '🔧', 'Usta ishlarim']] : []);
+  return [['usta', '🔧', 'Ishlarim'], ['bajarilgan', '✅', 'Bajarilgan']];
+}
 function chiz() {
   const r = D.rol;
   if (!D.ruxsat) {
-    $('sub').textContent = r.ism;
-    $('tabs').hidden = true; $('ref').hidden = true;
+    $('sub').textContent = r.ism; $('nav').hidden = true; $('ref').hidden = true;
     $('main').innerHTML = '<div class="empty"><div class="e">🔒</div><b>Ruxsat yo\'q</b><br><br>Botga /start yozing — so\'rovingiz adminga boradi. Ruxsat berilgach shu yerdan foydalanasiz.</div>';
     return;
   }
-  const rollar = [r.admin ? 'Admin' : '', r.xodim ? r.xodim + (r.filial ? ' · ' + r.filial : '') : '', r.usta ? '👷 ' + r.usta : ''].filter(Boolean);
-  $('sub').textContent = rollar.join(' · ') || r.ism;
-  $('ref').hidden = false;
-
-  const usta = !!r.usta && !r.admin && !r.xodim;
-  const T = usta
-    ? [['ochiq', 'Mening ishlarim', D.ochiq.length], ['yopilgan', 'Bajarilgan', D.yopilgan.length]]
-    : [['ochiq', 'Ochiq ishlar', D.ochiq.length], ['ustalar', 'Ustalar', D.ustalar.filter(u => !u.band).length + ' bo\'sh'], ['yopilgan', 'Yopilgan', D.yopilgan.length]];
-  if (!tab || !T.some(t => t[0] === tab)) tab = 'ochiq';
-  $('tabs').hidden = false;
-  $('tabs').innerHTML = T.map(t => '<button class="tab' + (t[0] === tab ? ' on' : '') + '" data-t="' + t[0] + '">' + esc(t[1]) + ' <span class="n">' + esc(t[2]) + '</span></button>').join('');
-  [...$('tabs').children].forEach(b => b.onclick = () => { tab = b.dataset.t; chiz(); if (tg) tg.HapticFeedback.selectionChanged(); });
-
-  let h = '';
-  if (tab === 'ustalar') {
-    const bosh = D.ustalar.filter(u => !u.band).length;
-    h += '<div class="sum"><div><b style="color:var(--green)">' + bosh + '</b><span>bo\'sh</span></div><div><b style="color:var(--orange)">' + (D.ustalar.length - bosh) + '</b><span>band</span></div></div>';
-    h += '<div class="card">' + D.ustalar.map(u => '<div class="u"><div><div class="nm">' + esc(u.nom) + '</div>' +
-      (u.band ? '<div class="muted" style="font-size:12px">' + esc(u.mijoz) + ' · ' + esc(u.qachon) + ' dan</div>' : '') +
-      '</div><div class="st ' + (u.band ? 'busy">🔒 Band' : 'free">🟢 Bo\'sh') + '</div></div>').join('') + '</div>';
-  } else {
-    const L = tab === 'ochiq' ? D.ochiq : D.yopilgan;
-    if (!L.length) h = '<div class="empty"><div class="e">' + (tab === 'ochiq' ? '✨' : '📭') + '</div>' + (tab === 'ochiq' ? (usta ? 'Hozircha sizga biriktirilgan ish yo\'q' : 'Ochiq ish yo\'q') : 'Hali yopilgan ish yo\'q') + '</div>';
-    L.forEach(i => h += karta(i, usta || (r.usta && i.usta === r.usta)));
-  }
-  $('main').innerHTML = h;
-  document.querySelectorAll('[data-yop]').forEach(b => b.onclick = () => tugat(b.dataset.yop, b));
+  $('sub').textContent = [r.admin ? 'Rahbar' : '', r.xodim ? r.xodim + (r.filial ? ' · ' + r.filial : '') : '', r.usta ? '👷 ' + r.usta : ''].filter(Boolean).join(' · ') || r.ism;
+  const M = menyu();
+  if (!ekran || !M.some(m => m[0] === ekran)) ekran = M[0][0];
+  $('nav').hidden = false;
+  $('nav').innerHTML = M.map(m => '<button data-e="' + m[0] + '" class="' + (m[0] === ekran ? 'on' : '') + '"><span class="ic">' + m[1] + '</span>' + m[2] + '</button>').join('');
+  [...$('nav').children].forEach(b => b.onclick = () => { ekran = b.dataset.e; natija = null; hap('sel'); chiz(); window.scrollTo(0, 0); });
+  $('ref').hidden = ekran === 'yangi';
+  ({ stat: ekStat, ishlar: ekIshlar, ustalar: ekUstalar, yangi: ekYangi, mening: ekMening, usta: ekUsta, bajarilgan: ekBajarilgan })[ekran]();
 }
 
-function karta(i, meniki) {
+/* ---------- Umumiy: ish kartasi va ro'yxat ---------- */
+function holatPill(i) {
+  if (i.otkaz) return '<span class="pill otk">❌ Otkaz' + (i.sabab ? ' · ' + esc(i.sabab) : '') + '</span>';
+  if (i.yopildi) return '<span class="pill done">✅ ' + esc(i.yopVaqt) + (i.jamiMin != null ? ' · ' + dav(i.jamiMin) : '') + '</span>';
+  if (!i.usta) return '<span class="pill wait">⏳ Usta kutilmoqda · ' + dav(i.tushganMin) + '</span>';
+  return '<span class="pill work">🔧 ' + esc(i.usta) + (i.ustadaMin != null ? ' · ' + dav(i.ustadaMin) : '') + '</span>';
+}
+function karta(i, tugma) {
   const jami = i.ishlar.reduce((s, x) => s + (x.summa || 0), 0);
-  let holat;
-  if (i.yopildi) holat = '<span class="pill done">✅ Yopildi · ' + esc(i.yopVaqt) + '</span>';
-  else if (!i.usta) holat = '<span class="pill wait">⏳ Usta kutilmoqda · ' + dav(i.tushganMin) + '</span>';
-  else holat = '<span class="pill work">🔧 ' + esc(i.usta) + (i.ustadaMin != null ? ' · ' + dav(i.ustadaMin) : '') + '</span>';
   const map = i.manzil ? 'https://yandex.uz/maps/?text=' + encodeURIComponent(i.manzil + ", Qo'qon") : '';
-  return '<div class="card">' +
-    '<div class="row"><div><div class="name">' + esc(i.mijoz || '—') + '</div>' + holat + '</div>' +
+  return '<div class="card"><div class="row"><div><div class="name">' + esc(i.mijoz || '—') + '</div>' + holatPill(i) + '</div>' +
     '<div class="time">' + esc(i.sana) + '<br>' + esc(i.vaqt) + '</div></div>' +
     '<div class="jobs">' + i.ishlar.map(x => '<div class="job"><span><b>' + esc(x.turi) + '</b> × ' + x.soni + '</span><span>' + pul(x.summa) + '</span></div>').join('') +
       (i.ishlar.length > 1 && jami ? '<div class="job" style="border-top:1px solid var(--mist);margin-top:4px;padding-top:6px"><b>Jami</b><b>' + pul(jami) + '</b></div>' : '') + '</div>' +
@@ -153,33 +171,191 @@ function karta(i, meniki) {
     (i.manzil ? '<div class="line"><span class="i">📍</span><a class="map" href="' + map + '" target="_blank">' + esc(i.manzil) + '</a></div>' : '') +
     (i.izoh ? '<div class="line"><span class="i">📝</span><span>' + esc(i.izoh) + '</span></div>' : '') +
     '<div class="line muted"><span class="i">🏢</span><span>' + esc(i.filial || '—') + (i.shaxs ? ' · ' + esc(i.shaxs) : '') + '</span></div>' +
-    (meniki && !i.yopildi ? '<button class="btn" data-yop="' + esc(i.h) + '">✅ Ishni tugatdim</button>' : '') +
-    '</div>';
+    (i.yopildi && i.kutishMin != null ? '<div class="line muted small"><span class="i">⏱</span><span>Ustaga berilguncha ' + dav(i.kutishMin) + ' · usta ' + dav(i.ustaMin) + '</span></div>' : '') +
+    (tugma && !i.yopildi && !i.otkaz ? '<button class="btn" data-yop="' + esc(i.h) + '">✅ Ishni tugatdim</button>' : '') + '</div>';
+}
+function segChiz(kalit, variantlar) {
+  if (!seg[kalit] || !variantlar.some(v => v[0] === seg[kalit])) seg[kalit] = variantlar[0][0];
+  return '<div class="seg" data-k="' + kalit + '">' + variantlar.map(v => '<button data-v="' + v[0] + '" class="' + (v[0] === seg[kalit] ? 'on' : '') + '">' + esc(v[1]) + '<span class="n">' + v[2] + '</span></button>').join('') + '</div>';
+}
+function segUlash() {
+  document.querySelectorAll('.seg').forEach(s => [...s.children].forEach(b => b.onclick = () => { seg[s.dataset.k] = b.dataset.v; hap('sel'); chiz(); }));
+  document.querySelectorAll('[data-yop]').forEach(b => b.onclick = () => tugat(b.dataset.yop, b));
+  const q = $('q'); if (q) q.oninput = () => { qidir = q.value; const p = q.selectionStart; chiz(); const n = $('q'); n.focus(); n.setSelectionRange(p, p); };
+}
+const filtr = (L, k) => k === 'ochiq' ? L.filter(i => !i.yopildi && !i.otkaz) : k === 'kutish' ? L.filter(i => !i.yopildi && !i.otkaz && !i.usta)
+  : k === 'yopilgan' ? L.filter(i => i.yopildi && !i.otkaz) : k === 'otkaz' ? L.filter(i => i.otkaz) : L;
+const izla = L => { const q = qidir.trim().toLowerCase(); if (!q) return L; const d = q.replace(/\D/g, '');
+  return L.filter(i => (i.mijoz + ' ' + i.manzil + ' ' + i.usta + ' ' + i.shaxs).toLowerCase().includes(q) || (d.length >= 3 && i.tel.replace(/\D/g, '').includes(d))); };
+const bosh = (e, t) => '<div class="empty"><div class="e">' + e + '</div>' + t + '</div>';
+
+/* ---------- Rahbar: barcha ishlar ---------- */
+function ekIshlar() {
+  const L = D.barcha;
+  let h = segChiz('ishlar', [['ochiq', 'Ochiq', filtr(L, 'ochiq').length], ['kutish', 'Usta kutilmoqda', filtr(L, 'kutish').length], ['yopilgan', 'Yopilgan', filtr(L, 'yopilgan').length], ['otkaz', 'Otkaz', filtr(L, 'otkaz').length]]);
+  h += '<input class="search" id="q" placeholder="🔎 Mijoz, telefon, usta, manzil…" value="' + esc(qidir) + '">';
+  const R = izla(filtr(L, seg.ishlar)).slice(0, 100);
+  h += R.length ? R.map(i => karta(i, false)).join('') : bosh('📭', 'Bu bo\'limda ish yo\'q');
+  $('main').innerHTML = h; segUlash();
 }
 
+/* ---------- Xodim: o'zi bergan ishlar ---------- */
+function ekMening() {
+  const L = D.meniki;
+  const oy = D.meta.bugun.slice(0, 7);
+  const buOy = L.filter(i => i.t.slice(0, 7) === oy);
+  let h = '<div class="kpis"><div class="kpi"><b>' + buOy.length + '</b><span>bu oy bergan ishlarim</span></div><div class="kpi"><b>' + buOy.filter(i => i.yopildi).length + '</b><span>shundan yopilgan</span></div></div>';
+  h += segChiz('mening', [['ochiq', 'Ochiq', filtr(L, 'ochiq').length], ['yopilgan', 'Yopilgan', filtr(L, 'yopilgan').length], ['otkaz', 'Otkaz', filtr(L, 'otkaz').length]]);
+  h += '<input class="search" id="q" placeholder="🔎 Mijoz yoki telefon…" value="' + esc(qidir) + '">';
+  const R = izla(filtr(L, seg.mening)).slice(0, 100);
+  h += R.length ? R.map(i => karta(i, false)).join('') : bosh('📭', seg.mening === 'ochiq' ? 'Siz bergan ochiq ish yo\'q' : 'Bu bo\'limda ish yo\'q');
+  $('main').innerHTML = h; segUlash();
+}
+
+/* ---------- Usta ---------- */
+function ekUsta() {
+  const L = D.ustaIshlari.filter(i => !i.yopildi);
+  $('main').innerHTML = (L.length ? '<h2>Hozirgi ishlarim · ' + L.length + '</h2>' + L.map(i => karta(i, true)).join('') : bosh('✨', 'Hozircha sizga biriktirilgan ish yo\'q')) +
+    (D.rol.xodim ? '' : '');
+  segUlash();
+}
+function ekBajarilgan() {
+  const L = D.ustaIshlari.filter(i => i.yopildi);
+  const bugun = D.meta.bugun, oy = bugun.slice(0, 7);
+  const hafta = new Date(bugun); hafta.setDate(hafta.getDate() - 6); const hs = hafta.toISOString().slice(0, 10);
+  const b = L.filter(i => i.y.slice(0, 10) === bugun).length, w = L.filter(i => i.y.slice(0, 10) >= hs).length;
+  const o = L.filter(i => i.y.slice(0, 7) === oy);
+  let h = '<div class="kpis"><div class="kpi"><b>' + b + '</b><span>bugun</span></div><div class="kpi"><b>' + w + '</b><span>oxirgi 7 kun</span></div>' +
+    '<div class="kpi"><b>' + o.length + '</b><span>bu oy</span></div><div class="kpi"><b>' + dav(ort(o.map(i => i.ustaMin).filter(x => x != null))) + '</b><span>bu oy o\'rtacha ish vaqti</span></div></div>';
+  h += '<h2>Bajarilgan ishlar</h2>' + (L.length ? L.slice(0, 50).map(i => karta(i, false)).join('') : bosh('📭', 'Hali yopilgan ish yo\'q'));
+  $('main').innerHTML = h;
+}
+
+/* ---------- Ustalar holati ---------- */
+function ekUstalar() {
+  const U = D.ustalar, b = U.filter(u => !u.band).length;
+  $('main').innerHTML = '<div class="kpis"><div class="kpi"><b style="color:var(--green)">' + b + '</b><span>bo\'sh</span></div><div class="kpi"><b style="color:var(--orange)">' + (U.length - b) + '</b><span>band</span></div></div>' +
+    '<div class="card">' + U.map(u => '<div class="u"><div><div style="font-weight:700">' + esc(u.nom) + '</div>' +
+      (u.band ? '<div class="muted small">' + esc(u.mijoz) + ' · ' + esc(u.qachon) + ' dan</div>' : '') + '</div>' +
+      '<div class="st ' + (u.band ? 'busy">🔒 Band' : 'free">🟢 Bo\'sh') + '</div></div>').join('') + '</div>';
+}
+
+/* ---------- Rahbar: statistika ---------- */
+function ekStat() {
+  const L = D.barcha, bugun = D.meta.bugun;
+  const chegara = { bugun: bugun, hafta: (() => { const d = new Date(bugun); d.setDate(d.getDate() - 6); return d.toISOString().slice(0, 10); })(), oy: bugun.slice(0, 7) + '-01', hammasi: '0000' }[davr];
+  const ichida = s => s && s.slice(0, 10) >= chegara;
+  const T = L.filter(i => ichida(i.t)), Y = L.filter(i => !i.otkaz && i.yopildi && ichida(i.y));
+  const ochiq = L.filter(i => !i.yopildi && !i.otkaz), kut = ochiq.filter(i => !i.usta);
+  const summa = T.filter(i => !i.otkaz).reduce((s, i) => s + i.ishlar.reduce((a, x) => a + (x.summa || 0), 0), 0);
+  const kutO = ort(Y.map(i => i.kutishMin).filter(x => x != null)), ustO = ort(Y.map(i => i.ustaMin).filter(x => x != null)), jamO = ort(Y.map(i => i.jamiMin).filter(x => x != null));
+  let h = '<div class="seg" id="dv">' + [['bugun', 'Bugun'], ['hafta', '7 kun'], ['oy', 'Bu oy'], ['hammasi', 'Hammasi']].map(x => '<button data-v="' + x[0] + '" class="' + (x[0] === davr ? 'on' : '') + '">' + x[1] + '</button>').join('') + '</div>';
+  h += '<div class="kpis">' +
+    '<div class="kpi"><b>' + T.length + '</b><span>tushgan ish</span></div>' +
+    '<div class="kpi"><b style="color:var(--teal)">' + Y.length + '</b><span>yopilgan</span></div>' +
+    '<div class="kpi"><b style="color:var(--orange)">' + ochiq.length + '</b><span>hozir ochiq · ' + kut.length + ' tasi ustasiz</span></div>' +
+    '<div class="kpi"><b style="color:var(--red)">' + T.filter(i => i.otkaz).length + '</b><span>otkaz</span></div>' +
+    '<div class="kpi wide"><b>' + mln(summa) + '</b><span>ishga olingan summa (otkazsiz)</span></div></div>';
+  h += '<h2>⏱ Vaqt qayerda ketyapti</h2><div class="card">' +
+    '<div class="bar"><span>⏳ Ustaga berilguncha</span><div class="tr"><div class="fl" style="background:var(--orange);width:' + pr(kutO, jamO) + '%"></div></div><span class="v">' + dav(kutO) + '</span></div>' +
+    '<div class="bar"><span>🔧 Usta ishladi</span><div class="tr"><div class="fl" style="width:' + pr(ustO, jamO) + '%"></div></div><span class="v">' + dav(ustO) + '</span></div>' +
+    '<div class="bar"><span><b>⏱ Jami</b></span><div class="tr"><div class="fl" style="background:var(--charcoal);width:' + (jamO ? 100 : 0) + '%"></div></div><span class="v">' + dav(jamO) + '</span></div></div>';
+  // ustalar
+  const us = {};
+  L.forEach(i => { if (!i.usta || i.otkaz) return; const x = us[i.usta] || (us[i.usta] = { y: 0, t: [], o: 0 });
+    if (i.yopildi && ichida(i.y)) { x.y++; if (i.ustaMin != null) x.t.push(i.ustaMin); } if (!i.yopildi) x.o++; });
+  const ul = Object.keys(us).sort((a, b) => us[b].y - us[a].y);
+  h += '<h2>👷 Ustalar</h2><div class="card">' + (ul.length ? '<table class="tbl"><tr><th>Usta</th><th>Yopgan</th><th>O\'rt. vaqt</th><th>Hozir</th></tr>' +
+    ul.map(u => '<tr><td>' + esc(u) + '</td><td>' + us[u].y + '</td><td>' + dav(ort(us[u].t)) + '</td><td>' + (us[u].o ? '🔒 ' + us[u].o : '🟢') + '</td></tr>').join('') + '</table>' : '<div class="muted">Ma\'lumot yo\'q</div>') + '</div>';
+  h += barlar('🏢 Filiallar', sana(T, i => i.filial)) + barlar('🙋 Ish bergan xodimlar', sana(T, i => i.shaxs)) +
+    barlar('🛠 Ish turlari', (() => { const m = {}; T.filter(i => !i.otkaz).forEach(i => i.ishlar.forEach(x => m[x.turi] = (m[x.turi] || 0) + 1)); return m; })());
+  h += '<p class="muted small" style="margin:14px 4px">Hisob «Yangi Ishlar» varag\'idagi ishlardan. Davr: tushgan ishlar — tushgan sanasi bo\'yicha, yopilganlar — yopilgan sanasi bo\'yicha.</p>';
+  $('main').innerHTML = h;
+  [...$('dv').children].forEach(b => b.onclick = () => { davr = b.dataset.v; hap('sel'); chiz(); });
+}
+const pr = (a, b) => a == null || !b ? 0 : Math.max(3, Math.round(a / b * 100));
+const sana = (L, f) => { const m = {}; L.forEach(i => { const k = f(i) || '—'; m[k] = (m[k] || 0) + 1; }); return m; };
+function barlar(t, m) {
+  const k = Object.keys(m).sort((a, b) => m[b] - m[a]); const mx = Math.max(1, ...k.map(x => m[x]));
+  return '<h2>' + t + '</h2><div class="card">' + (k.length ? k.map(x => '<div class="bar"><span>' + esc(x) + '</span><div class="tr"><div class="fl" style="width:' + Math.round(m[x] / mx * 100) + '%"></div></div><span class="v">' + m[x] + '</span></div>').join('') : '<div class="muted">Ma\'lumot yo\'q</div>') + '</div>';
+}
+
+/* ---------- Yangi ish formasi ---------- */
+function yangiForma() { return { sana: D.meta.bugun, mijoz: '', tel: '', manzil: '', turlar: [], soni: {}, summa: {}, izoh: '', usta: '', shaxs: '', filial: '' }; }
+function ekYangi() {
+  if (!F) F = yangiForma();
+  if (natija) {
+    $('main').innerHTML = '<div class="ok">' + natija.map(esc).join('<br>') + '</div><button class="btn" id="yana">➕ Yana yangi ish</button>';
+    $('yana').onclick = () => { natija = null; F = yangiForma(); chiz(); };
+    return;
+  }
+  const m = D.meta, band = {}; (D.ustalar || []).forEach(u => band[u.nom] = u.band);
+  let h = '';
+  h += '<label class="f">📅 Sana</label><input class="in" type="date" id="f_sana" value="' + esc(F.sana) + '">';
+  h += '<label class="f">👤 Mijoz ismi *</label><input class="in" id="f_mijoz" placeholder="Masalan: Abdulloh aka" value="' + esc(F.mijoz) + '">';
+  h += '<label class="f">📞 Telefon</label><input class="in" id="f_tel" type="tel" inputmode="tel" placeholder="90 123 45 67" value="' + esc(F.tel) + '">';
+  h += '<label class="f">📍 Manzil</label><input class="in" id="f_manzil" placeholder="Mahalla, ko\'cha, mo\'ljal" value="' + esc(F.manzil) + '">';
+  h += '<label class="f">🛠 Ish turi * — bir nechtasini tanlash mumkin</label><div class="chips">' +
+    m.turlar.map(t => '<button class="chip' + (F.turlar.includes(t) ? ' on' : '') + '" data-tur="' + esc(t) + '">' + esc(t) + '</button>').join('') + '</div>';
+  F.turlar.forEach(t => {
+    h += '<div class="tur"><div class="tn">' + esc(t) + '</div><div class="g">' +
+      '<div class="step"><button data-m="' + esc(t) + '">−</button><span>' + (F.soni[t] || 1) + '</span><button data-p="' + esc(t) + '">+</button></div>' +
+      '<input class="in" inputmode="numeric" placeholder="Summa, so\'m" data-sm="' + esc(t) + '" value="' + esc(F.summa[t] || '') + '"></div></div>';
+  });
+  h += '<label class="f">👷 Usta (ixtiyoriy)</label><div class="chips">' +
+    '<button class="chip' + (!F.usta ? ' on' : '') + '" data-usta="">⏳ Keyin tanlanadi</button>' +
+    m.ustalar.map(u => '<button class="chip' + (F.usta === u ? ' on' : '') + '" data-usta="' + esc(u) + '"' + (band[u] ? ' disabled' : '') + '>' + (band[u] ? '🔒 ' : '') + esc(u) + '</button>').join('') + '</div>';
+  if (!D.rol.xodim) {
+    h += '<label class="f">🙋 Ishni bergan</label><select class="in" id="f_shaxs"><option value="">— tanlang —</option>' + m.shaxslar.map(s => '<option' + (F.shaxs === s ? ' selected' : '') + '>' + esc(s) + '</option>').join('') + '</select>';
+    h += '<label class="f">🏢 Filial</label><select class="in" id="f_filial"><option value="">— tanlang —</option>' + m.filiallar.map(s => '<option' + (F.filial === s ? ' selected' : '') + '>' + esc(s) + '</option>').join('') + '</select>';
+  } else h += '<p class="muted small" style="margin:12px 4px 0">🙋 Ishni bergan: <b>' + esc(D.rol.xodim) + '</b> · ' + esc(D.rol.filial) + '</p>';
+  h += '<label class="f">📝 Izoh</label><textarea class="in" id="f_izoh" placeholder="Nima qilish kerak, qachon borish…">' + esc(F.izoh) + '</textarea>';
+  const jami = F.turlar.reduce((s, t) => s + (Number(String(F.summa[t] || '').replace(/\D/g, '')) || 0), 0);
+  h += '<button class="btn" id="f_yubor">💾 Saqlash va yuborish' + (jami ? ' · ' + pul(jami) : '') + '</button>';
+  $('main').innerHTML = h;
+
+  const oqi = () => ['sana', 'mijoz', 'tel', 'manzil', 'izoh', 'shaxs', 'filial'].forEach(k => { const e = $('f_' + k); if (e) F[k] = e.value; });
+  document.querySelectorAll('[data-tur]').forEach(b => b.onclick = () => { oqi(); const t = b.dataset.tur; F.turlar = F.turlar.includes(t) ? F.turlar.filter(x => x !== t) : F.turlar.concat(t); hap('sel'); chiz(); });
+  document.querySelectorAll('[data-p]').forEach(b => b.onclick = () => { oqi(); F.soni[b.dataset.p] = (F.soni[b.dataset.p] || 1) + 1; chiz(); });
+  document.querySelectorAll('[data-m]').forEach(b => b.onclick = () => { oqi(); F.soni[b.dataset.m] = Math.max(1, (F.soni[b.dataset.m] || 1) - 1); chiz(); });
+  document.querySelectorAll('[data-sm]').forEach(e => e.oninput = () => {
+    const raw = e.value.replace(/\D/g, ''); F.summa[e.dataset.sm] = raw ? raw.replace(/\B(?=(\d{3})+(?!\d))/g, ' ') : ''; e.value = F.summa[e.dataset.sm];
+    const j = F.turlar.reduce((s, t) => s + (Number(String(F.summa[t] || '').replace(/\D/g, '')) || 0), 0);
+    $('f_yubor').textContent = '💾 Saqlash va yuborish' + (j ? ' · ' + pul(j) : ''); });
+  document.querySelectorAll('[data-usta]').forEach(b => b.onclick = () => { oqi(); F.usta = b.dataset.usta; hap('sel'); chiz(); });
+  $('f_yubor').onclick = async () => {
+    oqi();
+    if (!F.mijoz.trim()) return xabar('Mijoz ismini yozing.');
+    if (!F.turlar.length) return xabar('Kamida bitta ish turini tanlang.');
+    const btn = $('f_yubor'); btn.disabled = true; btn.textContent = 'Saqlanmoqda…';
+    try {
+      const r = await api({ api: 'yangi', d: { sana: F.sana, mijoz: F.mijoz, tel: F.tel, manzil: F.manzil, izoh: F.izoh, usta: F.usta, shaxs: F.shaxs, filial: F.filial,
+        ishlar: F.turlar.map(t => ({ turi: t, soni: F.soni[t] || 1, summa: String(F.summa[t] || '').replace(/\D/g, '') })) } });
+      if (!r.ok) throw new Error(r.xato || 'Saqlanmadi');
+      hap('success'); natija = r.natija; F = null; yukla(true);
+    } catch (e) { btn.disabled = false; btn.textContent = '💾 Saqlash va yuborish'; hap('error'); xabar('⚠️ ' + e.message); }
+  };
+}
+
+/* ---------- Ishni tugatdim ---------- */
 function tugat(h, btn) {
   const ok = async () => {
     btn.disabled = true; btn.textContent = 'Yopilmoqda…';
     try {
       const r = await api({ api: 'tugatdim', h });
       if (!r.ok) throw new Error(r.xato);
-      if (tg) tg.HapticFeedback.notificationOccurred('success');
-      btn.textContent = '✅ Yopildi';
-      await yukla();
-    } catch (e) {
-      btn.disabled = false; btn.textContent = '✅ Ishni tugatdim';
-      tg ? tg.showAlert('⚠️ ' + e.message) : alert(e.message);
-    }
+      hap('success'); btn.textContent = '✅ Yopildi'; await yukla(true);
+    } catch (e) { btn.disabled = false; btn.textContent = '✅ Ishni tugatdim'; xabar('⚠️ ' + e.message); }
   };
   if (tg && tg.showConfirm) tg.showConfirm('Ishni tugatdingizmi? Ish yopiladi va guruhga xabar ketadi.', y => y && ok());
   else if (confirm('Ishni tugatdingizmi?')) ok();
 }
 
-$('ref').onclick = () => { $('main').innerHTML = '<div class="spin"></div>'; yukla(); };
+$('ref').onclick = () => { hap('sel'); yukla(); };
 if (!tg || !tg.initData) {
   $('sub').textContent = '';
-  $('main').innerHTML = '<div class="empty"><div class="e">📱</div>Bu sahifa faqat Telegram ichida ishlaydi.<br><br>@halowatt_servis_bot ni oching va «📱 Ochish» tugmasini bosing.</div>';
-} else yukla();
+  $('main').innerHTML = bosh('📱', 'Bu sahifa faqat Telegram ichida ishlaydi.<br><br>@halowatt_servis_bot ni oching va «📱 Ochish» tugmasini bosing.');
+} else { $('ref').hidden = false; yukla(); }
 </script>
 </body>
 </html>
