@@ -173,7 +173,7 @@ function chiz() {
 function holatPill(i) {
   if (i.otkaz) return '<span class="pill otk">❌ Otkaz' + (i.sabab ? ' · ' + esc(i.sabab) : '') + '</span>';
   if (i.yopildi) return '<span class="pill done">✅ ' + esc(i.yopVaqt) + (i.jamiMin != null ? ' · ' + dav(i.jamiMin) : '') + '</span>';
-  if (!i.usta) return '<span class="pill wait">⏳ Usta kutilmoqda · ' + dav(i.tushganMin) + '</span>';
+  if (!i.usta) return '<span class="pill wait">⏳ Usta kutilmoqda · ' + dav(i.tushganMin) + '</span>' + (i.sorovlar && i.sorovlar.length ? ' <span class="pill work">🙋 ' + esc(i.sorovlar.map(x => x.usta).join(', ')) + '</span>' : '');
   return '<span class="pill work">🔧 ' + esc(i.usta) + (i.ustadaMin != null ? ' · ' + dav(i.ustadaMin) : '') + '</span>';
 }
 function karta(i, tugma) {
@@ -199,6 +199,7 @@ function amallar(i) {
   if (ochiq && (r.admin || (r.xodim && i.shaxs === r.xodim))) b.push(['usta', i.usta ? '🔁 Ustani almashtirish' : '👷 Usta biriktirish', '']);
   if (ochiq && r.admin) { b.push(['tahrir', '✏️ Tahrirlash', '']); b.push(['otkaz', '❌ Otkaz', 'red']); }
   if (i.otkaz && r.admin) b.push(['sabab', !i.sabab || /ko.rsatilmagan/i.test(i.sabab) ? '📝 Otkaz sababini belgilash' : '📝 Sababni o\'zgartirish', !i.sabab || /ko.rsatilmagan/i.test(i.sabab) ? 'red' : '']);
+  if (r.admin && ochiq && !i.usta && i.sorovlar && i.sorovlar.length) i.sorovlar.forEach(x => { b.push(['olb:' + x.id, '🙋 ' + x.usta + 'ga berish', '']); b.push(['olr:' + x.id, '✕ ' + x.usta + ' rad', 'red']); });
   if (i.rasm && r.admin) b.push(['rasm', '📸 Rasmlar · ' + i.rasm, '']);
   if (i.yopildi && !i.otkaz && !i.tolov && r.usta && i.usta === r.usta) b.push(['tolov', '💵 To\'lovni kiritish', 'red']);
   if (i.tarixN && ochiq && r.usta && i.usta === r.usta) b.push(['utarix', '📞 Mijoz tarixi · ' + i.tarixN, '']);
@@ -226,6 +227,11 @@ async function amal(body, btn, matn) {
 }
 function amalBos(act, h) {
   const i = ishTop(h); if (!i) return;
+  if (/^ol[br]:/.test(act)) {
+    const ok = act[2] === 'b', id = act.slice(4), u = (i.sorovlar.find(x => x.id === id) || {}).usta || '';
+    const go = () => amal({ api: 'olamanHal', id, ok }, null, '');
+    return tg && tg.showConfirm ? tg.showConfirm(ok ? 'Ish ' + u + 'ga berilsinmi? Ustaga to\'liq ma\'lumot boradi.' : u + ' so\'rovi rad etilsinmi?', y => y && go()) : go();
+  }
   if (act === 'usta') {
     const band = {}; (D.ustalar || []).forEach(u => band[u.nom] = u);
     oyna(i.usta ? 'Ustani almashtirish' : 'Usta biriktirish', '<p class="muted small" style="margin:0 2px 8px">' + esc(i.mijoz) + ' · ' + esc(i.ishlar.map(x => x.turi).join(', ')) + '</p>' +
@@ -397,6 +403,7 @@ function ekBosh() {
   let h = '<label class="f">🛠 Ish turi</label><div class="chips">' + chip('', bT, 'bt', L.length) + turlar.map(t => chip(t, bT, 'bt', L.filter(i => i.ishlar.some(x => x.turi === t)).length)).join('') + '</div>';
   if (filiallar.length > 1) h += '<label class="f">🏢 Filial</label><div class="chips">' + chip('', bF, 'bf') + filiallar.map(f => chip(f, bF, 'bf')).join('') + '</div>';
   const io = String(D.meta.ishOlish || ''), tel = (io.match(/\+?\d[\d\s]{8,}/) || [''])[0].replace(/\s/g, '');
+  const menBand = !!(D.rol.usta && (D.ustalar || []).some(u => u.nom === D.rol.usta && u.band));
   h += R.length ? '<h2>Bo\'sh ishlar · ' + R.length + '</h2>' + R.map(i => {
     const jami = i.ishlar.reduce((s, x) => s + (x.summa || 0), 0);
     return '<div class="card"><div class="row"><div><div class="name">' + esc(i.mijoz) + '</div><span class="pill wait">⏳ ' + dav(i.tushganMin) + 'dan beri bo\'sh</span></div>' +
@@ -405,12 +412,18 @@ function ekBosh() {
         (i.ishlar.length > 1 && jami ? '<div class="job" style="border-top:1px solid var(--mist);margin-top:4px;padding-top:6px"><b>Jami</b><b>' + pul(jami) + '</b></div>' : '') + '</div>' +
       '<div class="line muted"><span class="i">📞</span><span>' + esc(i.tel) + '</span></div>' +
       '<div class="line muted"><span class="i">🏢</span><span>' + esc(i.filial || '—') + '</span></div>' +
-      (io ? '<div class="line"><span class="i">📲</span><span>Ishni olish uchun: ' + (tel ? '<a class="tel" style="font-size:14px" href="tel:' + esc(tel) + '">' + esc(io) + '</a>' : esc(io)) + '</span></div>' : '') +
+      (D.rol.usta ? (i.sorov ? '<button class="btn ghost" disabled>⏳ So\'rov yuborildi — rahbar javobini kuting</button>'
+        : menBand ? '<button class="btn ghost" disabled>🔒 Avval ochiq ishingizni yoping</button>'
+        : '<button class="btn" data-ol="' + esc(i.h) + '">🙋 Ishni olaman</button>') : '') +
       '</div>'; }).join('') : bosh('✨', L.length ? 'Bu filtrda bo\'sh ish yo\'q' : 'Hozircha bo\'sh ish yo\'q');
-  h += '<p class="muted small" style="margin:12px 4px">Mijoz ismi va telefoni yashirilgan. Ish sizga biriktirilgach, to\'liq ma\'lumot «Ishlarim»da va botdagi xabarda chiqadi.</p>';
+  h += '<p class="muted small" style="margin:12px 4px">Mijoz ismi va telefoni yashirilgan. «🙋 Ishni olaman» bosilsa rahbarga so\'rov boradi; berilgach to\'liq ma\'lumot «Ishlarim»da va botdagi xabarda chiqadi.</p>';
   $('main').innerHTML = h;
   document.querySelectorAll('[data-bt]').forEach(b => b.onclick = () => { bT = b.dataset.bt; hap('sel'); chiz(); });
   document.querySelectorAll('[data-bf]').forEach(b => b.onclick = () => { bF = b.dataset.bf; hap('sel'); chiz(); });
+  document.querySelectorAll('[data-ol]').forEach(b => b.onclick = () => {
+    const go = () => amal({ api: 'olaman', h: b.dataset.ol }, b, 'Yuborilmoqda…');
+    tg && tg.showConfirm ? tg.showConfirm('Shu ishni olmoqchimisiz? Rahbarga so\'rov boradi.', y => y && go()) : go();
+  });
 }
 
 /* ---------- Ustalar holati ---------- */
