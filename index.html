@@ -89,6 +89,22 @@
   .err{background:#FBEAEA;color:var(--red);border-radius:12px;padding:12px;margin:12px 0;font-size:14px}
   .spin{width:28px;height:28px;border:3px solid var(--mist);border-top-color:var(--teal);border-radius:50%;animation:s .8s linear infinite;margin:60px auto}
   @keyframes s{to{transform:rotate(360deg)}}
+  .acts{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+  .act{flex:1 1 auto;border:0;border-radius:10px;padding:10px 8px;font:700 13px Manrope,sans-serif;background:var(--ice);color:var(--teal)}
+  .act.red{background:#FBEAEA;color:var(--red)}
+  .ov{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:50;display:flex;align-items:flex-end}
+  .sheet{background:var(--bg);width:100%;max-height:88vh;overflow:auto;border-radius:20px 20px 0 0;padding:16px 14px calc(18px + env(safe-area-inset-bottom))}
+  .sheet .hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+  .sheet .hd b{font-size:17px}
+  .x{border:0;background:var(--card);width:34px;height:34px;border-radius:17px;font-size:16px;color:var(--muted);box-shadow:0 0 0 1px var(--line) inset}
+  .uitem{display:flex;justify-content:space-between;align-items:center;width:100%;border:0;background:var(--card);border-radius:12px;padding:13px 14px;margin:6px 0;font:700 15px Manrope,sans-serif;color:var(--text);box-shadow:0 0 0 1px var(--line) inset;text-align:left}
+  .uitem[disabled]{opacity:.45} .uitem.cur{box-shadow:0 0 0 2px var(--teal) inset}
+  .mon{display:flex;align-items:center;justify-content:space-between;margin:12px 0 4px}
+  .mon button{border:0;background:var(--card);width:40px;height:40px;border-radius:12px;font-size:18px;color:var(--teal);box-shadow:0 0 0 1px var(--line) inset}
+  .mon b{font-size:16px}
+  .mrow{display:flex;justify-content:space-between;font-size:14px;padding:5px 0}
+  .mrow span:first-child{color:var(--muted)}
+  .neg{color:var(--red)} .pos{color:var(--teal)}
 </style>
 </head>
 <body>
@@ -102,7 +118,7 @@ const API = 'https://script.google.com/macros/s/AKfycbytPwCL-MZPwtpr3swxDePb4oKk
 const tg = window.Telegram && Telegram.WebApp;
 if (tg) { tg.ready(); tg.expand(); try { tg.setHeaderColor('#01825F'); } catch (e) {} }
 
-let D = null, ekran = null, seg = {}, qidir = '', davr = 'oy', F = null, natija = null;
+let D = null, ekran = null, seg = {}, qidir = '', davr = 'oy', F = null, natija = null, MOL = {}, moliyaOy = null;
 const $ = id => document.getElementById(id);
 const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const pul = n => n == null || n === '' || isNaN(n) ? '' : String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, ' ') + " so'm";
@@ -132,9 +148,9 @@ async function yukla(jim) {
 /* ---------- Rol va menyu ---------- */
 function menyu() {
   const r = D.rol;
-  if (r.admin) return [['stat', '📊', 'Statistika'], ['ishlar', '📋', 'Ishlar'], ['ustalar', '👷', 'Ustalar'], ['yangi', '➕', 'Yangi ish']];
+  if (r.admin) return [['stat', '📊', 'Statistika'], ['ishlar', '📋', 'Ishlar'], ['ustalar', '👷', 'Ustalar'], ['moliya', '💰', 'Moliya'], ['yangi', '➕', 'Yangi']];
   if (r.xodim) return [['yangi', '➕', 'Yangi ish'], ['mening', '📋', 'Bergan ishlarim'], ['ustalar', '👷', 'Ustalar']].concat(r.usta ? [['usta', '🔧', 'Usta ishlarim']] : []);
-  return [['usta', '🔧', 'Ishlarim'], ['bajarilgan', '✅', 'Bajarilgan']];
+  return [['usta', '🔧', 'Ishlarim'], ['bajarilgan', '✅', 'Bajarilgan'], ['moliya', '💰', 'Balans']];
 }
 function chiz() {
   const r = D.rol;
@@ -150,7 +166,7 @@ function chiz() {
   $('nav').innerHTML = M.map(m => '<button data-e="' + m[0] + '" class="' + (m[0] === ekran ? 'on' : '') + '"><span class="ic">' + m[1] + '</span>' + m[2] + '</button>').join('');
   [...$('nav').children].forEach(b => b.onclick = () => { ekran = b.dataset.e; natija = null; hap('sel'); chiz(); window.scrollTo(0, 0); });
   $('ref').hidden = ekran === 'yangi';
-  ({ stat: ekStat, ishlar: ekIshlar, ustalar: ekUstalar, yangi: ekYangi, mening: ekMening, usta: ekUsta, bajarilgan: ekBajarilgan })[ekran]();
+  ({ stat: ekStat, ishlar: ekIshlar, ustalar: ekUstalar, yangi: ekYangi, mening: ekMening, usta: ekUsta, bajarilgan: ekBajarilgan, moliya: ekMoliya })[ekran]();
 }
 
 /* ---------- Umumiy: ish kartasi va ro'yxat ---------- */
@@ -172,7 +188,74 @@ function karta(i, tugma) {
     (i.izoh ? '<div class="line"><span class="i">📝</span><span>' + esc(i.izoh) + '</span></div>' : '') +
     '<div class="line muted"><span class="i">🏢</span><span>' + esc(i.filial || '—') + (i.shaxs ? ' · ' + esc(i.shaxs) : '') + '</span></div>' +
     (i.yopildi && i.kutishMin != null ? '<div class="line muted small"><span class="i">⏱</span><span>Ustaga berilguncha ' + dav(i.kutishMin) + ' · usta ' + dav(i.ustaMin) + '</span></div>' : '') +
-    (tugma && !i.yopildi && !i.otkaz ? '<button class="btn" data-yop="' + esc(i.h) + '">✅ Ishni tugatdim</button>' : '') + '</div>';
+    (tugma && !i.yopildi && !i.otkaz ? '<button class="btn" data-yop="' + esc(i.h) + '">✅ Ishni tugatdim</button>' : '') + amallar(i) + '</div>';
+}
+/* Ish kartasidagi amallar — huquqqa qarab */
+function amallar(i) {
+  const r = D.rol, ochiq = !i.yopildi && !i.otkaz, b = [];
+  if (ochiq && (r.admin || (r.xodim && i.shaxs === r.xodim))) b.push(['usta', i.usta ? '🔁 Ustani almashtirish' : '👷 Usta biriktirish', '']);
+  if (ochiq && r.admin) { b.push(['tahrir', '✏️ Tahrirlash', '']); b.push(['otkaz', '❌ Otkaz', 'red']); }
+  if (r.admin && D.barcha && i.tel) { const n = D.barcha.filter(x => x.tel === i.tel && x.h !== i.h).length; if (n) b.push(['tarix', '📞 Mijoz tarixi · ' + n, '']); }
+  return b.length ? '<div class="acts">' + b.map(x => '<button class="act ' + x[2] + '" data-act="' + x[0] + '" data-h="' + esc(i.h) + '">' + x[1] + '</button>').join('') + '</div>' : '';
+}
+const ishlarHammasi = () => [].concat(D.barcha || [], D.meniki || [], D.ustaIshlari || []);
+const ishTop = h => ishlarHammasi().find(x => x.h === h);
+function oyna(sarlavha, ichi) {
+  yop();
+  const o = document.createElement('div'); o.className = 'ov'; o.id = 'ov';
+  o.innerHTML = '<div class="sheet"><div class="hd"><b>' + esc(sarlavha) + '</b><button class="x" id="ovx">✕</button></div>' + ichi + '</div>';
+  o.onclick = e => { if (e.target === o) yop(); };
+  document.body.appendChild(o); $('ovx').onclick = yop;
+  if (tg && tg.BackButton) { tg.BackButton.show(); tg.BackButton.onClick(yop); }
+}
+function yop() { const o = $('ov'); if (o) o.remove(); if (tg && tg.BackButton) { tg.BackButton.offClick(yop); tg.BackButton.hide(); } }
+async function amal(body, btn, matn) {
+  if (btn) { btn.disabled = true; btn.dataset.t = btn.textContent; btn.textContent = matn || 'Saqlanmoqda…'; }
+  try {
+    const r = await api(body);
+    if (!r.ok) throw new Error(r.xato || 'Xatolik');
+    hap('success'); yop(); xabar((r.natija || ['✅ Bajarildi']).join('\n')); await yukla(true);
+  } catch (e) { if (btn) { btn.disabled = false; btn.textContent = btn.dataset.t; } hap('error'); xabar('⚠️ ' + e.message); }
+}
+function amalBos(act, h) {
+  const i = ishTop(h); if (!i) return;
+  if (act === 'usta') {
+    const band = {}; (D.ustalar || []).forEach(u => band[u.nom] = u);
+    oyna(i.usta ? 'Ustani almashtirish' : 'Usta biriktirish', '<p class="muted small" style="margin:0 2px 8px">' + esc(i.mijoz) + ' · ' + esc(i.ishlar.map(x => x.turi).join(', ')) + '</p>' +
+      D.meta.ustalar.map(u => { const b = band[u] && band[u].band && u !== i.usta;
+        return '<button class="uitem' + (u === i.usta ? ' cur' : '') + '" data-u="' + esc(u) + '"' + (b || u === i.usta ? ' disabled' : '') + '><span>' + esc(u) + '</span><span class="st ' + (u === i.usta ? 'free">✓ hozirgi' : b ? 'busy">🔒 band' : 'free">🟢 bo\'sh') + '</span></button>'; }).join(''));
+    document.querySelectorAll('[data-u]').forEach(b => b.onclick = () => {
+      const u = b.dataset.u;
+      const go = () => amal({ api: 'usta', h, usta: u }, b, 'Biriktirilmoqda…');
+      tg && tg.showConfirm ? tg.showConfirm(u + 'ga biriktirilsinmi? Ustaga xabar boradi.', y => y && go()) : go();
+    });
+  }
+  if (act === 'tahrir') {
+    oyna('Tahrirlash', '<p class="muted small" style="margin:0 2px">' + esc(i.mijoz) + '</p>' +
+      i.ishlar.map((x, k) => '<label class="f">💰 ' + esc(x.turi) + ' × ' + x.soni + '</label><input class="in" inputmode="numeric" data-ts="' + k + '" value="' + (x.summa == null ? '' : String(x.summa).replace(/\B(?=(\d{3})+(?!\d))/g, ' ')) + '" placeholder="Summa, so\'m">').join('') +
+      '<label class="f">📍 Manzil</label><input class="in" id="t_manzil" value="' + esc(i.manzil) + '">' +
+      '<label class="f">📝 Izoh</label><textarea class="in" id="t_izoh">' + esc(i.izoh) + '</textarea>' +
+      '<button class="btn" id="t_saq">💾 Saqlash</button>');
+    document.querySelectorAll('[data-ts]').forEach(e => e.oninput = () => { const r = e.value.replace(/\D/g, ''); e.value = r ? r.replace(/\B(?=(\d{3})+(?!\d))/g, ' ') : ''; });
+    $('t_saq').onclick = () => amal({ api: 'tahrir', h, d: { manzil: $('t_manzil').value, izoh: $('t_izoh').value,
+      summalar: [...document.querySelectorAll('[data-ts]')].map(e => e.value.replace(/\D/g, '')) } }, $('t_saq'));
+  }
+  if (act === 'otkaz') {
+    let tanlov = '';
+    const S = (D.meta.sabablar && D.meta.sabablar.length) ? D.meta.sabablar : ['Mijoz rad etdi', 'Narx kelishilmadi', 'Mijoz javob bermadi', 'Boshqa'];
+    oyna('Otkaz qilish', '<p class="muted small" style="margin:0 2px 8px">' + esc(i.mijoz) + ' · ' + esc(i.ishlar.map(x => x.turi).join(', ')) + '</p>' +
+      '<label class="f">Sabab</label><div class="chips">' + S.map(x => '<button class="chip" data-sb="' + esc(x) + '">' + esc(x) + '</button>').join('') + '</div>' +
+      '<label class="f">Yoki o\'zingiz yozing</label><input class="in" id="o_sabab" placeholder="Sabab…">' +
+      '<button class="btn" id="o_ok" style="background:var(--red)">❌ Otkaz qilish</button>');
+    document.querySelectorAll('[data-sb]').forEach(b => b.onclick = () => { tanlov = b.dataset.sb; document.querySelectorAll('[data-sb]').forEach(x => x.classList.toggle('on', x === b)); $('o_sabab').value = ''; hap('sel'); });
+    $('o_ok').onclick = () => { const s = $('o_sabab').value.trim() || tanlov; if (!s) return xabar('Sababni tanlang yoki yozing.');
+      const go = () => amal({ api: 'otkaz', h, sabab: s }, $('o_ok'), 'Bajarilmoqda…');
+      tg && tg.showConfirm ? tg.showConfirm('Ish otkaz qilinsinmi? Guruhga xabar ketadi.', y => y && go()) : go(); };
+  }
+  if (act === 'tarix') {
+    const L = D.barcha.filter(x => x.tel === i.tel && x.h !== i.h);
+    oyna('📞 ' + i.tel + ' — oldingi ishlar', L.map(x => karta(x, false).replace(/<div class="acts">[\s\S]*?<\/div>(?=<\/div>$)/, '')).join(''));
+  }
 }
 function segChiz(kalit, variantlar) {
   if (!seg[kalit] || !variantlar.some(v => v[0] === seg[kalit])) seg[kalit] = variantlar[0][0];
@@ -181,6 +264,7 @@ function segChiz(kalit, variantlar) {
 function segUlash() {
   document.querySelectorAll('.seg').forEach(s => [...s.children].forEach(b => b.onclick = () => { seg[s.dataset.k] = b.dataset.v; hap('sel'); chiz(); }));
   document.querySelectorAll('[data-yop]').forEach(b => b.onclick = () => tugat(b.dataset.yop, b));
+  document.querySelectorAll('#main [data-act]').forEach(b => b.onclick = () => { hap('sel'); amalBos(b.dataset.act, b.dataset.h); });
   const q = $('q'); if (q) q.oninput = () => { qidir = q.value; const p = q.selectionStart; chiz(); const n = $('q'); n.focus(); n.setSelectionRange(p, p); };
 }
 const filtr = (L, k) => k === 'ochiq' ? L.filter(i => !i.yopildi && !i.otkaz) : k === 'kutish' ? L.filter(i => !i.yopildi && !i.otkaz && !i.usta)
@@ -269,15 +353,47 @@ function ekStat() {
     ul.map(u => '<tr><td>' + esc(u) + '</td><td>' + us[u].y + '</td><td>' + dav(ort(us[u].t)) + '</td><td>' + (us[u].o ? '🔒 ' + us[u].o : '🟢') + '</td></tr>').join('') + '</table>' : '<div class="muted">Ma\'lumot yo\'q</div>') + '</div>';
   h += barlar('🏢 Filiallar', sana(T, i => i.filial)) + barlar('🙋 Ish bergan xodimlar', sana(T, i => i.shaxs)) +
     barlar('🛠 Ish turlari', (() => { const m = {}; T.filter(i => !i.otkaz).forEach(i => i.ishlar.forEach(x => m[x.turi] = (m[x.turi] || 0) + 1)); return m; })());
+  h += '<button class="btn ghost" id="exp">📄 Shu davrni Excel\'ga yuklash</button>';
   h += '<p class="muted small" style="margin:14px 4px">Hisob «Yangi Ishlar» varag\'idagi ishlardan. Davr: tushgan ishlar — tushgan sanasi bo\'yicha, yopilganlar — yopilgan sanasi bo\'yicha.</p>';
   $('main').innerHTML = h;
   [...$('dv').children].forEach(b => b.onclick = () => { davr = b.dataset.v; hap('sel'); chiz(); });
+  $('exp').onclick = async () => { const b = $('exp'); b.disabled = true; b.textContent = 'Tayyorlanmoqda…';
+    try { const r = await api({ api: 'export', dan: chegara === '0000' ? '' : chegara }); if (!r.ok) throw new Error(r.xato); hap('success'); xabar(r.natija.join('\n')); }
+    catch (e) { xabar('⚠️ ' + e.message); } b.disabled = false; b.textContent = '📄 Shu davrni Excel\'ga yuklash'; };
 }
 const pr = (a, b) => a == null || !b ? 0 : Math.max(3, Math.round(a / b * 100));
 const sana = (L, f) => { const m = {}; L.forEach(i => { const k = f(i) || '—'; m[k] = (m[k] || 0) + 1; }); return m; };
 function barlar(t, m) {
   const k = Object.keys(m).sort((a, b) => m[b] - m[a]); const mx = Math.max(1, ...k.map(x => m[x]));
   return '<h2>' + t + '</h2><div class="card">' + (k.length ? k.map(x => '<div class="bar"><span>' + esc(x) + '</span><div class="tr"><div class="fl" style="width:' + Math.round(m[x] / mx * 100) + '%"></div></div><span class="v">' + m[x] + '</span></div>').join('') : '<div class="muted">Ma\'lumot yo\'q</div>') + '</div>';
+}
+
+/* ---------- 💰 Moliya / Balans ---------- */
+function oyNomi(o) { const N = ['Yanvar', 'Fevral', 'Mart', 'Aprel', 'May', 'Iyun', 'Iyul', 'Avgust', 'Sentabr', 'Oktabr', 'Noyabr', 'Dekabr']; return N[+o.slice(5, 7) - 1] + ' ' + o.slice(0, 4); }
+function oySur(o, n) { let y = +o.slice(0, 4), m = +o.slice(5, 7) + n; while (m < 1) { m += 12; y--; } while (m > 12) { m -= 12; y++; } return y + '-' + ('0' + m).slice(-2); }
+async function ekMoliya() {
+  if (!moliyaOy) moliyaOy = D.meta.bugun.slice(0, 7);
+  const oy = moliyaOy;
+  let h = '<div class="mon"><button id="m_p">‹</button><b>' + oyNomi(oy) + '</b><button id="m_n"' + (oy >= D.meta.bugun.slice(0, 7) ? ' disabled style="opacity:.3"' : '') + '>›</button></div>';
+  $('main').innerHTML = h + '<div class="spin"></div>';
+  $('m_p').onclick = () => { moliyaOy = oySur(oy, -1); chiz(); };
+  $('m_n').onclick = () => { if (oy < D.meta.bugun.slice(0, 7)) { moliyaOy = oySur(oy, 1); chiz(); } };
+  try {
+    if (!MOL[oy]) { const r = await api({ api: 'moliya', oy }); if (!r.ok) throw new Error(r.xato); MOL[oy] = r.moliya; }
+    if (ekran !== 'moliya' || moliyaOy !== oy) return;
+    const M = MOL[oy], j = k => M.reduce((s, x) => s + (x[k] || 0), 0);
+    if (D.rol.admin) h += '<div class="kpis"><div class="kpi"><b>' + j('oyIsh') + '</b><span>ish (usta varaqlari)</span></div><div class="kpi"><b>' + mln(j('oySumma')) + '</b><span>ishga olingan summa</span></div>' +
+      '<div class="kpi"><b>' + mln(j('oyServis')) + '</b><span>servis daromadi 10%</span></div><div class="kpi"><b>' + mln(j('oyDepozit')) + '</b><span>depozit</span></div></div>';
+    h += M.slice().sort((a, b) => b.oySumma - a.oySumma).map(x => '<div class="card"><div class="row"><div class="name">' + esc(x.nom) + '</div><div class="time">' + x.oyIsh + ' ta ish</div></div>' +
+      '<div class="mrow"><span>Ishga olingan summa</span><b>' + pul(x.oySumma) + '</b></div>' +
+      '<div class="mrow"><span>Servis daromadi 10%</span><b>' + pul(x.oyServis) + '</b></div>' +
+      '<div class="mrow"><span>Depozit (shu oy)</span><b>' + pul(x.oyDepozit) + '</b></div>' +
+      '<div class="mrow" style="border-top:1px solid var(--line);margin-top:4px;padding-top:8px"><span>Umumiy balans</span><b class="' + (x.balans < 0 ? 'neg' : 'pos') + '">' + pul(x.balans) + '</b></div></div>').join('');
+    h += '<p class="muted small" style="margin:12px 4px">Balans = barcha depozitlar − barcha servis daromadi (10%), ustaning varag\'idagi hamma qatorlar bo\'yicha. Manfiy bo\'lsa — usta qarzdor.</p>';
+    $('main').innerHTML = h;
+    $('m_p').onclick = () => { moliyaOy = oySur(oy, -1); chiz(); };
+    $('m_n').onclick = () => { if (oy < D.meta.bugun.slice(0, 7)) { moliyaOy = oySur(oy, 1); chiz(); } };
+  } catch (e) { $('main').innerHTML = h + '<div class="err">⚠️ ' + esc(e.message) + '</div>'; }
 }
 
 /* ---------- Yangi ish formasi ---------- */
@@ -351,7 +467,7 @@ function tugat(h, btn) {
   else if (confirm('Ishni tugatdingizmi?')) ok();
 }
 
-$('ref').onclick = () => { hap('sel'); yukla(); };
+$('ref').onclick = () => { hap('sel'); MOL = {}; yukla(); };
 if (!tg || !tg.initData) {
   $('sub').textContent = '';
   $('main').innerHTML = bosh('📱', 'Bu sahifa faqat Telegram ichida ishlaydi.<br><br>@halowatt_servis_bot ni oching va «📱 Ochish» tugmasini bosing.');
