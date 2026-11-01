@@ -39,6 +39,9 @@
   .name{font-weight:800;font-size:17px}
   .time{font-size:12px;color:var(--muted);white-space:nowrap;text-align:right}
   .pill{display:inline-block;font-size:12px;font-weight:700;border-radius:20px;padding:3px 9px;margin-top:6px}
+  .tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+  .tag{display:inline-flex;align-items:center;gap:4px;font-size:12.5px;font-weight:700;border-radius:8px;padding:4px 9px;background:var(--ice);color:var(--teal);box-shadow:0 0 0 1px var(--mist) inset}
+  .tag.yoq{color:var(--orange);background:#FDF0E2;box-shadow:none}
   .pill.wait{background:#FDF0E2;color:var(--orange)} .pill.work{background:var(--ice);color:var(--teal)}
   .pill.done{background:var(--ice);color:var(--gray)} .pill.otk{background:#FBEAEA;color:var(--red)}
   .jobs{margin:10px 0 4px;padding:10px 12px;border-radius:12px;background:var(--ice)}
@@ -118,6 +121,7 @@ const API = 'https://script.google.com/macros/s/AKfycbytPwCL-MZPwtpr3swxDePb4oKk
 const tg = window.Telegram && Telegram.WebApp;
 if (tg) { tg.ready(); tg.expand(); try { tg.setHeaderColor('#01825F'); } catch (e) {} }
 
+let ishFil = '';
 let D = null, ekran = null, seg = {}, qidir = '', davr = 'oy', F = null, natija = null, MOL = {}, moliyaOy = null, bT = '', bF = '';
 const $ = id => document.getElementById(id);
 const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -179,7 +183,10 @@ function holatPill(i) {
 function karta(i, tugma) {
   const jami = i.ishlar.reduce((s, x) => s + (x.summa || 0), 0);
   const map = i.manzil ? 'https://yandex.uz/maps/?text=' + encodeURIComponent(i.manzil + ", Qo'qon") : '';
-  return '<div class="card"><div class="row"><div><div class="name">' + esc(i.mijoz || '—') + '</div>' + holatPill(i) + '</div>' +
+  const fil = String(i.filial || '').replace(/^Qo.qon\s*/i, '');
+  const teglar = '<div class="tags"><span class="tag">🏢 ' + esc(fil || 'Filial —') + '</span>' +
+    (i.usta ? '<span class="tag">👷 ' + esc(i.usta) + '</span>' : (i.otkaz ? '' : '<span class="tag yoq">👷 Usta yo\'q</span>')) + '</div>';
+  return '<div class="card"><div class="row"><div><div class="name">' + esc(i.mijoz || '—') + '</div>' + holatPill(i) + teglar + '</div>' +
     '<div class="time">' + esc(i.sana) + '<br>' + esc(i.vaqt) + '</div></div>' +
     '<div class="jobs">' + i.ishlar.map(x => '<div class="job"><span><b>' + esc(x.turi) + '</b> × ' + x.soni + '</span><span>' + pul(x.summa) + '</span></div>').join('') +
       (i.ishlar.length > 1 && jami ? '<div class="job" style="border-top:1px solid var(--mist);margin-top:4px;padding-top:6px"><b>Jami</b><b>' + pul(jami) + '</b></div>' : '') + '</div>' +
@@ -378,12 +385,17 @@ const bosh = (e, t) => '<div class="empty"><div class="e">' + e + '</div>' + t +
 
 /* ---------- Rahbar: barcha ishlar ---------- */
 function ekIshlar() {
-  const L = D.barcha;
-  let h = segChiz('ishlar', [['ochiq', 'Ochiq', filtr(L, 'ochiq').length], ['kutish', 'Usta kutilmoqda', filtr(L, 'kutish').length], ['yopilgan', 'Yopilgan', filtr(L, 'yopilgan').length], ['otkaz', 'Otkaz', filtr(L, 'otkaz').length]]);
+  const FL = [...new Set(D.barcha.map(i => i.filial).filter(Boolean))].sort();
+  if (ishFil && !FL.includes(ishFil)) ishFil = '';
+  const L = ishFil ? D.barcha.filter(i => i.filial === ishFil) : D.barcha;
+  let h = '<div class="chips" style="margin:12px 0 2px">' + [''].concat(FL).map(f => '<button class="chip' + (f === ishFil ? ' on' : '') + '" data-if="' + esc(f) + '">' +
+    (f ? '🏢 ' + esc(f.replace(/^Qo.qon\s*/i, '')) + ' · ' + filtr(D.barcha.filter(i => i.filial === f), 'ochiq').length : 'Barcha filiallar') + '</button>').join('') + '</div>';
+  h += segChiz('ishlar', [['ochiq', 'Ochiq', filtr(L, 'ochiq').length], ['kutish', 'Usta kutilmoqda', filtr(L, 'kutish').length], ['yopilgan', 'Yopilgan', filtr(L, 'yopilgan').length], ['otkaz', 'Otkaz', filtr(L, 'otkaz').length]]);
   h += '<input class="search" id="q" placeholder="🔎 Mijoz, telefon, usta, manzil…" value="' + esc(qidir) + '">';
   const R = izla(filtr(L, seg.ishlar)).slice(0, 100);
   h += R.length ? R.map(i => karta(i, false)).join('') : bosh('📭', 'Bu bo\'limda ish yo\'q');
   $('main').innerHTML = h; segUlash();
+  document.querySelectorAll('[data-if]').forEach(b => b.onclick = () => { ishFil = b.dataset.if; hap('sel'); chiz(); });
 }
 
 /* ---------- Xodim: o'zi bergan ishlar ---------- */
