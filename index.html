@@ -323,13 +323,22 @@ async function ekEslatma() {
     h += ES.length ? ES.map(x => '<div class="card"><div class="row"><div><div class="name">' + esc(x.mijoz) + '</div><span class="pill wait">📅 ' + esc(x.sana) + (x.kun != null ? ' · ' + x.kun + ' kun' : '') + '</span></div>' +
       '<div class="time">' + esc(x.usta) + '</div></div>' +
       '<div class="line"><span class="i">🛠</span><span>' + esc(x.ornatma) + '</span></div>' +
-      (x.tel ? '<div class="line"><span class="i">📞</span><a class="tel" href="tel:' + esc(x.tel) + '">' + esc(x.tel) + '</a></div>' : '<div class="line muted"><span class="i">📞</span><span>telefon topilmadi</span></div>') +
+      (x.tel ? '<a class="btn" style="display:block;text-align:center;text-decoration:none;margin:10px 0 2px" href="tel:' + esc(x.tel) + '">📞 Qo\'ng\'iroq qilish · ' + esc(x.tel) + '</a>'
+        : '<div class="line" style="color:var(--orange)"><span class="i">📞</span><span>Telefon topilmadi</span></div><button class="btn ghost" style="margin:6px 0 2px" data-st="' + x.row + '">✏️ Raqamni kiritish</button>') +
       (x.manzil ? '<div class="line muted"><span class="i">📍</span><span>' + esc(x.manzil) + '</span></div>' : '') +
       '<div class="acts"><button class="act" data-sq="' + x.row + '">✅ Qo\'ng\'iroq qilindi</button><button class="act" data-sk="' + x.row + '">⏭ Keyinroq</button></div></div>').join('')
       : bosh('✅', 'Hozircha qo\'ng\'iroq qilinadigan mijoz yo\'q');
     $('main').innerHTML = h;
     const hal = (row, holat, btn, izoh) => amal({ api: 'eslatmaHal', row, holat, izoh }, btn, 'Saqlanmoqda…').then(() => { ES = null; if (ekran === 'eslatma') chiz(); });
     document.querySelectorAll('[data-sk]').forEach(b => b.onclick = () => hal(+b.dataset.sk, 'keyin', b, ''));
+    document.querySelectorAll('[data-st]').forEach(b => b.onclick = () => {
+      const x = ES.find(e => e.row === +b.dataset.st) || {};
+      oyna('📞 Mijoz raqami', '<p class="muted small" style="margin:0 2px 8px">' + esc(x.mijoz || '') + ' · ' + esc(x.ornatma || '') + '</p>' +
+        '<label class="f">Telefon</label><input class="in" id="st_tel" type="tel" inputmode="tel" placeholder="90 123 45 67">' +
+        '<button class="btn" id="st_ok">💾 Saqlash</button>');
+      $('st_ok').onclick = () => { const v = $('st_tel').value; if (v.replace(/\D/g, '').length < 9) return xabar('Raqamni to\'liq kiriting.');
+        amal({ api: 'eslatmaTel', row: +b.dataset.st, tel: v }, $('st_ok'), 'Saqlanmoqda…').then(() => { ES = null; if (ekran === 'eslatma') chiz(); }); };
+    });
     document.querySelectorAll('[data-sq]').forEach(b => b.onclick = () => {
       oyna('✅ Qo\'ng\'iroq natijasi', '<label class="f">📝 Izoh (ixtiyoriy)</label><input class="in" id="sq_iz" placeholder="Masalan: servisga yozildi, keyinroq qo\'ng\'iroq…">' +
         '<button class="btn" id="sq_ok">💾 Saqlash</button>');
