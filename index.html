@@ -736,7 +736,7 @@ function ekYangi() {
 /* ---------- Ishni tugatdim ---------- */
 /* ⭐ Mijoz bahosi — usta ishni yopgach telefonni mijozga beradi */
 const BAHO_S = ['⏰ Usta vaqtida keldimi?', '🛠 Ish sifati sizni qoniqtirdimi?', '🧹 Usta ishdan keyin joyni toza qoldirdimi?', '🤝 Ustaning muomalasi qanday bo\'ldi?', '📱 Usta tizimdan foydalanishni tushuntirib berdimi?'];
-const BAHO_T = [[1, '😞', 'Qoniqarsiz'], [2, '🙂', 'Qoniqarli'], [3, '🤩', 'A\'lo']];
+const BAHO_T = [[1, '😞', 'Qoniqarsiz'], [3, '🙂', 'Qoniqarli'], [5, '🤩', 'A\'lo']];
 function bahoSorov(h, keyin) {
   const J = BAHO_S.map(() => 0);
   const i = ishTop(h);
@@ -759,7 +759,7 @@ function bahoSorov(h, keyin) {
   $('bh_otk').onclick = () => { const go = () => yubor({ otkaz: true }, $('bh_otk'));
     tg && tg.showConfirm ? tg.showConfirm('Mijoz bahosiz qoldirilsinmi? Bu ham qayd qilinadi.', y => y && go()) : go(); };
 }
-const bahoBelgi = b => !b ? '' : b.holat === 'O\'tkazildi' ? '⏭ Baho o\'tkazilgan' : '⭐ Mijoz bahosi: ' + b.o + ' / 3' + (b.past ? ' · 😞 qoniqmagan' : '');
+const bahoBelgi = b => !b ? '' : b.holat === 'O\'tkazildi' ? '⏭ Baho o\'tkazilgan' : '⭐ Mijoz bahosi: ' + b.o + ' / 5' + (b.past ? ' · 😞 qoniqmagan' : '');
 function tugat(h, btn) {
   const R = [];   // tayyor JPEG (dataURL)
   oyna('✅ Ishni tugatish', '<p class="muted small" style="margin:0 2px 10px">📸 Bajarilgan ish rasmini yuklang (1–3 ta). <b>Rasmsiz ish yopilmaydi.</b></p>' +
