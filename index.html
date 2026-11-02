@@ -514,6 +514,7 @@ function segUlash() {
   const q = $('q'); if (q) q.oninput = () => { qidir = q.value; const p = q.selectionStart; chiz(); const n = $('q'); n.focus(); n.setSelectionRange(p, p); };
 }
 const filtr = (L, k) => k === 'ochiq' ? L.filter(i => !i.yopildi && !i.otkaz) : k === 'kutish' ? L.filter(i => !i.yopildi && !i.otkaz && !i.usta)
+  : k === 'jarayon' ? L.filter(i => !i.yopildi && !i.otkaz && i.usta)
   : k === 'yopilgan' ? L.filter(i => i.yopildi && !i.otkaz) : k === 'otkaz' ? L.filter(i => i.otkaz) : L;
 const izla = L => { const q = qidir.trim().toLowerCase(); if (!q) return L; const d = q.replace(/\D/g, '');
   return L.filter(i => (i.mijoz + ' ' + i.manzil + ' ' + i.usta + ' ' + i.shaxs).toLowerCase().includes(q) || (d.length >= 3 && i.tel.replace(/\D/g, '').includes(d))); };
@@ -526,7 +527,7 @@ function ekIshlar() {
   const L = ishFil ? D.barcha.filter(i => i.filial === ishFil) : D.barcha;
   let h = '<div class="chips" style="margin:12px 0 2px">' + [''].concat(FL).map(f => '<button class="chip' + (f === ishFil ? ' on' : '') + '" data-if="' + esc(f) + '">' +
     (f ? '🏢 ' + esc(f.replace(/^Qo.qon\s*/i, '')) + ' · ' + filtr(D.barcha.filter(i => i.filial === f), 'ochiq').length : 'Barcha filiallar') + '</button>').join('') + '</div>';
-  h += segChiz('ishlar', [['ochiq', 'Ochiq', filtr(L, 'ochiq').length], ['kutish', 'Usta kutilmoqda', filtr(L, 'kutish').length], ['yopilgan', 'Yopilgan', filtr(L, 'yopilgan').length], ['otkaz', 'Otkaz', filtr(L, 'otkaz').length]]);
+  h += segChiz('ishlar', [['kutish', 'Usta kutilmoqda', filtr(L, 'kutish').length], ['jarayon', 'Jarayonda', filtr(L, 'jarayon').length], ['yopilgan', 'Yopilgan', filtr(L, 'yopilgan').length], ['otkaz', 'Otkaz', filtr(L, 'otkaz').length]]);
   h += '<input class="search" id="q" placeholder="🔎 Mijoz, telefon, usta, manzil…" value="' + esc(qidir) + '">';
   const R = izla(filtr(L, seg.ishlar)).slice(0, 100);
   h += R.length ? R.map(i => karta(i, false)).join('') : bosh('📭', 'Bu bo\'limda ish yo\'q');
@@ -542,10 +543,10 @@ function ekMening() {
   const oy = D.meta.bugun.slice(0, 7);
   const buOy = L.filter(i => i.t.slice(0, 7) === oy);
   let h = '<div class="kpis"><div class="kpi"><b>' + buOy.length + '</b><span>bu oy bergan ishlarim</span></div><div class="kpi"><b>' + buOy.filter(i => i.yopildi).length + '</b><span>shundan yopilgan</span></div></div>';
-  h += segChiz('mening', [['ochiq', 'Ochiq', filtr(L, 'ochiq').length], ['yopilgan', 'Yopilgan', filtr(L, 'yopilgan').length], ['otkaz', 'Otkaz', filtr(L, 'otkaz').length]]);
+  h += segChiz('mening', [['kutish', 'Usta kutilmoqda', filtr(L, 'kutish').length], ['jarayon', 'Jarayonda', filtr(L, 'jarayon').length], ['yopilgan', 'Yopilgan', filtr(L, 'yopilgan').length], ['otkaz', 'Otkaz', filtr(L, 'otkaz').length]]);
   h += '<input class="search" id="q" placeholder="🔎 Mijoz yoki telefon…" value="' + esc(qidir) + '">';
   const R = izla(filtr(L, seg.mening)).slice(0, 100);
-  h += R.length ? R.map(i => karta(i, false)).join('') : bosh('📭', seg.mening === 'ochiq' ? 'Siz bergan ochiq ish yo\'q' : 'Bu bo\'limda ish yo\'q');
+  h += R.length ? R.map(i => karta(i, false)).join('') : bosh('📭', seg.mening === 'kutish' ? 'Usta kutayotgan ishingiz yo\'q' : seg.mening === 'jarayon' ? 'Jarayondagi ishingiz yo\'q' : 'Bu bo\'limda ish yo\'q');
   $('main').innerHTML = h; segUlash();
 }
 
@@ -763,10 +764,17 @@ function ekYangi() {
     $('f_yubor').textContent = '💾 Saqlash va yuborish' + (j ? ' · ' + pul(j) : ''); });
   document.querySelectorAll('[data-usta]').forEach(b => b.onclick = () => { oqi(); F.usta = b.dataset.usta; hap('sel'); chiz(); });
   let _tt = null;
-  $('f_tel').oninput = () => { clearTimeout(_tt); const v = $('f_tel').value; if (v.replace(/\D/g, '').length < 9) { F.tarixHtml = ''; $('f_tarix').innerHTML = ''; return; }
-    _tt = setTimeout(async () => { try { const r = await api({ api: 'mijoz', tel: v }); const t = r.ok && r.tarix;
-      F.tarixHtml = t ? '<div class="line small" style="color:var(--orange);margin:6px 2px"><span class="i">🔁</span><span><b>Takroriy mijoz</b> — oldin ' + t.n + ' marta. Oxirgisi: ' + esc(t.sana) + (t.usta ? ', ' + esc(t.usta) : '') + (t.turi ? ' (' + esc(t.turi) + ')' : '') + (t.mijoz ? ' — ' + esc(t.mijoz) : '') + '</span></div>' : '';
-      const el = $('f_tarix'); if (el) el.innerHTML = F.tarixHtml; } catch (e) {} }, 600); };
+  const tBog = () => { const b = $('f_mk'); if (b) b.onclick = () => mijozKarta({ k: b.dataset.k }); };
+  tBog();
+  $('f_tel').oninput = () => { clearTimeout(_tt); const v = $('f_tel').value, dg = v.replace(/\D/g, ''); F.tel = v;
+    if (dg.length < 9) { F.tarixHtml = ''; $('f_tarix').innerHTML = ''; return; }
+    $('f_tarix').innerHTML = '<div class="muted small" style="margin:6px 2px">🔎 Bazadan qidirilmoqda…</div>';
+    _tt = setTimeout(async () => { try { const r = await api({ api: 'mijoz', tel: v });
+      const el = $('f_tarix'); if (!el || !$('f_tel') || $('f_tel').value.replace(/\D/g, '').slice(-9) !== dg.slice(-9)) return;
+      F.tarixHtml = mijozFormaHtml(r); el.innerHTML = F.tarixHtml; tBog();
+      const fm = $('f_mijoz'); if (fm) { const avto = !fm.value.trim() || (F.ismAvto && fm.value === F.ismAvto); const yi = r.m && r.m.ism ? r.m.ism.replace(/\s+\d{4}$/, '') : '';
+        if (avto) { fm.value = F.mijoz = yi; F.ismAvto = yi; } }
+    } catch (e) { const el = $('f_tarix'); if (el) el.innerHTML = ''; } }, 500); };
   $('f_yubor').onclick = async () => {
     oqi();
     if (!F.mijoz.trim()) return xabar('Mijoz ismini yozing.');
@@ -781,6 +789,27 @@ function ekYangi() {
   };
 }
 
+/* «➕ Yangi»: telefon bo'yicha mijoz tarixi (LTV) */
+function mijozFormaHtml(r) {
+  if (!r || !r.ok) return '';
+  const qat = (i, t, st) => '<div class="line small"' + (st ? ' style="' + st + '"' : '') + '><span class="i">' + i + '</span><span>' + t + '</span></div>';
+  if (r.m) {
+    const m = r.m, x = m.ox, ism = String(m.ism || '').replace(/\s+\d{4}$/, '');
+    return '<div class="card" style="margin:8px 0 0;padding:12px 12px 10px;border-left:4px solid var(--orange)">' +
+      '<div style="font-weight:800;color:var(--orange);margin-bottom:4px">🔁 Takroriy mijoz — ' + (m.mur + 1) + '-marta murojaat</div>' +
+      qat('👤', '<b>' + esc(ism) + '</b>' + (m.birinchi ? ' · birinchi ish: ' + esc(m.birinchi) : '')) +
+      qat('💰', 'Jami: <b>' + (m.summa ? pul(m.summa) : '—') + '</b> · ✅ ' + m.ish + ' ta ish' + (m.otkaz ? ' · ❌ ' + m.otkaz + ' otkaz' : '')) +
+      (x ? qat('🛠', 'Oxirgi: <b>' + esc(x.sana) + '</b> · ' + esc(x.turi) + (x.usta ? ' · usta <b>' + esc(x.usta) + '</b>' : '') +
+        (x.baho ? ' · ⭐ ' + x.baho.o + ' / 5' + (x.baho.past ? ' 😞' : '') : '')) : '') +
+      (m.ochiq ? qat('⏳', '<b>Bu mijozning hozir ochiq ishi bor</b> — ikki marta kiritilmasin', 'color:var(--red)')
+        : x && x.holat !== 'otkaz' && x.kun != null && x.kun <= 30 ? qat('⚠️', '<b>' + x.kun + ' kun oldin</b> ish qilingan — takroriy nosozlik bo\'lishi mumkin', 'color:var(--red)') : '') +
+      '<button class="act" id="f_mk" data-k="' + esc(m.k) + '" style="margin-top:8px">👤 Kartochkani ochish</button></div>';
+  }
+  if (r.tarix) { const t = r.tarix;
+    return qat('🔁', '<b>Takroriy mijoz</b> — oldin ' + t.n + ' marta. Oxirgisi: ' + esc(t.sana) + (t.usta ? ', ' + esc(t.usta) : '') + (t.turi ? ' (' + esc(t.turi) + ')' : '') + (t.mijoz ? ' — ' + esc(t.mijoz) : ''), 'color:var(--orange);margin:6px 2px'); }
+  if (r.yangi) return qat('🆕', '<b>Yangi mijoz</b> — bazada yo\'q', 'color:var(--teal);margin:6px 2px');
+  return '';
+}
 /* ---------- Ishni tugatdim ---------- */
 /* ⭐ Mijoz bahosi — usta ishni yopgach telefonni mijozga beradi */
 const BAHO_S = ['⏰ Usta vaqtida keldimi?', '🛠 Ish sifati sizni qoniqtirdimi?', '🧹 Usta ishdan keyin joyni toza qoldirdimi?', '🤝 Ustaning muomalasi qanday bo\'ldi?', '📱 Usta tizimdan foydalanishni tushuntirib berdimi?'];
