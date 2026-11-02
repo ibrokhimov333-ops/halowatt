@@ -707,10 +707,11 @@ async function ekMoliya() {
       (tug ? '<div class="acts"><button class="act" data-tq="1" data-id="' + esc(t.id) + '">✅ Tasdiqlash</button><button class="act red" data-tq="0" data-id="' + esc(t.id) + '">❌ Rad etish</button></div>' : '') + '</div>';
     if (D.rol.admin && KT.length) h += '<h2>⏳ Tasdiq kutayotganlar · ' + KT.length + '</h2>' + KT.map(t => tlKarta(t, true)).join('');
     if (!D.rol.admin && D.rol.usta) h += '<button class="btn" id="dp_yangi">🏦 Depozit kiritish</button>' + (KT.length ? '<h2>⏳ Tasdiq kutilmoqda</h2>' + KT.map(t => tlKarta(t, false)).join('') : '');
-    if (D.rol.admin) h += '<div class="kpis"><div class="kpi"><b>' + j('oyIsh') + '</b><span>ish (usta varaqlari)</span></div><div class="kpi"><b>' + mln(j('oySumma')) + '</b><span>ishga olingan summa</span></div>' +
+    if (D.rol.admin) h += '<div class="kpis"><div class="kpi"><b>' + j('oyIsh') + '</b><span>yopilgan ish (pul olingan oy)</span></div><div class="kpi"><b>' + mln(j('oySumma')) + '</b><span>ishga olingan summa' + (j('oyKutish') ? '<br>⏳ +' + mln(j('oyKutish')) + ' tasdiq kutmoqda' : '') + '</span></div>' +
       '<div class="kpi"><b>' + mln(j('oyServis')) + '</b><span>servis daromadi 10%</span></div><div class="kpi"><b>' + mln(j('oyDepozit')) + '</b><span>depozit</span></div></div>';
     h += M.slice().sort((a, b) => b.oySumma - a.oySumma).map(x => '<div class="card"><div class="row"><div class="name">' + esc(x.nom) + '</div><div class="time">' + x.oyIsh + ' ta ish</div></div>' +
       '<div class="mrow"><span>Ishga olingan summa</span><b>' + pul(x.oySumma) + '</b></div>' +
+      (x.oyKutish ? '<div class="mrow" style="color:var(--orange)"><span>⏳ Tasdiq kutmoqda</span><b>' + pul(x.oyKutish) + '</b></div>' : '') +
       '<div class="mrow"><span>Servis daromadi 10%</span><b>' + pul(x.oyServis) + '</b></div>' +
       '<div class="mrow"><span>Depozit (shu oy)</span><b>' + pul(x.oyDepozit) + '</b></div>' +
       '<div class="mrow" style="border-top:1px solid var(--line);margin-top:4px;padding-top:8px"><span>Umumiy balans</span><b class="' + (x.balans < 0 ? 'neg' : 'pos') + '">' + pul(x.balans) + '</b></div></div>').join('');
