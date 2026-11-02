@@ -198,20 +198,22 @@ function karta(i, tugma) {
     (i.tel ? '<div class="line"><span class="i">📞</span><a class="tel" href="tel:' + esc(i.tel) + '">' + esc(i.tel) + '</a></div>' : '') +
     (i.manzil ? '<div class="line"><span class="i">📍</span><a class="map" href="' + map + '" target="_blank">' + esc(i.manzil) + '</a></div>' : '') +
     (i.izoh ? '<div class="line"><span class="i">📝</span><span>' + esc(i.izoh) + '</span></div>' : '') +
-    (i.kech ? '<div class="line" style="color:var(--orange)"><span class="i">⏸</span><span><b>' + (i.kech.faol ? esc(i.kech.sana) + ' ga ko\'chirilgan' : 'Bugunga ko\'chirilgan') + '</b>' + (i.kech.sabab ? ' · ' + esc(i.kech.sabab) : '') + '</span></div>' : '') +
+    (i.kech ? '<div class="line" style="color:var(--orange)"><span class="i">⏸</span><span><b>' + esc(kechMatn(i.kech)) + '</b>' + (i.kech.sabab ? ' · ' + esc(i.kech.sabab) : '') + '</span></div>' : '') +
     '<div class="line muted"><span class="i">🏢</span><span>' + esc(i.filial || '—') + (i.shaxs ? ' · ' + esc(i.shaxs) : '') + '</span></div>' +
     (i.otkaz ? '<div class="line" style="color:var(--red)"><span class="i">❌</span><span>' + (!i.sabab || /ko.rsatilmagan/i.test(i.sabab) ? '<b>Otkaz sababi belgilanmagan</b>' : 'Otkaz sababi: <b>' + esc(i.sabab) + '</b>') + '</span></div>' : '') +
     (i.yopildi && i.kutishMin != null ? '<div class="line muted small"><span class="i">⏱</span><span>Ustaga berilguncha ' + dav(i.kutishMin) + ' · usta ' + dav(i.ustaMin) + '</span></div>' : '') +
     (i.yopildi && !i.otkaz && i.tolov ? '<div class="line small" style="color:' + (i.tolov.holat === 'Tasdiqlandi' ? 'var(--teal)' : 'var(--orange)') + '"><span class="i">💵</span><span>' +
       (i.tolov.holat === 'Tasdiqlandi' ? 'To\'lov tasdiqlangan' : 'To\'lov tasdiq kutmoqda') + ': <b>' + pul(i.tolov.summa) + '</b> · ' + esc(i.tolov.usul) + '</span></div>' : '') +
     (i.yopildi && !i.otkaz && i.baho ? '<div class="line small" style="color:' + (i.baho.past ? 'var(--red)' : 'var(--teal)') + '"><span class="i">⭐</span><span>' + esc(bahoBelgi(i.baho)) + '</span></div>' : '') +
-    (tugma && !i.yopildi && !i.otkaz ? '<button class="btn" data-yop="' + esc(i.h) + '">✅ Ishni tugatdim</button>' : '') + amallar(i) + '</div>';
+    (tugma && i.usta && !i.yopildi && !i.otkaz ? '<button class="btn" data-yop="' + esc(i.h) + '">✅ Ishni tugatdim</button>' : '') + amallar(i) + '</div>';
 }
 /* Ish kartasidagi amallar — huquqqa qarab */
 function amallar(i) {
   const r = D.rol, ochiq = !i.yopildi && !i.otkaz, b = [];
   if (ochiq && (r.admin || (r.xodim && i.shaxs === r.xodim))) b.push(['usta', i.usta ? '🔁 Ustani almashtirish' : '👷 Usta biriktirish', '']);
-  if (ochiq && (r.admin || (r.xodim && i.shaxs === r.xodim) || (r.usta && i.usta === r.usta))) b.push(['kech', '⏸ Kechiktirish', '']);
+  if (ochiq && (r.admin || (r.xodim && i.shaxs === r.xodim) || (r.usta && i.usta && i.usta === r.usta))) b.push(['kech', '⏸ Kechiktirish', '']);
+  if (ochiq && i.kech && (r.admin || (r.xodim && i.shaxs === r.xodim) || (r.usta && (i.kech.usta === r.usta || i.usta === r.usta)))) b.push(['kbekor', '↩️ Bugun bajaramiz', '']);
+  if (i.kechN) b.push(['ktarix', '⏸ ' + i.kechN + ' marta ko\'chirilgan', '']);
   if (ochiq && r.admin) { b.push(['tahrir', '✏️ Tahrirlash', '']); b.push(['otkaz', '❌ Otkaz', 'red']); }
   if (i.otkaz && r.admin) b.push(['sabab', !i.sabab || /ko.rsatilmagan/i.test(i.sabab) ? '📝 Otkaz sababini belgilash' : '📝 Sababni o\'zgartirish', !i.sabab || /ko.rsatilmagan/i.test(i.sabab) ? 'red' : '']);
   if (r.admin && ochiq && !i.usta && i.sorovlar && i.sorovlar.length) i.sorovlar.forEach(x => { b.push(['olb:' + x.id, '🙋 ' + x.usta + 'ga berish', '']); b.push(['olr:' + x.id, '✕ ' + x.usta + ' rad', 'red']); });
@@ -299,6 +301,12 @@ function amalBos(act, h) {
   if (act === 'rasm') rasmKor(h, i.rasm, esc(i.mijoz) + ' · ' + esc(i.usta || ''));
   if (act === 'baho') bahoSorov(h);
   if (act === 'kech') kechiktir(h);
+  if (act === 'kbekor') { const go = () => amal({ api: 'kechBekor', h }, null, '');
+    return tg && tg.showConfirm ? tg.showConfirm('Kechiktirish bekor qilinsinmi? Ish bugun bajariladi' + (i.kech && i.kech.usta && !i.usta ? ' va ' + i.kech.usta + 'ga qaytariladi' : '') + '.', y => y && go()) : go(); }
+  if (act === 'ktarix') oyna('⏸ Ko\'chirishlar tarixi', '<p class="muted small" style="margin:0 2px 8px">' + esc(i.mijoz) + '</p>' + (i.kechT || []).map((k, n) =>
+    '<div class="card" style="padding:12px"><div class="row"><b>' + (n + 1) + '. → ' + esc(k.sana) + (k.soat ? ' ' + esc(k.soat) : '') + '</b><span class="pill ' + (k.holat === 'Rad' ? 'otk' : k.holat === 'So\'rov' ? 'wait' : 'done') + '">' + esc(kechHolat(k.holat)) + '</span></div>' +
+    '<div class="line small"><span class="i">📝</span><span>' + esc(k.sabab || '—') + '</span></div>' +
+    '<div class="line small muted"><span class="i">🙋</span><span>' + esc(k.kim) + ' · ' + esc(k.vaqt) + (k.usta ? ' · 👷 ' + esc(k.usta) : '') + '</span></div></div>').join(''));
   if (act === 'mkarta') { let n = i.mijoz; const d = String(i.tel || '').replace(/\D/g, ''); if (d.length >= 4 && !/\d{4}/.test(n)) n = n + ' ' + d.slice(-4); mijozKarta({ tel: i.tel, ism: n }); }
   if (act === 'utarix') {
     oyna('📞 Mijoz tarixi', '<p class="muted small" style="margin:0 2px 8px">' + esc(i.mijoz) + ' · ' + esc(i.tel) + '</p><div id="ut"><div class="spin"></div></div>');
@@ -351,6 +359,10 @@ async function ekNatija() {
   } catch (e) { $('main').innerHTML = '<div class="err">⚠️ ' + esc(e.message) + '</div>'; }
 }
 /* ⏸ Ishni kechiktirish */
+const kechHolat = x => ({ '': 'Ustada qolgan', Faol: 'Kutmoqda', Taklif: 'Ustaga taklif', Ochiq: 'Bo\'sh ishlarda', Olindi: 'Bajarildi', Bekor: 'Bekor qilingan', 'So\'rov': 'Ruxsat kutmoqda', Rad: 'Rad etilgan' })[String(x || '').replace(/:.*/, '')] || x;
+const kechMatn = k => k.holat === 'Taklif' ? '🔁 ' + k.usta + 'ga taklif qilindi' + (k.soat ? ' · ⏰ ' + k.soat : '')
+  : k.holat === 'Ochiq' ? 'Bugunga ko\'chirilgan — «Bo\'sh ishlar»da' + (k.soat ? ' · ⏰ ' + k.soat : '')
+  : (k.faol ? k.sana + (k.soat ? ' ' + k.soat : '') + ' ga ko\'chirilgan' : 'Bugunga ko\'chirilgan' + (k.soat ? ' · ⏰ ' + k.soat : '')) + (k.holat === 'Faol' && k.usta ? ' · ' + k.usta + 'ga qayta taklif qilinadi' : '');
 function kechiktir(h) {
   const i = ishTop(h); if (!i) return;
   const d = new Date(); d.setDate(d.getDate() + 1);
@@ -360,13 +372,15 @@ function kechiktir(h) {
   const S = ['Mijoz ertaga so\'radi', 'Mijoz uyda yo\'q', 'Material/uskuna yo\'q', 'Ob-havo', 'Boshqa'];
   oyna('⏸ Ishni kechiktirish', '<p class="muted small" style="margin:0 2px 8px">' + esc(i.mijoz) + ' · ' + esc(i.ishlar.map(x => x.turi).join(', ')) + '</p>' +
     '<label class="f">📅 Yangi sana</label><input class="in" type="date" id="k_sana" value="' + iso(d) + '" min="' + iso(d) + '" max="' + iso(mx) + '">' +
+    '<label class="f">🕑 Soat (ixtiyoriy)</label><input class="in" type="time" id="k_soat">' +
     '<label class="f">Sabab</label><div class="chips">' + S.map(x => '<button class="chip" data-ks="' + esc(x) + '">' + esc(x) + '</button>').join('') + '</div>' +
     '<label class="f">Yoki o\'zingiz yozing</label><input class="in" id="k_sabab" placeholder="Sabab…">' +
-    '<p class="muted small" style="margin:8px 2px">Ish otkaz bo\'lmaydi. Shu sanagacha usta band hisoblanmaydi va kechikish ogohlantirishlari kelmaydi.</p>' +
+    '<p class="muted small" style="margin:8px 2px">Ish otkaz bo\'lmaydi. ' + (i.usta ? 'Ish <b>' + esc(i.usta) + '</b>dan yechiladi — usta bo\'shaydi va yangi ish oladi. Sana kuni 09:00 da unga qayta taklif keladi (1 soatda olmasa — «Bo\'sh ishlar»ga chiqadi).' : 'Sana kelguncha «Bo\'sh ishlar»da ko\'rinmaydi.') + (i.kechN ? ' Bu ish avval ' + i.kechN + ' marta ko\'chirilgan.' : '') + '</p>' +
+    (i.kechN >= 2 && !D.rol.admin ? '<p class="small" style="margin:4px 2px;color:var(--red)">⚠️ 2 martadan ko\'p ko\'chirish uchun rahbar ruxsati kerak — so\'rov rahbarga boradi.</p>' : '') +
     '<button class="btn" id="k_ok">⏸ Kechiktirish</button>');
   document.querySelectorAll('[data-ks]').forEach(b => b.onclick = () => { tanlov = b.dataset.ks; document.querySelectorAll('[data-ks]').forEach(x => x.classList.toggle('on', x === b)); $('k_sabab').value = ''; hap('sel'); });
   $('k_ok').onclick = () => { const s = $('k_sabab').value.trim() || tanlov; if (!s) return xabar('Sababni tanlang yoki yozing.'); if (!$('k_sana').value) return xabar('Sanani tanlang.');
-    amal({ api: 'kechiktir', h, sana: $('k_sana').value, sabab: s }, $('k_ok'), 'Saqlanmoqda…'); };
+    amal({ api: 'kechiktir', h, sana: $('k_sana').value, soat: $('k_soat').value, sabab: s }, $('k_ok'), 'Saqlanmoqda…'); };
 }
 /* 📞 Servis eslatmasi — rahbar uchun */
 let ES = null;
@@ -430,7 +444,7 @@ function mijozKarta(q) {
         (m.ustalar ? '<div class="line"><span class="i">👷</span><span>' + esc(m.ustalar) + '</span></div>' : '') +
         (m.turlar ? '<div class="line"><span class="i">🛠</span><span>' + esc(m.turlar) + '</span></div>' : '') + '</div>' +
         '<h2 style="margin:14px 2px 6px">🗂 Ishlar tarixi</h2>' +
-        m.ishlar.map(j => '<div class="card"><div class="row"><div><div class="name" style="font-size:15px">' + esc(j.ish.map(x => x.turi + (x.soni > 1 ? ' × ' + x.soni : '')).join(', ')) + '</div>' + holat(j) + '</div>' +
+        m.ishlar.map(j => '<div class="card"><div class="row"><div><div class="name" style="font-size:15px">' + esc(j.ish.map(x => x.turi + (x.soni > 1 ? ' × ' + x.soni : '')).join(', ')) + '</div>' + holat(j) + (j.kechN ? ' <span class="pill wait">⏸ ' + j.kechN + ' marta ko\'chirilgan</span>' : '') + '</div>' +
           '<div class="time">' + esc(j.sana) + '</div></div>' +
           '<div class="line muted"><span class="i">👷</span><span>' + esc(j.usta || '—') + '</span>' + (j.summa ? '<span style="margin-left:auto"><b>' + pul(j.summa) + '</b></span>' : '') + '</div>' +
           (j.izoh ? '<div class="line small"><span class="i">📝</span><span>' + esc(j.izoh) + '</span></div>' : '') +
