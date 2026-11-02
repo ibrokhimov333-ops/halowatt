@@ -801,12 +801,13 @@ function mijozFormaHtml(r) {
       qat('💰', 'Jami: <b>' + (m.summa ? pul(m.summa) : '—') + '</b> · ✅ ' + m.ish + ' ta ish' + (m.otkaz ? ' · ❌ ' + m.otkaz + ' otkaz' : '')) +
       (x ? qat('🛠', 'Oxirgi: <b>' + esc(x.sana) + '</b> · ' + esc(x.turi) + (x.usta ? ' · usta <b>' + esc(x.usta) + '</b>' : '') +
         (x.baho ? ' · ⭐ ' + x.baho.o + ' / 5' + (x.baho.past ? ' 😞' : '') : '')) : '') +
-      (m.ochiq ? qat('⏳', '<b>Bu mijozning hozir ochiq ishi bor</b> — ikki marta kiritilmasin', 'color:var(--red)')
+      (m.ochiq ? qat('⏳', '<b>Hozir ochiq ishi bor</b>' + (m.ochiqTuri ? ' — ' + esc(m.ochiqTuri) : '') + (m.ochiqUsta ? ' · usta <b>' + esc(m.ochiqUsta) + '</b>' : ' · usta hali yo\'q') + '. Ikki marta kiritmang!', 'color:var(--red)')
         : x && x.holat !== 'otkaz' && x.kun != null && x.kun <= 30 ? qat('⚠️', '<b>' + x.kun + ' kun oldin</b> ish qilingan — takroriy nosozlik bo\'lishi mumkin', 'color:var(--red)') : '') +
       '<button class="act" id="f_mk" data-k="' + esc(m.k) + '" style="margin-top:8px">👤 Kartochkani ochish</button></div>';
   }
+  const och = r.ochiq ? qat('⏳', '<b>Hozir ochiq ishi bor</b>. Ikki marta kiritmang!', 'color:var(--red);margin:6px 2px') : '';
   if (r.tarix) { const t = r.tarix;
-    return qat('🔁', '<b>Takroriy mijoz</b> — oldin ' + t.n + ' marta. Oxirgisi: ' + esc(t.sana) + (t.usta ? ', ' + esc(t.usta) : '') + (t.turi ? ' (' + esc(t.turi) + ')' : '') + (t.mijoz ? ' — ' + esc(t.mijoz) : ''), 'color:var(--orange);margin:6px 2px'); }
+    return och + qat('🔁', '<b>Takroriy mijoz</b> — oldin ' + t.n + ' marta. Oxirgisi: ' + esc(t.sana) + (t.usta ? ', ' + esc(t.usta) : '') + (t.turi ? ' (' + esc(t.turi) + ')' : '') + (t.mijoz ? ' — ' + esc(t.mijoz) : ''), 'color:var(--orange);margin:6px 2px'); }
   if (r.yangi) return qat('🆕', '<b>Yangi mijoz</b> — bazada yo\'q', 'color:var(--teal);margin:6px 2px');
   return '';
 }
