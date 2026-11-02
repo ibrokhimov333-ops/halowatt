@@ -622,7 +622,14 @@ function ekStat() {
   const ichida = s => s && s.slice(0, 10) >= chegara;
   const T = L.filter(i => ichida(i.t)), Y = L.filter(i => !i.otkaz && i.yopildi && ichida(i.y));
   const ochiq = L.filter(i => !i.yopildi && !i.otkaz), kut = ochiq.filter(i => !i.usta);
-  const summa = T.filter(i => !i.otkaz).reduce((s, i) => s + i.ishlar.reduce((a, x) => a + (x.summa || 0), 0), 0);
+  // 💰 Ishga olingan summa — shu davrda YOPILGAN ishlar bo'yicha (to'lov tasdiqlangan + tasdiq kutayotgan)
+  const ishS = i => i.ishlar.reduce((a, x) => a + (x.summa || 0), 0);
+  let tasd = 0, kutS = 0, yoqN = 0;
+  Y.forEach(i => { const t = i.tolov;
+    if (t && t.holat === 'Tasdiqlandi') tasd += Number(t.summa) || ishS(i);
+    else if (t && t.holat === 'Kutilmoqda') kutS += Number(t.summa) || 0;
+    else if (ishS(i)) tasd += ishS(i); else yoqN++; });
+  const summa = tasd + kutS;
   const kutO = ort(Y.map(i => i.kutishMin).filter(x => x != null)), ustO = ort(Y.map(i => i.ustaMin).filter(x => x != null)), jamO = ort(Y.map(i => i.jamiMin).filter(x => x != null));
   let h = '<div class="seg" id="dv">' + [['bugun', 'Bugun'], ['hafta', '7 kun'], ['oy', 'Bu oy'], ['hammasi', 'Hammasi']].map(x => '<button data-v="' + x[0] + '" class="' + (x[0] === davr ? 'on' : '') + '">' + x[1] + '</button>').join('') + '</div>';
   h += '<div class="kpis">' +
@@ -630,7 +637,7 @@ function ekStat() {
     '<div class="kpi"><b style="color:var(--teal)">' + Y.length + '</b><span>yopilgan</span></div>' +
     '<div class="kpi"><b style="color:var(--orange)">' + ochiq.length + '</b><span>hozir ochiq · ' + kut.length + ' tasi ustasiz</span></div>' +
     '<div class="kpi"><b style="color:var(--red)">' + T.filter(i => i.otkaz).length + '</b><span>otkaz</span></div>' +
-    '<div class="kpi wide"><b>' + mln(summa) + '</b><span>ishga olingan summa (otkazsiz)</span></div></div>';
+    '<div class="kpi wide"><b>' + mln(summa) + '</b><span>ishga olingan summa · yopilgan ishlar' + (kutS ? '<br>⏳ ' + mln(kutS) + ' — to\'lov tasdig\'i kutilmoqda' : '') + (yoqN ? '<br>📝 ' + yoqN + ' ta yopilgan ishda summa kiritilmagan' : '') + '</span></div></div>';
   h += '<h2>⏱ Vaqt qayerda ketyapti</h2><div class="card">' +
     '<div class="bar"><span>⏳ Ustaga berilguncha</span><div class="tr"><div class="fl" style="background:var(--orange);width:' + pr(kutO, jamO) + '%"></div></div><span class="v">' + dav(kutO) + '</span></div>' +
     '<div class="bar"><span>🔧 Usta ishladi</span><div class="tr"><div class="fl" style="width:' + pr(ustO, jamO) + '%"></div></div><span class="v">' + dav(ustO) + '</span></div>' +
