@@ -611,6 +611,7 @@ function ekUstalar() {
   $('main').innerHTML = '<div class="kpis"><div class="kpi"><b style="color:var(--green)">' + b + '</b><span>bo\'sh</span></div><div class="kpi"><b style="color:var(--orange)">' + (U.length - b) + '</b><span>band</span></div></div>' +
     '<div class="card">' + U.map(u => '<div class="u"><div><div style="font-weight:700">' + esc(u.nom) + '</div>' +
       (u.band ? '<div class="muted small">' + esc(u.mijoz) + ' · ' + esc(u.qachon) + ' dan</div>' : '') +
+      (u.kechlar ? '<div class="small" style="color:var(--orange)">⏸ Kechiktirilgan: ' + esc(u.kechlar.join(', ')) + '</div>' : '') +
       (u.qarz != null ? '<div class="small" style="color:var(--red)">💸 Qarzdor: ' + pul(-u.qarz) + ' — ish berilmaydi</div>' : '') + '</div>' +
       '<div class="st ' + (u.band ? 'busy">🔒 Band' : 'free">🟢 Bo\'sh') + '</div></div>').join('') + '</div>';
 }
