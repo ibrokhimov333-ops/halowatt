@@ -151,7 +151,7 @@ async function api(body) {
 const LS = 'hw1:' + ((tg && tg.initDataUnsafe && tg.initDataUnsafe.user && tg.initDataUnsafe.user.id) || 0) + ':';
 function lsOl(k) { try { const v = localStorage.getItem(LS + k); return v ? JSON.parse(v) : null; } catch (e) { return null; } }
 function lsQoy(k, v) { try { localStorage.setItem(LS + k, JSON.stringify(v)); } catch (e) { try { localStorage.removeItem(LS + k); } catch (e2) {} } }
-function molTozala() { MOL = {}; try { Object.keys(localStorage).forEach(k => { if (k.indexOf(LS + 'M') === 0) localStorage.removeItem(k); }); } catch (e) {} }
+function molTozala() { MOL = {}; for (const k in TRX) delete TRX[k]; for (const k in TY) delete TY[k]; try { Object.keys(localStorage).forEach(k => { if (k.indexOf(LS + 'M') === 0 || k.indexOf(LS + 'T') === 0) localStorage.removeItem(k); }); } catch (e) {} }
 const bandMi = () => !!$('ov') || ekran === 'yangi' || ekran === 'test';
 async function yukla(jim) {
   let eski = false;
@@ -184,8 +184,8 @@ async function yukla(jim) {
 function menyu() {
   const r = D.rol;
   if (r.admin) return [['stat', '📊', 'Statistika'], ['ishlar', '📋', 'Ishlar'], ['ustalar', '👷', 'Ustalar'], ['moliya', '💰', 'Moliya'], ['eslatma', '👥', 'Mijozlar'], ['yangi', '➕', 'Yangi']];
-  if (r.xodim) return [['yangi', '➕', 'Yangi ish'], ['mening', '📋', 'Bergan ishlarim'], ['ustalar', '👷', 'Ustalar']].concat(r.usta ? [['usta', '🔧', 'Usta ishlarim'], ['bosh', '🆓', 'Bo\'sh ishlar'], ['natija', '📈', 'Natijam']] : []);
-  return [['usta', '🔧', 'Ishlarim'], ['bosh', '🆓', 'Bo\'sh ishlar'], ['bajarilgan', '✅', 'Bajarilgan'], ['natija', '📈', 'Natijam'], ['moliya', '💰', 'Balans']];
+  if (r.xodim) return [['yangi', '➕', 'Yangi ish'], ['mening', '📋', 'Bergan ishlarim'], ['ustalar', '👷', 'Ustalar']].concat(r.usta ? [['usta', '🔧', 'Usta ishlarim'], ['bosh', '🆓', 'Bo\'sh ishlar'], ['bajarilgan', '📜', 'Tarix'], ['natija', '📈', 'Natijam']] : []);
+  return [['usta', '🔧', 'Ishlarim'], ['bosh', '🆓', 'Bo\'sh ishlar'], ['bajarilgan', '📜', 'Tarix'], ['natija', '📈', 'Natijam'], ['moliya', '💰', 'Balans']];
 }
 function chiz() {
   const r = D.rol;
@@ -598,16 +598,49 @@ function ekUsta() {
     (D.rol.xodim ? '' : '');
   segUlash();
 }
-function ekBajarilgan() {
-  const L = D.ustaIshlari.filter(i => i.yopildi);
-  const bugun = D.meta.bugun, oy = bugun.slice(0, 7);
-  const hafta = new Date(bugun); hafta.setDate(hafta.getDate() - 6); const hs = hafta.toISOString().slice(0, 10);
-  const b = L.filter(i => i.y.slice(0, 10) === bugun).length, w = L.filter(i => i.y.slice(0, 10) >= hs).length;
-  const o = L.filter(i => i.y.slice(0, 7) === oy);
-  let h = '<div class="kpis"><div class="kpi"><b>' + b + '</b><span>bugun</span></div><div class="kpi"><b>' + w + '</b><span>oxirgi 7 kun</span></div>' +
-    '<div class="kpi"><b>' + o.length + '</b><span>bu oy</span></div><div class="kpi"><b>' + dav(ort(o.map(i => i.ustaMin).filter(x => x != null))) + '</b><span>bu oy o\'rtacha ish vaqti</span></div></div>';
-  h += '<h2>Bajarilgan ishlar</h2>' + (L.length ? L.slice(0, 50).map(i => karta(i, false)).join('') : bosh('📭', 'Hali yopilgan ish yo\'q'));
-  $('main').innerHTML = h;
+/* 📜 Ishlar tarixi — oy bo'yicha: yopilgan ishlar (mijoz yashirin) + depozitlar */
+let tarixOy = null; const TRX = {}, TY = {};
+function trxYangi(oy) {
+  TY[oy] = 1;
+  api({ api: 'ustaTarix', oy }).then(r => {
+    if (!r || !r.ok) return;
+    const o = JSON.stringify(TRX[oy] || null); TRX[oy] = r; lsQoy('T' + oy, r);
+    if (o !== JSON.stringify(r) && ekran === 'bajarilgan' && tarixOy === oy && !$('ov')) ekBajarilgan();
+  }).catch(() => {});
+}
+async function ekBajarilgan() {
+  if (!tarixOy) tarixOy = D.meta.bugun.slice(0, 7);
+  const oy = tarixOy, bu = D.meta.bugun.slice(0, 7);
+  let h = '<div class="mon"><button id="t_p">‹</button><b>' + oyNomi(oy) + '</b><button id="t_n"' + (oy >= bu ? ' disabled style="opacity:.3"' : '') + '>›</button></div>';
+  const ulash = () => { $('t_p').onclick = () => { tarixOy = oySur(oy, -1); chiz(); }; $('t_n').onclick = () => { if (oy < bu) { tarixOy = oySur(oy, 1); chiz(); } }; };
+  if (!TRX[oy]) {
+    const c = lsOl('T' + oy);
+    if (c && c.ok) { TRX[oy] = c; trxYangi(oy); }
+    else {
+      $('main').innerHTML = h + '<div class="spin"></div>'; ulash();
+      try { const r = await api({ api: 'ustaTarix', oy }); if (!r.ok) throw new Error(r.xato); TRX[oy] = r; TY[oy] = 1; lsQoy('T' + oy, r); }
+      catch (e) { if (ekran === 'bajarilgan') $('main').innerHTML = h + '<div class="err">⚠️ ' + esc(e.message) + '</div>'; ulash(); return; }
+      if (ekran !== 'bajarilgan' || tarixOy !== oy) return;
+    }
+  } else if (!TY[oy]) trxYangi(oy);
+  const R = TRX[oy], J = R.jami, L = R.royxat || [];
+  const hol = x => x === 'Tasdiqlandi' ? '<span class="pill done">✅ tasdiqlangan</span>' : x === 'Rad etildi' ? '<span class="pill otk">❌ rad etilgan</span>' : x ? '<span class="pill wait">⏳ kutilmoqda</span>' : '';
+  const usul = x => x === 'karta' ? '💳 karta' : x === 'naqd' ? '💵 naqd' : '';
+  h += '<div class="kpis"><div class="kpi"><b>' + J.ish + '</b><span>bajarilgan ish</span></div><div class="kpi"><b>' + dav(J.min) + '</b><span>jami ish vaqti</span></div>' +
+    '<div class="kpi"><b>' + pul(J.summa) + '</b><span>olingan summa</span></div><div class="kpi"><b>' + pul(J.depozit) + '</b><span>berilgan depozit</span></div>' +
+    (J.balans != null ? '<div class="kpi wide"><b style="color:' + (J.balans < 0 ? 'var(--red)' : 'var(--teal)') + '">' + (J.balans < 0 ? '−' : '') + pul(Math.abs(J.balans)) + '</b><span>joriy balans</span></div>' : '') + '</div>';
+  h += '<h2>' + oyNomi(oy) + ' · ' + L.length + ' ta yozuv</h2>';
+  h += L.length ? L.map(x => x.tur === 'dep'
+    ? '<div class="card"><div class="row"><div><div class="name">🏦 Depozit berdi</div>' + hol(x.holat) + '</div><div class="time">' + esc(x.y) + '</div></div>' +
+      '<div class="mrow"><span>' + usul(x.usul) + '</span><b>' + pul(x.summa) + '</b></div>' + (x.izoh ? '<div class="line small muted"><span class="i">📝</span><span>' + esc(x.izoh) + '</span></div>' : '') + '</div>'
+    : '<div class="card"><div class="row"><div><div class="name">👤 ' + esc(x.mijoz) + '</div><div class="muted small">📞 ' + esc(x.tel) + (x.filial ? ' · 🏢 ' + esc(x.filial) : '') + '</div></div>' +
+      '<div class="time">' + esc(String(x.y || '').split(' ')[0]) + '<br>' + esc(String(x.y || '').split(' ')[1] || '') + '</div></div>' +
+      '<div class="line small"><span class="i">🛠</span><span>' + esc(x.ishlar.map(j => j.turi + (j.soni > 1 ? ' ×' + j.soni : '')).join(', ')) + '</span></div>' +
+      '<div class="line small muted"><span class="i">⏱</span><span>' + (x.b ? 'Olgan: ' + esc(x.b) + ' · ' : '') + 'ishladi: <b>' + dav(x.min) + '</b></span></div>' +
+      '<div class="mrow"><span>' + (usul(x.usul) || 'Summa') + ' ' + hol(x.holat) + '</span><b>' + (x.summa ? pul(x.summa) : '—') + '</b></div></div>').join('')
+    : bosh('📭', 'Bu oyda yozuv yo\'q');
+  h += '<p class="muted small" style="margin:12px 4px">🔒 Mijoz ismi va raqami yashirilgan. Ochiq ishingizdagi mijoz ma\'lumoti «🔧 Ishlarim»da to\'liq ko\'rinadi.</p>';
+  $('main').innerHTML = h; ulash();
 }
 
 /* ---------- Usta uchun bo'sh ishlar (mijoz ma'lumoti yashirilgan) ---------- */
