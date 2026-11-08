@@ -147,11 +147,26 @@ async function api(body) {
   const r = await fetch(API, { method: 'POST', body: JSON.stringify(Object.assign({ initData: tg ? tg.initData : '' }, body)) });
   return r.json();
 }
+/* ⚡ Telefon xotirasi — oxirgi ma'lumot darhol ko'rinadi, yangisi orqada keladi */
+const LS = 'hw1:' + ((tg && tg.initDataUnsafe && tg.initDataUnsafe.user && tg.initDataUnsafe.user.id) || 0) + ':';
+function lsOl(k) { try { const v = localStorage.getItem(LS + k); return v ? JSON.parse(v) : null; } catch (e) { return null; } }
+function lsQoy(k, v) { try { localStorage.setItem(LS + k, JSON.stringify(v)); } catch (e) { try { localStorage.removeItem(LS + k); } catch (e2) {} } }
+function molTozala() { MOL = {}; try { Object.keys(localStorage).forEach(k => { if (k.indexOf(LS + 'M') === 0) localStorage.removeItem(k); }); } catch (e) {} }
+const bandMi = () => !!$('ov') || ekran === 'yangi' || ekran === 'test';
 async function yukla(jim) {
-  if (!jim) $('main').innerHTML = '<div class="spin"></div>';
+  let eski = false;
+  if (!jim) {
+    const c = !D && lsOl('D' + (ARX ? 1 : 0));
+    if (c && c.ok && c.ruxsat) {
+      D = c; eski = true;
+      try { chiz(); $('sub').textContent += ' · ⟳'; } catch (e) { eski = false; $('main').innerHTML = '<div class="spin"></div>'; }
+    } else $('main').innerHTML = '<div class="spin"></div>';
+  }
   try {
-    D = await api({ api: 'ishlar', arxiv: ARX });
-    if (!D.ok) throw new Error(D.xato || 'Xatolik');
+    const Y = await api({ api: 'ishlar', arxiv: ARX });
+    if (!Y.ok) throw new Error(Y.xato || 'Xatolik');
+    D = Y; lsQoy('D' + (ARX ? 1 : 0), Y);
+    if (eski && bandMi()) { $('sub').textContent = $('sub').textContent.replace(' · ⟳', ''); if (!T) testYukla().catch(() => {}); return; }
     const yopH = YOP_H; YOP_H = '';
     const yi = yopH && (D.ustaIshlari || []).find(x => x.h === yopH);
     if (yi && !yi.yopildi && !yi.otkaz) ekran = 'usta';
@@ -159,6 +174,7 @@ async function yukla(jim) {
     if (!T) testYukla().catch(() => {});
     if (yopH) { if (yi && !yi.yopildi && !yi.otkaz) tugat(yopH); else if (yi && yi.yopildi) xabar('✅ Bu ish allaqachon yopilgan.'); }
   } catch (e) {
+    if (eski) { $('sub').textContent = $('sub').textContent.replace(' · ⟳', ' · ⚠️ oflayn'); return; }
     $('main').innerHTML = '<div class="err">⚠️ ' + esc(e.message) + '</div>';
     $('sub').textContent = 'Ulanib bo\'lmadi';
   }
@@ -251,7 +267,7 @@ async function amal(body, btn, matn) {
   try {
     const r = await api(body);
     if (!r.ok) throw new Error(r.xato || 'Xatolik');
-    hap('success'); yop(); xabar((r.natija || ['✅ Bajarildi']).join('\n')); MOL = {}; await yukla(true);
+    hap('success'); yop(); xabar((r.natija || ['✅ Bajarildi']).join('\n')); molTozala(); await yukla(true);
   } catch (e) { if (btn) { btn.disabled = false; btn.textContent = btn.dataset.t; } hap('error'); xabar('⚠️ ' + e.message); }
 }
 function amalBos(act, h) {
@@ -697,6 +713,14 @@ function barlar(t, m) {
 /* ---------- 💰 Moliya / Balans ---------- */
 function oyNomi(o) { const N = ['Yanvar', 'Fevral', 'Mart', 'Aprel', 'May', 'Iyun', 'Iyul', 'Avgust', 'Sentabr', 'Oktabr', 'Noyabr', 'Dekabr']; return N[+o.slice(5, 7) - 1] + ' ' + o.slice(0, 4); }
 function oySur(o, n) { let y = +o.slice(0, 4), m = +o.slice(5, 7) + n; while (m < 1) { m += 12; y--; } while (m > 12) { m -= 12; y++; } return y + '-' + ('0' + m).slice(-2); }
+function molYangi(oy) {   // orqada yangilab, hali shu ekranda bo'lsa qayta chizadi
+  api({ api: 'moliya', oy }).then(r => {
+    if (!r || !r.ok) return;
+    const o = JSON.stringify(MOL[oy] || null), y = JSON.stringify(r);
+    MOL[oy] = r; lsQoy('M' + oy, r);
+    if (o !== y && ekran === 'moliya' && moliyaOy === oy && !$('ov')) ekMoliya();
+  }).catch(() => {});
+}
 async function ekMoliya() {
   if (!moliyaOy) moliyaOy = D.meta.bugun.slice(0, 7);
   const oy = moliyaOy;
@@ -705,7 +729,11 @@ async function ekMoliya() {
   $('m_p').onclick = () => { moliyaOy = oySur(oy, -1); chiz(); };
   $('m_n').onclick = () => { if (oy < D.meta.bugun.slice(0, 7)) { moliyaOy = oySur(oy, 1); chiz(); } };
   try {
-    if (!MOL[oy]) { const r = await api({ api: 'moliya', oy }); if (!r.ok) throw new Error(r.xato); MOL[oy] = r; }
+    if (!MOL[oy]) {
+      const c = lsOl('M' + oy);
+      if (c && c.ok) { MOL[oy] = c; molYangi(oy); }
+      else { const r = await api({ api: 'moliya', oy }); if (!r.ok) throw new Error(r.xato); MOL[oy] = r; lsQoy('M' + oy, r); }
+    }
     if (ekran !== 'moliya' || moliyaOy !== oy) return;
     const MR = MOL[oy], M = MR.moliya, j = k => M.reduce((s, x) => s + (x[k] || 0), 0);
     const KT = MR.kutish || [], TR = MR.tarix || [];
@@ -864,7 +892,7 @@ function bahoSorov(h, keyin) {
   const yubor = async (body, btn) => {
     btn.disabled = true; const t0 = btn.textContent; btn.textContent = 'Yuborilmoqda…';
     try { const r = await api(Object.assign({ api: 'baho', h }, body)); if (!r.ok) throw new Error(r.xato);
-      hap('success'); yop(); const t = body.otkaz ? '' : '🙏 Rahmat! Fikringiz biz uchun muhim.'; if (keyin) keyin(t); else { if (t) xabar(t); MOL = {}; yukla(true); }
+      hap('success'); yop(); const t = body.otkaz ? '' : '🙏 Rahmat! Fikringiz biz uchun muhim.'; if (keyin) keyin(t); else { if (t) xabar(t); molTozala(); yukla(true); }
     } catch (e) { btn.disabled = false; btn.textContent = t0; hap('error'); xabar('⚠️ ' + e.message); }
   };
   $('bh_ok').onclick = () => yubor({ javob: J }, $('bh_ok'));
@@ -912,8 +940,8 @@ function tugat(h, btn) {
       }
       hap('success'); yop(); if (btn) { btn.disabled = true; btn.textContent = '✅ Yopildi'; }
       const m = r.oldin ? '✅ Bu ish allaqachon yopilgan.' : '✅ Ish yopildi — ' + r.vaqt + '\n📸 ' + r.rasm + ' ta rasm saqlandi.' + (r.tolov ? '\n💵 To\'lov rahbar tasdig\'iga yuborildi.' : r.tolovXato ? '\n⚠️ To\'lov: ' + r.tolovXato : '');
-      if (r.oldin) { xabar(m); MOL = {}; await yukla(true); }
-      else bahoSorov(h, t => { xabar((t ? t + '\n\n' : '') + m); MOL = {}; yukla(true); });
+      if (r.oldin) { xabar(m); molTozala(); await yukla(true); }
+      else bahoSorov(h, t => { xabar((t ? t + '\n\n' : '') + m); molTozala(); yukla(true); });
     } catch (x) { b.disabled = false; b.textContent = '✅ Ishni yopish'; hap('error'); xabar('⚠️ ' + x.message); }
   };
 }
@@ -987,7 +1015,7 @@ function testChiz() {
   tick(); Ttimer = setInterval(tick, 250);
 }
 
-$('ref').onclick = () => { hap('sel'); MOL = {}; ES = null; MJ = {}; NAT = null; T = null; yukla(); };
+$('ref').onclick = () => { hap('sel'); molTozala(); ES = null; MJ = {}; NAT = null; T = null; yukla(); };
 /* Ilovaga qaytilganda va so'rov kutilayotganda ma'lumot o'zi yangilansin */
 let _oxirgi = Date.now();
 const jimYangila = () => { if (!D || !D.ruxsat || $('ov') || ekran === 'yangi' || ekran === 'eslatma' || ekran === 'test') return; if (Date.now() - _oxirgi < 15000) return; _oxirgi = Date.now(); MOL = {}; yukla(true); };
