@@ -71,14 +71,13 @@ async function yukla() {
   if (!tg || !tg.initData) return xato('Ilovani Telegram\'dagi Halowatt botidan oching.');
   const c = lsOl();
   if (c && c.ok && c.ruxsat) { S = c; if (S.sayt) SAYT = S.sayt; bosh(); }
-  else $('main').innerHTML = '<div class="card hello" style="margin-top:12px"><b>Assalomu alaykum!</b><div class="small" style="margin-top:6px">Bir soniya — ma\'lumotlaringiz yuklanmoqda…</div></div>' +
-    '<div class="grid" style="margin-top:12px;opacity:.55"><div class="tile big"><div class="e">🛠</div><b>Usta chaqirish</b><span>Muammoni tanlang — 30 soniya</span></div></div><div class="spin" style="margin-top:14px"></div>';
+  else royxat();   // ⚡ yangi mijoz kutmaydi: ro'yxatdan o'tish ekrani darhol; ro'yxatdan o'tgan bo'lsa — server javobi bilan bosh ekranga o'tadi
   try { const r = await api({ mapi: 'holat' });
     if (!r.ok) { if (!c) xato(r.xato || 'Xatolik'); return; }
     if (r.ruxsat) lsQoy(r);
     const ozgardi = JSON.stringify(r) !== JSON.stringify(c);
     S = r; if (S.sayt) SAYT = S.sayt;
-    if (!c || !c.ruxsat) { S.ruxsat ? bosh() : royxat(); return; }
+    if (!c || !c.ruxsat) { if (S.ruxsat && $('tel') && !$('tel').disabled) bosh(); return; }
     if (ozgardi && ekranBosh()) bosh();
   } catch (e) { if (!c) xato('Internet bilan muammo. Qayta urinib ko\'ring.'); }
 }
@@ -86,7 +85,7 @@ async function yukla() {
 function royxat(ismKerak) {
   $('sub').textContent = 'Xush kelibsiz!';
   $('main').innerHTML = '<div class="card hello" style="margin-top:12px"><b>Assalomu alaykum!</b><div class="small" style="margin-top:6px">Halowatt servis xizmatiga xush kelibsiz. Sizni tanishimiz uchun telefon raqamingizni yuboring — bir marta.</div></div>' +
-    (ismKerak ? '<label class="f">Ismingiz</label><input class="in" id="ism" placeholder="Masalan: Aziz aka" maxlength="60" value="' + esc(S.ism || '') + '">' : '') +
+    (ismKerak ? '<label class="f">Ismingiz</label><input class="in" id="ism" placeholder="Masalan: Aziz aka" maxlength="60" value="' + esc((S && S.ism) || '') + '">' : '') +
     '<button class="btn" id="tel">📞 Raqamni yuborish</button><p class="muted small" style="margin:12px 4px">Raqamingiz faqat xizmat uchun ishlatiladi: usta chaqirish, ish holati va kafolat haqida xabarlar.</p>';
   $('tel').onclick = () => {
     hap();
