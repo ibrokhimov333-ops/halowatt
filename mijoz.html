@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>Halowatt Servis — Mijozlar</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
+<link rel="preconnect" href="https://script.google.com">
+<link rel="preconnect" href="https://script.googleusercontent.com" crossorigin>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
@@ -68,7 +70,9 @@ const ekranBosh = () => !$('orq');
 async function yukla() {
   if (!tg || !tg.initData) return xato('Ilovani Telegram\'dagi Halowatt botidan oching.');
   const c = lsOl();
-  if (c && c.ok && c.ruxsat) { S = c; if (S.sayt) SAYT = S.sayt; bosh(); } else $('main').innerHTML = '<div class="spin"></div>';
+  if (c && c.ok && c.ruxsat) { S = c; if (S.sayt) SAYT = S.sayt; bosh(); }
+  else $('main').innerHTML = '<div class="card hello" style="margin-top:12px"><b>Assalomu alaykum!</b><div class="small" style="margin-top:6px">Bir soniya — ma\'lumotlaringiz yuklanmoqda…</div></div>' +
+    '<div class="grid" style="margin-top:12px;opacity:.55"><div class="tile big"><div class="e">🛠</div><b>Usta chaqirish</b><span>Muammoni tanlang — 30 soniya</span></div></div><div class="spin" style="margin-top:14px"></div>';
   try { const r = await api({ mapi: 'holat' });
     if (!r.ok) { if (!c) xato(r.xato || 'Xatolik'); return; }
     if (r.ruxsat) lsQoy(r);
