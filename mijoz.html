@@ -96,7 +96,7 @@ async function yukla() {
 function royxat(ismKerak) {
   $('sub').textContent = 'Xush kelibsiz!';
   $('main').innerHTML = '<div class="card hello" style="margin-top:12px"><b>Assalomu alaykum!</b><div class="small" style="margin-top:6px">Halowatt servis xizmatiga xush kelibsiz. Sizni tanishimiz uchun telefon raqamingizni yuboring — bir marta.</div></div>' +
-    (ismKerak ? '<label class="f">Ismingiz</label><input class="in" id="ism" placeholder="Masalan: Aziz aka" maxlength="60" value="' + esc((S && S.ism) || '') + '">' : '') +
+    (ismKerak ? '<label class="f">Ismingiz</label><input class="in" id="ism" placeholder="Masalan: Aziz aka" maxlength="60" value="" autocomplete="name">' + '<div class="small muted" style="margin:6px 4px 0">Usta sizga shu ism bilan murojaat qiladi.</div>' : '') +
     '<button class="btn" id="tel">📞 Raqamni yuborish</button><p class="muted small" style="margin:12px 4px">Raqamingiz faqat xizmat uchun ishlatiladi: usta chaqirish, ish holati va kafolat haqida xabarlar.</p>';
   $('tel').onclick = () => {
     hap();
@@ -119,7 +119,7 @@ function bosh() {
   const m = S.mijoz || {};
   $('sub').textContent = m.ism || 'Halowatt mijozi';
   const yil = S.birinchi ? S.birinchi.slice(0, 4) : '';
-  let h = '<div class="card hello" style="margin-top:12px"><b>Assalomu alaykum, ' + esc(m.ism) + '!</b><div class="small" style="margin-top:6px">' +
+  let h = '<div class="card hello" style="margin-top:12px"><div class="row" style="align-items:flex-start"><b>Assalomu alaykum, ' + esc(m.ism) + '!</b><button class="chip" id="ismT" style="flex:none;margin:0 0 0 8px;padding:6px 10px">✏️ Ism</button></div><div class="small" style="margin-top:6px">' +
     (S.tarix && S.ishlar && S.ishlar.length ? 'Siz bilan ' + yil + '-yildan beri ishlaymiz. Oxirgi xizmat: ' + esc(S.ishlar[0].sana) + '.' : 'Biror muammo bo\'lsa — bir tugma bilan usta chaqiring.') + '</div></div>';
   if (S.arizalar && S.arizalar.length) h += '<h2>Ko\'rib chiqilayotgan arizalar</h2>' + S.arizalar.map(a => '<div class="card"><div class="row"><b>№ ' + esc(a.n) + '</b><span class="pill' + (a.holat === 'Kutilmoqda' ? ' wait' : '') + '">' + (a.holat === 'Kutilmoqda' ? '⏳ Ko\'rib chiqilmoqda' : a.usta ? '👷 ' + esc(a.usta) : '✅ Qabul qilindi') + '</span></div><div class="small muted" style="margin-top:6px">🛠 ' + esc(a.muammo) + ' · ' + esc(a.vaqt) + '</div></div>').join('');
   h += '<div class="grid" style="margin-top:12px"><button class="tile big" id="t_usta"><div class="e">🛠</div><b>Usta chaqirish</b><span>Muammoni tanlang — 30 soniya</span></button>' +
@@ -127,11 +127,28 @@ function bosh() {
     '<button class="btn ghost" id="t_sav">💬 Savol berish</button>';
   $('main').innerHTML = h;
   $('t_usta').onclick = () => { hap(); F = {}; ariza(); };
+  $('ismT').onclick = () => { hap(); ismOyna(); };
   if ($('t_ish')) $('t_ish').onclick = () => { hap(); ishlar(); };
   if ($('t_tiz')) $('t_tiz').onclick = () => { hap(); tizim(); };
   $('t_sav').onclick = () => { hap(); try { tg.close(); } catch (e) {} };
 }
 const orqaga = () => '<button class="back" id="orq">‹ Orqaga</button>';
+/* ✏️ Ismni o'zgartirish */
+function ismOyna() {
+  const m = S.mijoz || {};
+  $('main').innerHTML = orqaga() + '<h2>Ismingiz</h2><label class="f">Sizga qanday murojaat qilaylik?</label><input class="in" id="ismY" maxlength="60" placeholder="Masalan: Aziz aka" value="' + esc(m.ism || '') + '">' +
+    '<button class="btn" id="ismS">💾 Saqlash</button><div id="xb"></div>';
+  orqUlash(); const i = $('ismY'); i.focus(); i.select();
+  $('ismS').onclick = async () => {
+    const v = i.value.replace(/\s+/g, ' ').trim();
+    if (v.length < 2) return $('xb').innerHTML = '<div class="err">Ismingizni to\'liq yozing.</div>';
+    yuk($('ismS'), '⏳ Saqlanmoqda…');
+    try { const r = await api({ mapi: 'ism', ism: v });
+      if (!r.ok) { yukTugadi($('ismS')); return $('xb').innerHTML = '<div class="err">' + esc(r.xato) + '</div>'; }
+      S = r; lsQoy(r); hap('ok'); bosh(); window.scrollTo(0, 0);
+    } catch (e) { yukTugadi($('ismS')); $('xb').innerHTML = '<div class="err">Internet bilan muammo.</div>'; }
+  };
+}
 function orqUlash() { $('orq').onclick = () => { hap(); bosh(); window.scrollTo(0, 0); }; }
 /* 3 — usta chaqirish */
 function ariza() {
