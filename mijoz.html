@@ -42,9 +42,16 @@
   @keyframes r{to{transform:rotate(360deg)}}
   .ok{text-align:center;padding:26px 10px} .ok .e{font-size:54px} .ok b{display:block;font-size:20px;margin:10px 0 6px}
   .back{border:0;background:none;color:var(--teal);font:700 14px Manrope,sans-serif;margin:14px 4px 0}
+  /* ⏳ Kutish: tugma ichi chapdan o'ngga to'ladi + tepada ingichka chiziq */
+  .btn.yuk{position:relative;overflow:hidden;opacity:1!important}
+  .btn.yuk::after{content:'';position:absolute;left:0;top:0;bottom:0;width:0;background:rgba(255,255,255,.32);animation:tol 6s cubic-bezier(.15,.75,.3,1) forwards}
+  @keyframes tol{0%{width:0}100%{width:94%}}
+  #yb{position:fixed;left:0;top:0;height:3px;width:0;background:#7EE2BE;z-index:99;transition:width .3s,opacity .4s;opacity:0}
+  #yb.on{opacity:1;animation:tol 4s cubic-bezier(.15,.75,.3,1) forwards}
 </style>
 </head>
 <body>
+<div id="yb"></div>
 <header><div class="t">Halowatt Servis</div><div class="s" id="sub">Xavfsizlik tizimlari xizmati</div></header>
 <button class="sayt" id="sayt">🌐 halowatt.uz — saytga o'tish<span>Katalog, narxlar va do'konlarimiz ›</span></button>
 <main id="main"><div class="spin"></div></main>
@@ -56,6 +63,9 @@ const $ = id => document.getElementById(id);
 const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 const hap = t => { try { t === 'ok' ? tg.HapticFeedback.notificationOccurred('success') : tg.HapticFeedback.selectionChanged(); } catch (e) {} };
 let S = null, F = {}, SAYT = 'https://halowatt.uz';
+const yuk = (b, matn) => { if (!b) return; b.dataset.m = b.dataset.m || b.textContent; b.disabled = true; b.classList.add('yuk'); b.textContent = matn; };
+const yukTugadi = b => { if (!b) return; b.disabled = false; b.classList.remove('yuk'); if (b.dataset.m) b.textContent = b.dataset.m; };
+const chiziq = on => { const e = $('yb'); if (!e) return; if (on) { e.style.width = ''; e.classList.add('on'); } else { e.classList.remove('on'); e.style.width = '100%'; setTimeout(() => { e.style.width = '0'; e.style.opacity = '0'; setTimeout(() => e.style.opacity = '', 400); }, 300); } };
 async function api(body) {
   const r = await fetch(API, { method: 'POST', body: JSON.stringify(Object.assign({ initData: tg ? tg.initData : '' }, body)) });
   return r.json();
@@ -72,14 +82,15 @@ async function yukla() {
   const c = lsOl();
   if (c && c.ok && c.ruxsat) { S = c; if (S.sayt) SAYT = S.sayt; bosh(); }
   else royxat();   // ⚡ yangi mijoz kutmaydi: ro'yxatdan o'tish ekrani darhol; ro'yxatdan o'tgan bo'lsa — server javobi bilan bosh ekranga o'tadi
-  try { const r = await api({ mapi: 'holat' });
+  chiziq(true);
+  try { const r = await api({ mapi: 'holat' }); chiziq(false);
     if (!r.ok) { if (!c) xato(r.xato || 'Xatolik'); return; }
     if (r.ruxsat) lsQoy(r);
     const ozgardi = JSON.stringify(r) !== JSON.stringify(c);
     S = r; if (S.sayt) SAYT = S.sayt;
     if (!c || !c.ruxsat) { if (S.ruxsat && $('tel') && !$('tel').disabled) bosh(); return; }
     if (ozgardi && ekranBosh()) bosh();
-  } catch (e) { if (!c) xato('Internet bilan muammo. Qayta urinib ko\'ring.'); }
+  } catch (e) { chiziq(false); if (!c) xato('Internet bilan muammo. Qayta urinib ko\'ring.'); }
 }
 /* 1 — ro'yxatdan o'tish */
 function royxat(ismKerak) {
@@ -93,7 +104,7 @@ function royxat(ismKerak) {
     if (!tg.requestContact) return xato('Telegram ilovangizni yangilang.');
     tg.requestContact(async (ok, res) => {
       if (!ok || !res || !res.response) return;
-      $('tel').disabled = true; $('tel').textContent = 'Tekshirilmoqda…';
+      yuk($('tel'), '⏳ Tekshirilmoqda…');
       try {
         const r = await api({ mapi: 'royxat', kontakt: res.response, ism: ismKerak ? $('ism').value.trim() : '' });
         if (!r.ok) return xato(r.xato);
@@ -145,15 +156,15 @@ function ariza() {
     saqla();
     if (!F.muammo) return $('xb').innerHTML = '<div class="err">Muammoni tanlang.</div>';
     if (!F.manzil.trim() && !F.lat) return $('xb').innerHTML = '<div class="err">Manzilni yozing yoki lokatsiya yuboring.</div>';
-    $('yub').disabled = true; $('yub').textContent = 'Yuborilmoqda…';
+    yuk($('yub'), '⏳ Yuborilmoqda…');
     try {
       const r = await api(Object.assign({ mapi: 'ariza' }, F));
-      if (!r.ok) { $('yub').disabled = false; $('yub').textContent = '✅ Yuborish'; return $('xb').innerHTML = '<div class="err">' + esc(r.xato) + '</div>'; }
+      if (!r.ok) { yukTugadi($('yub')); return $('xb').innerHTML = '<div class="err">' + esc(r.xato) + '</div>'; }
       hap('ok');
       $('main').innerHTML = '<div class="card ok" style="margin-top:12px"><div class="e">✅</div><b>Arizangiz qabul qilindi</b><div>№ ' + esc(r.n) + '</div><p class="muted small" style="margin-top:10px">' +
         (r.ishVaqti ? 'Xodimimiz tez orada qo\'ng\'iroq qiladi.' : 'Ertaga soat 09:00 da qo\'ng\'iroq qilamiz.') + ' Holat haqidagi xabarlar shu botga keladi.</p></div><button class="btn ghost" id="bb">Bosh sahifaga</button>';
       $('bb').onclick = () => yukla();
-    } catch (e) { $('yub').disabled = false; $('yub').textContent = '✅ Yuborish'; $('xb').innerHTML = '<div class="err">Internet bilan muammo.</div>'; }
+    } catch (e) { yukTugadi($('yub')); $('xb').innerHTML = '<div class="err">Internet bilan muammo.</div>'; }
   };
 }
 /* 4 — mening ishlarim */
