@@ -97,8 +97,7 @@ function bosh() {
     (S.tarix && S.ishlar && S.ishlar.length ? 'Siz bilan ' + yil + '-yildan beri ishlaymiz. Oxirgi xizmat: ' + esc(S.ishlar[0].sana) + '.' : 'Biror muammo bo\'lsa — bir tugma bilan usta chaqiring.') + '</div></div>';
   if (S.arizalar && S.arizalar.length) h += '<h2>Ko\'rib chiqilayotgan arizalar</h2>' + S.arizalar.map(a => '<div class="card"><div class="row"><b>№ ' + esc(a.n) + '</b><span class="pill' + (a.holat === 'Kutilmoqda' ? ' wait' : '') + '">' + (a.holat === 'Kutilmoqda' ? '⏳ Ko\'rib chiqilmoqda' : a.usta ? '👷 ' + esc(a.usta) : '✅ Qabul qilindi') + '</span></div><div class="small muted" style="margin-top:6px">🛠 ' + esc(a.muammo) + ' · ' + esc(a.vaqt) + '</div></div>').join('');
   h += '<div class="grid" style="margin-top:12px"><button class="tile big" id="t_usta"><div class="e">🛠</div><b>Usta chaqirish</b><span>Muammoni tanlang — 30 soniya</span></button>' +
-    (S.tarix ? '<button class="tile" id="t_ish"><div class="e">📋</div><b>Mening ishlarim</b><span>' + (S.ishlar || []).length + ' ta xizmat</span></button>' +
-    '<button class="tile" id="t_tiz"><div class="e">📷</div><b>Mening tizimim</b><span>Nima o\'rnatilgan</span></button>' : '') + '</div>' +
+    (S.tarix ? '<button class="tile big" id="t_ish"><div class="e">📋</div><b>Mening ishlarim</b><span>' + (S.ishlar || []).filter(j => j.holat !== 'otkaz').length + ' ta bajarilgan xizmat</span></button>' : '') + '</div>' +
     '<button class="btn ghost" id="t_sav">💬 Savol berish</button>';
   $('main').innerHTML = h;
   $('t_usta').onclick = () => { hap(); F = {}; ariza(); };
@@ -144,8 +143,8 @@ function ariza() {
 }
 /* 4 — mening ishlarim */
 function ishlar() {
-  const L = S.ishlar || [];
-  $('main').innerHTML = orqaga() + '<h2>Mening ishlarim</h2>' + (L.length ? L.map(j => '<div class="card"><div class="row"><b>' + esc(j.turlar || 'Xizmat') + '</b><span class="pill' + (j.holat === 'ochiq' ? ' wait' : '') + '">' + (j.holat === 'ochiq' ? '⏳ Jarayonda' : j.holat === 'otkaz' ? 'Bekor' : '✅ Bajarildi') + '</span></div><div class="small muted" style="margin-top:6px">📅 ' + esc(j.sana) + (j.usta ? ' · 👷 ' + esc(j.usta) : '') + '</div></div>').join('')
+  const L = (S.ishlar || []).filter(j => j.holat !== 'otkaz');
+  $('main').innerHTML = orqaga() + '<h2>Mening ishlarim</h2>' + (L.length ? L.map(j => '<div class="card"><div class="row"><b>' + esc(j.turlar || 'Xizmat') + '</b><span class="pill' + (j.holat === 'ochiq' ? ' wait' : '') + '">' + (j.holat === 'ochiq' ? '⏳ Jarayonda' : j.holat === 'otkaz' ? 'Bekor' : '✅ Bajarildi') + '</span></div><div class="small muted" style="margin-top:6px">📅 ' + esc(j.sana) + '</div></div>').join('')
     : '<div class="card muted">Hali bizda xizmat olmagansiz. Birinchi ishingizni «🛠 Usta chaqirish» orqali bering.</div>');
   orqUlash(); window.scrollTo(0, 0);
 }
