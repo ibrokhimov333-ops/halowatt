@@ -94,16 +94,16 @@ function bosh() {
   $('sub').textContent = m.ism || 'Halowatt mijozi';
   const yil = S.birinchi ? S.birinchi.slice(0, 4) : '';
   let h = '<div class="card hello" style="margin-top:12px"><b>Assalomu alaykum, ' + esc(m.ism) + '!</b><div class="small" style="margin-top:6px">' +
-    (S.ishlar && S.ishlar.length ? 'Siz bilan ' + yil + '-yildan beri ishlaymiz. Oxirgi xizmat: ' + esc(S.ishlar[0].sana) + '.' : 'Biror muammo bo\'lsa — bir tugma bilan usta chaqiring.') + '</div></div>';
+    (S.tarix && S.ishlar && S.ishlar.length ? 'Siz bilan ' + yil + '-yildan beri ishlaymiz. Oxirgi xizmat: ' + esc(S.ishlar[0].sana) + '.' : 'Biror muammo bo\'lsa — bir tugma bilan usta chaqiring.') + '</div></div>';
   if (S.arizalar && S.arizalar.length) h += '<h2>Ko\'rib chiqilayotgan arizalar</h2>' + S.arizalar.map(a => '<div class="card"><div class="row"><b>№ ' + esc(a.n) + '</b><span class="pill' + (a.holat === 'Kutilmoqda' ? ' wait' : '') + '">' + (a.holat === 'Kutilmoqda' ? '⏳ Ko\'rib chiqilmoqda' : a.usta ? '👷 ' + esc(a.usta) : '✅ Qabul qilindi') + '</span></div><div class="small muted" style="margin-top:6px">🛠 ' + esc(a.muammo) + ' · ' + esc(a.vaqt) + '</div></div>').join('');
   h += '<div class="grid" style="margin-top:12px"><button class="tile big" id="t_usta"><div class="e">🛠</div><b>Usta chaqirish</b><span>Muammoni tanlang — 30 soniya</span></button>' +
-    '<button class="tile" id="t_ish"><div class="e">📋</div><b>Mening ishlarim</b><span>' + (S.ishlar || []).length + ' ta xizmat</span></button>' +
-    '<button class="tile" id="t_tiz"><div class="e">📷</div><b>Mening tizimim</b><span>Nima o\'rnatilgan</span></button></div>' +
+    (S.tarix ? '<button class="tile" id="t_ish"><div class="e">📋</div><b>Mening ishlarim</b><span>' + (S.ishlar || []).length + ' ta xizmat</span></button>' +
+    '<button class="tile" id="t_tiz"><div class="e">📷</div><b>Mening tizimim</b><span>Nima o\'rnatilgan</span></button>' : '') + '</div>' +
     '<button class="btn ghost" id="t_sav">💬 Savol berish</button>';
   $('main').innerHTML = h;
   $('t_usta').onclick = () => { hap(); F = {}; ariza(); };
-  $('t_ish').onclick = () => { hap(); ishlar(); };
-  $('t_tiz').onclick = () => { hap(); tizim(); };
+  if ($('t_ish')) $('t_ish').onclick = () => { hap(); ishlar(); };
+  if ($('t_tiz')) $('t_tiz').onclick = () => { hap(); tizim(); };
   $('t_sav').onclick = () => { hap(); try { tg.close(); } catch (e) {} };
 }
 const orqaga = () => '<button class="back" id="orq">‹ Orqaga</button>';
