@@ -60,11 +60,23 @@ async function api(body) {
 }
 $('sayt').onclick = () => { hap(); try { tg.openLink(SAYT); } catch (e) { location.href = SAYT; } };
 function xato(m) { $('main').innerHTML = '<div class="err">⚠️ ' + esc(m) + '</div><button class="btn ghost" onclick="yukla()">🔄 Qayta urinish</button>'; }
+/* ⚡ Tez ochilish: oxirgi holat telefonda saqlanadi — darhol ko'rsatiladi, orqada yangilanadi */
+const lsK = () => 'mh' + ((tg && tg.initDataUnsafe && tg.initDataUnsafe.user && tg.initDataUnsafe.user.id) || '');
+const lsOl = () => { try { return JSON.parse(localStorage.getItem(lsK()) || 'null'); } catch (e) { return null; } };
+const lsQoy = v => { try { localStorage.setItem(lsK(), JSON.stringify(v)); } catch (e) {} };
+const ekranBosh = () => !$('orq');
 async function yukla() {
-  $('main').innerHTML = '<div class="spin"></div>';
   if (!tg || !tg.initData) return xato('Ilovani Telegram\'dagi Halowatt botidan oching.');
-  try { S = await api({ mapi: 'holat' }); if (S.sayt) SAYT = S.sayt; if (!S.ok) return xato(S.xato || 'Xatolik'); S.ruxsat ? bosh() : royxat(); }
-  catch (e) { xato('Internet bilan muammo. Qayta urinib ko\'ring.'); }
+  const c = lsOl();
+  if (c && c.ok && c.ruxsat) { S = c; if (S.sayt) SAYT = S.sayt; bosh(); } else $('main').innerHTML = '<div class="spin"></div>';
+  try { const r = await api({ mapi: 'holat' });
+    if (!r.ok) { if (!c) xato(r.xato || 'Xatolik'); return; }
+    if (r.ruxsat) lsQoy(r);
+    const ozgardi = JSON.stringify(r) !== JSON.stringify(c);
+    S = r; if (S.sayt) SAYT = S.sayt;
+    if (!c || !c.ruxsat) { S.ruxsat ? bosh() : royxat(); return; }
+    if (ozgardi && ekranBosh()) bosh();
+  } catch (e) { if (!c) xato('Internet bilan muammo. Qayta urinib ko\'ring.'); }
 }
 /* 1 — ro'yxatdan o'tish */
 function royxat(ismKerak) {
@@ -83,7 +95,7 @@ function royxat(ismKerak) {
         const r = await api({ mapi: 'royxat', kontakt: res.response, ism: ismKerak ? $('ism').value.trim() : '' });
         if (!r.ok) return xato(r.xato);
         if (r.ismKerak) return royxat(true);
-        S = r; hap('ok'); bosh();
+        S = r; lsQoy(r); hap('ok'); bosh();
       } catch (e) { xato('Internet bilan muammo. Qayta urinib ko\'ring.'); }
     });
   };
