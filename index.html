@@ -111,6 +111,16 @@
   .champ{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:10px 12px 0;padding:10px 12px;border-radius:14px;background:linear-gradient(135deg,#FFF4D6,#FFE3A0);color:#5A4200;box-shadow:0 0 0 1px #EBCB72 inset}
   .champ b{font-size:15px;display:block;margin-top:1px} .champ .small{font-size:12px;opacity:.85}
   .champ button{border:0;border-radius:12px;padding:9px 12px;font:800 13px Manrope,sans-serif;background:var(--teal);color:#fff;white-space:nowrap}
+  .champs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 12px 0} .champs.bir{grid-template-columns:1fr}
+  .chc{border:0;text-align:left;border-radius:14px;padding:9px 11px;font-family:Manrope,sans-serif;background:linear-gradient(135deg,#FFF4D6,#FFE3A0);color:#5A4200;box-shadow:0 0 0 1px #EBCB72 inset;min-width:0}
+  .chc.o{background:linear-gradient(135deg,#E6F7F0,#C8ECDF);color:#0B5A43;box-shadow:0 0 0 1px #94D5BD inset}
+  .chc .small{font-size:11px;opacity:.85;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis} .chc b{font-size:14px;display:block;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .chc i{font-style:normal;font-size:12px;font-weight:800;display:inline-block;margin-top:5px;color:var(--teal)}
+  .ry{display:flex;align-items:center;gap:10px;padding:11px 12px;border-radius:14px;background:#fff;margin:0 0 8px;box-shadow:0 1px 0 var(--line,#e6ece9)}
+  .ry .o{width:34px;text-align:center;font-size:22px;font-weight:800;flex:none} .ry .n{flex:1;min-width:0} .ry .n b{display:block;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .ry .n span{font-size:12px;opacity:.75} .ry .s{text-align:right;flex:none} .ry .s b{display:block;font-size:17px} .ry .s span{font-size:11px;opacity:.7}
+  .qm h3{font-size:15px;margin:14px 0 6px;color:var(--teal)} .qm ul{margin:0 0 4px;padding-left:18px} .qm li{margin:4px 0;line-height:1.45;font-size:14px} .qm p{margin:6px 0;font-size:14px;line-height:1.45}
+  .ry.top{background:linear-gradient(135deg,#FFFBEA,#FFF1C7)} .ry.men{box-shadow:0 0 0 2px var(--teal) inset}
   .tsav{font-size:17px;font-weight:800;margin:14px 2px 10px;line-height:1.4}
   .tbar{height:8px;border-radius:4px;background:var(--mist);overflow:hidden;margin-top:12px} .tbar div{height:100%;width:100%;background:var(--teal);transition:width .25s linear}
   .tsec{text-align:center;font:800 30px Manrope,sans-serif;margin-top:6px}
@@ -132,7 +142,7 @@ if (tg) { tg.ready(); tg.expand(); try { tg.setHeaderColor('#01825F'); } catch (
 
 let ishFil = '';
 let YOP_H = (() => { try { return new URLSearchParams(location.search).get('yop') || ''; } catch (e) { return ''; } })();
-let D = null, ekran = (() => { try { return new URLSearchParams(location.search).get('test') === '1' ? 'test' : null; } catch (e) { return null; } })(), seg = {}, qidir = '', davr = 'oy', F = null, natija = null, MOL = {}, moliyaOy = null, bT = '', bF = '';
+let D = null, ekran = (() => { try { return new URLSearchParams(location.search).get('test') === '1' ? 'test' : new URLSearchParams(location.search).get('reyting') === '1' ? 'reyting' : (new URLSearchParams(location.search).get('e') || null); } catch (e) { return null; } })(), seg = {}, qidir = '', davr = 'oy', F = null, natija = null, MOL = {}, moliyaOy = null, bT = '', bF = '';
 const $ = id => document.getElementById(id);
 const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const pul = n => n == null || n === '' || isNaN(n) ? '' : String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, ' ') + " so'm";
@@ -197,12 +207,12 @@ function chiz() {
   $('sub').textContent = [r.admin ? 'Rahbar' : '', r.xodim ? r.xodim + (r.filial ? ' · ' + r.filial : '') : '', r.usta ? '👷 ' + r.usta : ''].filter(Boolean).join(' · ') || r.ism;
   clearInterval(Ttimer);
   const M = menyu();
-  if (!ekran || (ekran !== 'test' && !M.some(m => m[0] === ekran))) ekran = M[0][0];
+  if (!ekran || (['test', 'reyting', 'qollanma'].indexOf(ekran) < 0 && !M.some(m => m[0] === ekran))) ekran = M[0][0];
   $('nav').hidden = false;
   $('nav').innerHTML = M.map(m => '<button data-e="' + m[0] + '" class="' + (m[0] === ekran ? 'on' : '') + '"><span class="ic">' + m[1] + '</span>' + m[2] + '</button>').join('');
   [...$('nav').children].forEach(b => b.onclick = () => { ekran = b.dataset.e; natija = null; hap('sel'); chiz(); window.scrollTo(0, 0); });
   $('ref').hidden = ekran === 'yangi';
-  ({ stat: ekStat, ishlar: ekIshlar, ustalar: ekUstalar, yangi: ekYangi, mening: ekMening, usta: ekUsta, bajarilgan: ekBajarilgan, moliya: ekMoliya, bosh: ekBosh, eslatma: ekEslatma, natija: ekNatija, test: ekTest })[ekran]();
+  ({ stat: ekStat, ishlar: ekIshlar, ustalar: ekUstalar, yangi: ekYangi, mening: ekMening, usta: ekUsta, bajarilgan: ekBajarilgan, moliya: ekMoliya, bosh: ekBosh, eslatma: ekEslatma, natija: ekNatija, test: ekTest, reyting: ekReyting, qollanma: ekQollanma })[ekran]();
 }
 
 /* ---------- Umumiy: ish kartasi va ro'yxat ---------- */
@@ -986,9 +996,81 @@ function testBanner() {
   const el = $('top'); if (!el || !T || !D || !D.ruxsat) return;
   const c = T.chempion, b = T.bugun;
   el.hidden = false;
-  el.innerHTML = '<div class="champ"><div><span class="small">🏆 Hafta chempioni · ' + esc(T.chempionHafta) + '</span><b>' + (c ? esc(c.ism) + ' · ' + c.ball + ' ball' : 'Hali aniqlanmagan') + '</b></div>' +
-    '<button id="tbtn">' + (b.mumkin && T.ochiq && !b.tugadi ? '🧠 Bugungi test' : '📊 Test reytingi') + '</button></div>';
+  const ou = T.oyUstasi, bh = x => x && x.baho ? ' · ⭐ ' + x.baho.o : '';
+  el.innerHTML = '<div class="champs' + (ou ? '' : ' bir') + '"><button class="chc" id="tbtn"><span class="small">🏆 Hafta chempioni · ' + esc(T.chempionHafta) + '</span><b>' + (c ? esc(c.ism) + ' · ' + c.ball + ' ball' : 'Hali aniqlanmagan') + '</b>' +
+    '<i>' + (b.mumkin && T.ochiq && !b.tugadi ? '🧠 Bugungi test ›' : '📊 Test reytingi ›') + '</i></button>' +
+    (ou ? '<button class="chc o" id="rbtn"><span class="small">🏅 Oy ustasi · ' + esc(ou.oy) + '</span><b>' + esc(ou.u) + '</b><i>' + ou.ish + ' ta ish' + bh(ou) + ' ›</i></button>' : '') + '</div>';
+  if ($('rbtn')) $('rbtn').onclick = () => { ekran = 'reyting'; hap('sel'); chiz(); window.scrollTo(0, 0); };
   $('tbtn').onclick = () => { ekran = 'test'; hap('sel'); chiz(); window.scrollTo(0, 0); };
+}
+/* 🏅 Ustalar reytingi — oy bo'yicha, hamma ko'radi (summasiz) */
+let reytOy = null; const RYT = {}, RYY = {};
+function rytYangi(oy) {
+  RYY[oy] = 1;
+  api({ api: 'reyting', oy }).then(r => {
+    if (!r || !r.ok) return;
+    const o = JSON.stringify(RYT[oy] || null); RYT[oy] = r; lsQoy('R' + oy, r);
+    if (o !== JSON.stringify(r) && ekran === 'reyting' && reytOy === oy && !$('ov')) ekReyting();
+  }).catch(() => {});
+}
+async function ekReyting() {
+  [...$('nav').children].forEach(x => x.classList.remove('on'));
+  if (!reytOy) reytOy = D.meta.bugun.slice(0, 7);
+  const oy = reytOy, bu = D.meta.bugun.slice(0, 7);
+  let h = '<h2 style="margin:14px 4px 8px">🏅 Ustalar reytingi</h2><div class="mon"><button id="r_p">‹</button><b>' + oyNomi(oy) + '</b><button id="r_n"' + (oy >= bu ? ' disabled style="opacity:.3"' : '') + '>›</button></div>';
+  const ulash = () => { $('r_p').onclick = () => { reytOy = oySur(oy, -1); chiz(); }; $('r_n').onclick = () => { if (oy < bu) { reytOy = oySur(oy, 1); chiz(); } }; };
+  if (!RYT[oy]) {
+    const c = lsOl('R' + oy);
+    if (c && c.ok) { RYT[oy] = c; rytYangi(oy); }
+    else {
+      $('main').innerHTML = h + '<div class="spin"></div>'; ulash();
+      try { const r = await api({ api: 'reyting', oy }); if (!r.ok) throw new Error(r.xato); RYT[oy] = r; RYY[oy] = 1; lsQoy('R' + oy, r); }
+      catch (e) { if (ekran === 'reyting') $('main').innerHTML = h + '<div class="err">⚠️ ' + esc(e.message) + '</div>'; ulash(); return; }
+      if (ekran !== 'reyting' || reytOy !== oy) return;
+    }
+  } else if (!RYY[oy]) rytYangi(oy);
+  const R = RYT[oy], L = R.royxat || [], med = ['🥇', '🥈', '🥉'], ou = R.oyUstasi;
+  if (ou && oy === bu) h += '<div class="card" style="background:linear-gradient(135deg,#E6F7F0,#C8ECDF)"><div class="row"><div><span class="small muted">🏅 Oy ustasi · ' + esc(ou.oy) + '</span><div class="name" style="margin-top:2px">' + esc(ou.u) + '</div></div>' +
+    '<div style="text-align:right"><b>' + ou.ish + ' ta ish</b>' + (ou.baho ? '<div class="small">⭐ ' + ou.baho.o + ' / 5</div>' : '') + '</div></div></div>';
+  h += L.length ? L.map(x => '<div class="ry' + (x.orin <= 3 ? ' top' : '') + (x.men ? ' men' : '') + '"><div class="o">' + (med[x.orin - 1] || x.orin) + '</div>' +
+      '<div class="n"><b>' + esc(x.u) + (x.men ? ' (siz)' : '') + '</b><span>' + (x.baho ? '⭐ ' + x.baho.o + ' / 5 · ' + x.baho.n + ' ta baho' : '⭐ hali baho yo\'q') + '</span></div>' +
+      '<div class="s"><b>' + x.ish + '</b><span>ta ish</span></div></div>').join('')
+    : bosh('📭', 'Bu oyda hali yopilgan ish yo\'q');
+  const men = L.find(x => x.men);
+  if (men && men.orin > 1 && oy === bu) h += '<div class="card"><div class="line"><span>🎯 1-o\'ringa chiqish uchun yana <b>' + (L[0].ish - men.ish + 1) + ' ta ish</b> kerak.</span></div></div>';
+  h += '<p class="muted small" style="margin:12px 4px">Tartib: oyda yopilgan ishlar soni; teng bo\'lsa — mijozlar bahosi (⭐ 5 dan). Oy yakunida 1-o\'rindagi usta keyingi oy davomida ilova tepasida «🏅 Oy ustasi» bo\'lib turadi.</p>';
+  $('main').innerHTML = h; ulash();
+}
+/* 📘 Qo'llanmalar — «Qo'llanmalar» varag'idan; test mavzulari bilan bog'langan */
+let QLN = null;
+async function qlnYukla() {
+  if (QLN) return QLN;
+  const c = lsOl('Q'); if (c) QLN = c;
+  try { const r = await api({ api: 'qollanma' }); if (r.ok) { QLN = r.royxat || []; lsQoy('Q', QLN); } } catch (e) {}
+  return QLN || [];
+}
+function qlnHtml(t) {
+  const e = x => esc(x).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>');
+  let h = '', ul = false;
+  String(t || '').split('\n').forEach(l => {
+    l = l.trim();
+    if (/^- /.test(l)) { if (!ul) { h += '<ul>'; ul = true; } h += '<li>' + e(l.slice(2)) + '</li>'; return; }
+    if (ul) { h += '</ul>'; ul = false; }
+    if (/^##\s*/.test(l)) h += '<h3>' + e(l.replace(/^##\s*/, '')) + '</h3>'; else if (l) h += '<p>' + e(l) + '</p>';
+  });
+  return '<div class="qm">' + h + (ul ? '</ul>' : '') + '</div>';
+}
+function qlnOch(q) { hap('sel'); oyna('📘 ' + q.s, '<span class="pill">' + esc(q.m) + '</span>' + qlnHtml(q.t)); }
+async function ekQollanma() {
+  [...$('nav').children].forEach(x => x.classList.remove('on'));
+  let h = '<h2 style="margin:14px 4px 8px">📘 Qo\'llanmalar</h2>';
+  if (!QLN) $('main').innerHTML = h + '<div class="spin"></div>';
+  const L = await qlnYukla(); if (ekran !== 'qollanma') return;
+  h += '<p class="muted small" style="margin:0 4px 10px">Qisqa yo\'riqnomalar — ishda va bilim testiga tayyorlanishda yordam beradi.</p>';
+  h += L.length ? L.map((q, i) => '<div class="card" data-q="' + i + '" style="cursor:pointer"><div class="row"><div><span class="small muted">' + esc(q.m) + '</span><div class="name" style="margin-top:2px">' + esc(q.s) + '</div></div><b style="color:var(--teal)">›</b></div></div>').join('')
+    : bosh('📭', 'Hozircha qo\'llanma yo\'q');
+  $('main').innerHTML = h;
+  document.querySelectorAll('[data-q]').forEach(x => x.onclick = () => qlnOch(L[+x.dataset.q]));
 }
 async function ekTest() {
   [...$('nav').children].forEach(x => x.classList.remove('on'));
@@ -1002,15 +1084,17 @@ async function ekTest() {
     (b.javob ? '<div class="line small muted"><span>' + b.javob + ' ta savolga javob berilgan (+' + b.ball + ' ball) — davom eting.</span></div>' : '') +
     '<button class="btn" id="tbosh">' + (b.javob ? '▶️ Davom etish' : '▶️ Testni boshlash') + '</button>';
   h += '</div>';
+  h += '<button class="btn ghost" id="tqln">📘 Qo\'llanmalar — testga tayyorlaning</button>';
   if (T.chempion) h += '<div class="card"><div class="row"><b>🏆 Hafta chempioni · ' + esc(T.chempionHafta) + '</b><span class="pill done">' + T.chempion.ball + ' ball</span></div><div class="line"><span>' + esc(T.chempion.ism) + ' · ' + T.chempion.togri + '/' + T.chempion.jami + ' to\'g\'ri</span></div></div>';
   h += '<h2>📊 ' + (T.juma ? 'Haftaning yakuniy natijasi' : 'Shu hafta reytingi') + ' · ' + esc(T.hafta) + '</h2><div class="card">' + (T.reyting.length ? T.reyting.map(x => '<div class="mrow"' + (x.men ? ' style="font-weight:800;color:var(--teal)"' : '') + '><span>' + (x.orin <= 3 ? med[x.orin - 1] : x.orin + '.') + ' ' + esc(x.ism) + (x.men ? ' (siz)' : '') + '</span><b>' + x.ball + '</b></div>').join('') : '<div class="muted">Bu hafta hali hech kim test topshirmagan — birinchi bo\'ling!</div>') +
     (T.men && T.men.orin > T.reyting.length ? '<div class="mrow" style="font-weight:800;color:var(--teal);border-top:1px solid var(--mist);margin-top:4px"><span>' + T.men.orin + '. Siz</span><b>' + T.men.ball + '</b></div>' : '') + '</div>';
   h += '<p class="muted small" style="margin:12px 4px">Ball: oson savol — 10, o\'rtacha — 20, qiyin — 30; tez javob (≈10 soniyagacha) +5. Test shanbadan payshanbagacha, har kuni 5 savol (haftasiga 30). Juma — dam olish: haftaning eng ko\'p ball to\'plagani e\'lon qilinadi va keyingi hafta davomida «🏆 Hafta chempioni» bo\'lib ilova tepasida turadi. Ballar har shanba yangilanadi.</p>';
   $('main').innerHTML = h;
   if ($('tbosh')) $('tbosh').onclick = () => { hap('sel'); testSavol(); };
+  if ($('tqln')) $('tqln').onclick = () => { ekran = 'qollanma'; hap('sel'); chiz(); window.scrollTo(0, 0); };
 }
 async function testSavol() {
-  clearInterval(Ttimer);
+  clearInterval(Ttimer); qlnYukla().catch(() => {});
   $('main').innerHTML = '<div class="spin"></div>';
   try { const r = await api({ api: 'testSavol' }); if (!r.ok) throw new Error(r.xato); if (ekran !== 'test') return; if (r.tugadi) { T = null; return ekTest(); } TQ = r; testChiz(); }
   catch (e) { $('main').innerHTML = '<div class="err">⚠️ ' + esc(e.message) + '</div>'; }
@@ -1034,8 +1118,10 @@ function testChiz() {
       if (j >= 0 && !r.togri && B[j]) B[j].classList.add('no');
       hap(r.togri ? 'success' : 'error');
       $('tnat').innerHTML = '<div class="card" style="margin-top:10px"><b>' + (r.togri ? '✅ To\'g\'ri! +' + r.ball + ' ball' : j < 0 || r.vaqtOtdi ? '⏰ Vaqt tugadi' : '❌ Noto\'g\'ri') + '</b>' +
-        (r.izoh ? '<div class="line small"><span>💡 ' + esc(r.izoh) + '</span></div>' : '') + '</div>' +
+        (r.izoh ? '<div class="line small"><span>💡 ' + esc(r.izoh) + '</span></div>' : '') +
+        (!r.togri && (QLN || []).some(x => x.m === q.mavzu) ? '<button class="act" id="tqm" style="margin-top:8px">📘 Qo\'llanma: ' + esc(q.mavzu) + '</button>' : '') + '</div>' +
         '<button class="btn" id="tkey">' + (r.tugadi ? '🏁 Natijani ko\'rish' : '➡️ Keyingi savol') + '</button>';
+      if ($('tqm')) $('tqm').onclick = () => qlnOch(QLN.find(x => x.m === q.mavzu));
       $('tkey').onclick = () => { hap('sel'); if (r.tugadi) { T = null; ekTest().then(testBanner); } else testSavol(); };
     } catch (e) { $('tnat').innerHTML = '<div class="err">⚠️ ' + esc(e.message) + '</div><button class="btn" id="tkey">🔄 Qayta urinish</button>'; $('tkey').onclick = () => testSavol(); }
   };
