@@ -126,9 +126,18 @@
   .tsec{text-align:center;font:800 30px Manrope,sans-serif;margin-top:6px}
   .tv{display:block;width:100%;text-align:left;border:0;background:var(--card);border-radius:12px;padding:13px 14px;margin:7px 0;font:600 15px Manrope,sans-serif;color:var(--text);box-shadow:0 0 0 1px var(--line) inset}
   .tv b{color:var(--teal);margin-right:6px} .tv.sel{box-shadow:0 0 0 2px var(--teal) inset} .tv.ok{background:#DDF3EA;color:#0B3B2C;box-shadow:0 0 0 2px var(--teal) inset} .tv.no{background:#FBE3E3;color:#5B1010;box-shadow:0 0 0 2px var(--red) inset} .tv[disabled]{opacity:1}
+  /* ⏳ Kutish: tugma ichi to'ladi + tepada ingichka chiziq (har bir server so'rovi) */
+  .btn.yuk,.act.yuk,.chip.yuk{position:relative;overflow:hidden;opacity:1!important}
+  .btn.yuk::after,.act.yuk::after,.chip.yuk::after{content:'';position:absolute;left:0;top:0;bottom:0;width:0;background:rgba(255,255,255,.32);animation:tol 6s cubic-bezier(.15,.75,.3,1) forwards;pointer-events:none}
+  .act.yuk::after,.chip.yuk::after{background:rgba(1,130,95,.22)}
+  @keyframes tol{0%{width:0}100%{width:94%}}
+  #yb{position:fixed;left:0;top:0;height:3px;width:0;background:#7EE2BE;z-index:9999;opacity:0;pointer-events:none;transition:opacity .35s}
+  #yb.on{opacity:1;animation:tol 5s cubic-bezier(.15,.75,.3,1) forwards}
+  #yb.tug{opacity:0;width:100%!important;animation:none;transition:width .25s,opacity .5s .2s}
 </style>
 </head>
 <body>
+<div id="yb"></div>
 <header><div class="t">Halowatt · Servis</div><div class="s" id="sub">Yuklanmoqda…</div></header>
 <div id="top" hidden></div>
 <main id="main"><div class="spin"></div></main>
@@ -153,10 +162,22 @@ const ort = a => a.length ? a.reduce((s, x) => s + x, 0) / a.length : null;
 const hap = t => { try { tg && tg.HapticFeedback[t === 'sel' ? 'selectionChanged' : 'notificationOccurred'](t === 'sel' ? undefined : t); } catch (e) {} };
 const xabar = m => tg && tg.showAlert ? tg.showAlert(m) : alert(m);
 
+let _yb = 0;
+const chiziq = d => { _yb = Math.max(0, _yb + d); const e = $('yb'); if (!e) return;
+  if (_yb > 0) { if (!e.classList.contains('on')) { e.classList.remove('tug'); void e.offsetWidth; e.classList.add('on'); } }
+  else { e.classList.remove('on'); e.classList.add('tug'); } };
 async function api(body) {
-  const r = await fetch(API, { method: 'POST', body: JSON.stringify(Object.assign({ initData: tg ? tg.initData : '' }, body)) });
-  return r.json();
+  chiziq(1);
+  try {
+    const r = await fetch(API, { method: 'POST', body: JSON.stringify(Object.assign({ initData: tg ? tg.initData : '' }, body)) });
+    return await r.json();
+  } finally { chiziq(-1); }
 }
+/* Tugma «…» yozuvi bilan o'chirilsa — ichi to'la boshlaydi; qayta yoqilsa — to'xtaydi (hamma joyda avtomatik) */
+new MutationObserver(M => M.forEach(m => { const b = m.target;
+  if (!b.classList || !b.matches('button')) return;
+  if (b.disabled && /…|\.\.\./.test(b.textContent)) b.classList.add('yuk'); else b.classList.remove('yuk');
+})).observe(document.documentElement, { subtree: true, attributes: true, attributeFilter: ['disabled'] });
 /* ⚡ Telefon xotirasi — oxirgi ma'lumot darhol ko'rinadi, yangisi orqada keladi */
 const LS = 'hw1:' + ((tg && tg.initDataUnsafe && tg.initDataUnsafe.user && tg.initDataUnsafe.user.id) || 0) + ':';
 function lsOl(k) { try { const v = localStorage.getItem(LS + k); return v ? JSON.parse(v) : null; } catch (e) { return null; } }
