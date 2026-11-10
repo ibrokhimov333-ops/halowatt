@@ -215,7 +215,7 @@ async function yukla(jim) {
 function menyu() {
   const r = D.rol;
   if (r.admin) return [['stat', '📊', 'Statistika'], ['ishlar', '📋', 'Ishlar'], ['ustalar', '👷', 'Ustalar'], ['moliya', '💰', 'Moliya'], ['eslatma', '👥', 'Mijozlar'], ['yangi', '➕', 'Yangi']];
-  if (r.xodim) return [['yangi', '➕', 'Yangi ish'], ['mening', '📋', 'Bergan ishlarim'], ['ustalar', '👷', 'Ustalar']].concat(r.usta ? [['usta', '🔧', 'Usta ishlarim'], ['bosh', '🆓', 'Bo\'sh ishlar'], ['bajarilgan', '📜', 'Tarix'], ['natija', '📈', 'Natijam']] : []);
+  if (r.xodim) return [['yangi', '➕', 'Yangi ish'], ['mening', '📋', 'Bergan ishlarim'], ['ustalar', '👷', 'Ustalar'], ['eslatma', '👥', 'Mijozlar']].concat(r.usta ? [['usta', '🔧', 'Usta ishlarim'], ['bosh', '🆓', 'Bo\'sh ishlar'], ['bajarilgan', '📜', 'Tarix'], ['natija', '📈', 'Natijam']] : []);
   return [['usta', '🔧', 'Ishlarim'], ['bosh', '🆓', 'Bo\'sh ishlar'], ['bajarilgan', '📜', 'Tarix'], ['natija', '📈', 'Natijam'], ['moliya', '💰', 'Balans']];
 }
 function chiz() {
@@ -446,7 +446,8 @@ let ES = null;
 let MJ = {}, mjQ = '', mjKun = 180, ARX = false;
 function ekEslatma() {
   const t = seg.mj || 'qongiroq';
-  const s = segChiz('mj', [['qongiroq', '📞 Qo\'ng\'iroq', ES ? ES.length : ''], ['qidir', '🔎 Qidirish', ''], ['doimiy', '⭐ Doimiy', MJ.doimiy ? MJ.doimiy.jami : ''], ['uzoq', '😴 Kelmagan', ''], ['arxiv', '🗂 Arxiv', '']]);
+  const s = !D.rol.admin ? segChiz('mj', [['qidir', '🔎 Qidirish', ''], ['arxiv', '🗂 Arxiv', '']])   // xodim: qidiruv + arxiv
+    : segChiz('mj', [['qongiroq', '📞 Qo\'ng\'iroq', ES ? ES.length : ''], ['qidir', '🔎 Qidirish', ''], ['doimiy', '⭐ Doimiy', MJ.doimiy ? MJ.doimiy.jami : ''], ['uzoq', '😴 Kelmagan', ''], ['arxiv', '🗂 Arxiv', '']]);
   if (seg.mj === 'qongiroq' || !seg.mj) return ekQongiroq(s);
   if (seg.mj === 'arxiv') return ekArxivStat(s);
   $('main').innerHTML = s + '<div id="mjb"></div>'; segUlash();
