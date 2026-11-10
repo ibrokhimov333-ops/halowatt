@@ -141,7 +141,7 @@
 <header><div class="t">Halowatt · Servis</div><div class="s" id="sub">Yuklanmoqda…</div></header>
 <div id="top" hidden></div>
 <main id="main"><div class="spin"></div></main>
-<button class="refresh" id="ref" title="Yangilash" hidden>⟳</button>
+<button class="refresh" id="ref" title="Yangilaş" hidden>⟳</button>
 <nav id="nav" hidden></nav>
 
 <script>
@@ -154,7 +154,9 @@ let YOP_H = (() => { try { return new URLSearchParams(location.search).get('yop'
 let D = null, ekran = (() => { try { return new URLSearchParams(location.search).get('test') === '1' ? 'test' : new URLSearchParams(location.search).get('reyting') === '1' ? 'reyting' : (new URLSearchParams(location.search).get('e') || null); } catch (e) { return null; } })(), seg = {}, qidir = '', davr = 'oy', F = null, natija = null, MOL = {}, moliyaOy = null, bT = '', bF = '';
 const $ = id => document.getElementById(id);
 const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const pul = n => n == null || n === '' || isNaN(n) ? '' : String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, ' ') + " so'm";
+/* 🔤 Yangi alifbo (2026) — server/jadvaldan keladigan yorliqlarni faqat KO'RSATISHDA o'giradi (qiymat o'zgarmaydi) */
+const ya = s => String(s == null ? '' : s).replace(/([OoGg])['’‘`ʻ]/g, (m, h) => ({ O: 'Ö', o: 'ö', G: 'Ğ', g: 'ğ' })[h]).replace(/SH|Sh|sh|CH|Ch|ch/g, m => ({ SH: 'Ş', Sh: 'Ş', sh: 'ş', CH: 'Ç', Ch: 'Ç', ch: 'ç' })[m]).replace(/([A-Za-zÖöĞğŞşÇç])['’](?=[a-zöğşç])/g, '$1ʼ');
+const pul = n => n == null || n === '' || isNaN(n) ? '' : String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, ' ') + " söm";
 const mln = n => n >= 1e6 ? (n / 1e6).toFixed(1).replace('.0', '') + ' mln' : pul(n);
 const dav = m => { if (m == null || isNaN(m)) return '—'; m = Math.round(m); const k = Math.floor(m / 1440), s = Math.floor(m % 1440 / 60), d = m % 60;
   return k ? k + ' kun' + (s ? ' ' + s + ' soat' : '') : s ? s + ' soat' + (d ? ' ' + d + ' daq' : '') : (d || 1) + ' daq'; };
@@ -203,11 +205,11 @@ async function yukla(jim) {
     if (yi && !yi.yopildi && !yi.otkaz) ekran = 'usta';
     chiz();
     if (!T) testYukla().catch(() => {});
-    if (yopH) { if (yi && !yi.yopildi && !yi.otkaz) tugat(yopH); else if (yi && yi.yopildi) xabar('✅ Bu ish allaqachon yopilgan.'); }
+    if (yopH) { if (yi && !yi.yopildi && !yi.otkaz) tugat(yopH); else if (yi && yi.yopildi) xabar('✅ Bu iş allaqaçon yopilgan.'); }
   } catch (e) {
     if (eski) { $('sub').textContent = $('sub').textContent.replace(' · ⟳', ' · ⚠️ oflayn'); return; }
     $('main').innerHTML = '<div class="err">⚠️ ' + esc(e.message) + '</div>';
-    $('sub').textContent = 'Ulanib bo\'lmadi';
+    $('sub').textContent = 'Ulanib bölmadi';
   }
 }
 
@@ -215,14 +217,14 @@ async function yukla(jim) {
 function menyu() {
   const r = D.rol;
   if (r.admin) return [['stat', '📊', 'Statistika'], ['ishlar', '📋', 'Ishlar'], ['ustalar', '👷', 'Ustalar'], ['moliya', '💰', 'Moliya'], ['eslatma', '👥', 'Mijozlar'], ['yangi', '➕', 'Yangi']];
-  if (r.xodim) return [['yangi', '➕', 'Yangi ish'], ['mening', '📋', 'Bergan ishlarim'], ['ustalar', '👷', 'Ustalar'], ['eslatma', '👥', 'Mijozlar']].concat(r.usta ? [['usta', '🔧', 'Usta ishlarim'], ['bosh', '🆓', 'Bo\'sh ishlar'], ['bajarilgan', '📜', 'Tarix'], ['natija', '📈', 'Natijam']] : []);
-  return [['usta', '🔧', 'Ishlarim'], ['bosh', '🆓', 'Bo\'sh ishlar'], ['bajarilgan', '📜', 'Tarix'], ['natija', '📈', 'Natijam'], ['moliya', '💰', 'Balans']];
+  if (r.xodim) return [['yangi', '➕', 'Yangi iş'], ['mening', '📋', 'Bergan işlarim'], ['ustalar', '👷', 'Ustalar'], ['eslatma', '👥', 'Mijozlar']].concat(r.usta ? [['usta', '🔧', 'Usta işlarim'], ['bosh', '🆓', 'Böş işlar'], ['bajarilgan', '📜', 'Tarix'], ['natija', '📈', 'Natijam']] : []);
+  return [['usta', '🔧', 'Ishlarim'], ['bosh', '🆓', 'Böş işlar'], ['bajarilgan', '📜', 'Tarix'], ['natija', '📈', 'Natijam'], ['moliya', '💰', 'Balans']];
 }
 function chiz() {
   const r = D.rol;
   if (!D.ruxsat) {
     $('sub').textContent = r.ism; $('nav').hidden = true; $('ref').hidden = true;
-    $('main').innerHTML = '<div class="empty"><div class="e">🔒</div><b>Ruxsat yo\'q</b><br><br>Botga /start yozing — so\'rovingiz adminga boradi. Ruxsat berilgach shu yerdan foydalanasiz.</div>';
+    $('main').innerHTML = '<div class="empty"><div class="e">🔒</div><b>Ruxsat yöq</b><br><br>Botga /start yozing — sörovingiz adminga boradi. Ruxsat berilgaç şu yerdan foydalanasiz.</div>';
     return;
   }
   $('sub').textContent = [r.admin ? 'Rahbar' : '', r.xodim ? r.xodim + (r.filial ? ' · ' + r.filial : '') : '', r.usta ? '👷 ' + r.usta : ''].filter(Boolean).join(' · ') || r.ism;
@@ -245,10 +247,10 @@ function holatPill(i) {
 }
 function karta(i, tugma) {
   const jami = i.ishlar.reduce((s, x) => s + (x.summa || 0), 0);
-  const map = i.manzil ? 'https://yandex.uz/maps/?text=' + encodeURIComponent(i.manzil + ", Qo'qon") : '';
+  const map = i.manzil ? 'https://yandex.uz/maps/?text=' + encodeURIComponent(i.manzil + ", Qöqon") : '';
   const fil = String(i.filial || '').replace(/^Qo.qon\s*/i, '');
   const teglar = '<div class="tags"><span class="tag">🏢 ' + esc(fil || 'Filial —') + '</span>' +
-    (i.usta ? '<span class="tag">👷 ' + esc(i.usta) + '</span>' : (i.otkaz ? '' : '<span class="tag yoq">👷 Usta yo\'q</span>')) + '</div>';
+    (i.usta ? '<span class="tag">👷 ' + esc(i.usta) + '</span>' : (i.otkaz ? '' : '<span class="tag yoq">👷 Usta yöq</span>')) + '</div>';
   return '<div class="card"><div class="row"><div><div class="name">' + esc(i.mijoz || '—') + '</div>' + holatPill(i) + teglar + '</div>' +
     '<div class="time">' + esc(i.sana) + '<br>' + esc(i.vaqt) + '</div></div>' +
     '<div class="jobs">' + i.ishlar.map(x => '<div class="job"><span><b>' + esc(x.turi) + '</b> × ' + x.soni + '</span><span>' + pul(x.summa) + '</span></div>').join('') +
@@ -259,27 +261,27 @@ function karta(i, tugma) {
     (i.kech ? '<div class="line" style="color:var(--orange)"><span class="i">⏸</span><span><b>' + esc(kechMatn(i.kech)) + '</b>' + (i.kech.sabab ? ' · ' + esc(i.kech.sabab) : '') + '</span></div>' : '') +
     '<div class="line muted"><span class="i">🏢</span><span>' + esc(i.filial || '—') + (i.shaxs ? ' · ' + esc(i.shaxs) : '') + '</span></div>' +
     (i.otkaz ? '<div class="line" style="color:var(--red)"><span class="i">❌</span><span>' + (!i.sabab || /ko.rsatilmagan/i.test(i.sabab) ? '<b>Otkaz sababi belgilanmagan</b>' : 'Otkaz sababi: <b>' + esc(i.sabab) + '</b>') + '</span></div>' : '') +
-    (i.yopildi && i.kutishMin != null ? '<div class="line muted small"><span class="i">⏱</span><span>Ustaga berilguncha ' + dav(i.kutishMin) + ' · usta ' + dav(i.ustaMin) + '</span></div>' : '') +
+    (i.yopildi && i.kutishMin != null ? '<div class="line muted small"><span class="i">⏱</span><span>Ustaga berilgunça ' + dav(i.kutishMin) + ' · usta ' + dav(i.ustaMin) + '</span></div>' : '') +
     (i.yopildi && !i.otkaz && i.tolov ? '<div class="line small" style="color:' + (i.tolov.holat === 'Tasdiqlandi' ? 'var(--teal)' : 'var(--orange)') + '"><span class="i">💵</span><span>' +
-      (i.tolov.holat === 'Tasdiqlandi' ? 'To\'lov tasdiqlangan' : 'To\'lov tasdiq kutmoqda') + ': <b>' + pul(i.tolov.summa) + '</b> · ' + esc(i.tolov.usul) + '</span></div>' : '') +
+      (i.tolov.holat === 'Tasdiqlandi' ? 'Tölov tasdiqlangan' : 'Tölov tasdiq kutmoqda') + ': <b>' + pul(i.tolov.summa) + '</b> · ' + esc(i.tolov.usul) + '</span></div>' : '') +
     (i.yopildi && !i.otkaz && i.baho ? '<div class="line small" style="color:' + (i.baho.past ? 'var(--red)' : 'var(--teal)') + '"><span class="i">⭐</span><span>' + esc(bahoBelgi(i.baho)) + '</span></div>' : '') +
-    (tugma && i.usta && !i.yopildi && !i.otkaz ? '<button class="btn" data-yop="' + esc(i.h) + '">✅ Ishni tugatdim</button>' : '') + amallar(i) + '</div>';
+    (tugma && i.usta && !i.yopildi && !i.otkaz ? '<button class="btn" data-yop="' + esc(i.h) + '">✅ Işni tugatdim</button>' : '') + amallar(i) + '</div>';
 }
 /* Ish kartasidagi amallar — huquqqa qarab */
 function amallar(i) {
   const r = D.rol, ochiq = !i.yopildi && !i.otkaz, b = [];
-  if (ochiq && (r.admin || (r.xodim && i.shaxs === r.xodim))) b.push(['usta', i.usta ? '🔁 Ustani almashtirish' : '👷 Usta biriktirish', '']);
-  if (ochiq && (r.admin || (r.xodim && i.shaxs === r.xodim) || (r.usta && i.usta && i.usta === r.usta))) b.push(['kech', '⏸ Kechiktirish', '']);
+  if (ochiq && (r.admin || (r.xodim && i.shaxs === r.xodim))) b.push(['usta', i.usta ? '🔁 Ustani almaştiriş' : '👷 Usta biriktiriş', '']);
+  if (ochiq && (r.admin || (r.xodim && i.shaxs === r.xodim) || (r.usta && i.usta && i.usta === r.usta))) b.push(['kech', '⏸ Keçiktiriş', '']);
   if (ochiq && i.kech && (r.admin || (r.xodim && i.shaxs === r.xodim) || (r.usta && (i.kech.usta === r.usta || i.usta === r.usta)))) b.push(['kbekor', '↩️ Bugun bajaramiz', '']);
-  if (i.kechN) b.push(['ktarix', '⏸ ' + i.kechN + ' marta ko\'chirilgan', '']);
-  if (ochiq && r.admin) { b.push(['tahrir', '✏️ Tahrirlash', '']); b.push(['otkaz', '❌ Otkaz', 'red']); }
-  if (i.otkaz && r.admin) b.push(['sabab', !i.sabab || /ko.rsatilmagan/i.test(i.sabab) ? '📝 Otkaz sababini belgilash' : '📝 Sababni o\'zgartirish', !i.sabab || /ko.rsatilmagan/i.test(i.sabab) ? 'red' : '']);
-  if (r.admin && ochiq && !i.usta && i.sorovlar && i.sorovlar.length) i.sorovlar.forEach(x => { b.push(['olb:' + x.id, '🙋 ' + x.usta + 'ga berish', '']); b.push(['olr:' + x.id, '✕ ' + x.usta + ' rad', 'red']); });
+  if (i.kechN) b.push(['ktarix', '⏸ ' + i.kechN + ' marta köçirilgan', '']);
+  if (ochiq && r.admin) { b.push(['tahrir', '✏️ Tahrirlaş', '']); b.push(['otkaz', '❌ Otkaz', 'red']); }
+  if (i.otkaz && r.admin) b.push(['sabab', !i.sabab || /ko.rsatilmagan/i.test(i.sabab) ? '📝 Otkaz sababini belgilaş' : '📝 Sababni özgartiriş', !i.sabab || /ko.rsatilmagan/i.test(i.sabab) ? 'red' : '']);
+  if (r.admin && ochiq && !i.usta && i.sorovlar && i.sorovlar.length) i.sorovlar.forEach(x => { b.push(['olb:' + x.id, '🙋 ' + x.usta + 'ga beriş', '']); b.push(['olr:' + x.id, '✕ ' + x.usta + ' rad', 'red']); });
   if (i.rasm && r.admin) b.push(['rasm', '📸 Rasmlar · ' + i.rasm, '']);
-  if (i.yopildi && !i.otkaz && !i.tolov && r.usta && i.usta === r.usta) b.push(['tolov', '💵 To\'lovni kiritish', 'red']);
+  if (i.yopildi && !i.otkaz && !i.tolov && r.usta && i.usta === r.usta) b.push(['tolov', '💵 Tölovni kiritiş', 'red']);
   if (i.yopildi && !i.otkaz && !i.baho && r.usta && i.usta === r.usta) b.push(['baho', '⭐ Mijoz bahosi', '']);
   if (i.tarixN && ochiq && r.usta && i.usta === r.usta) b.push(['utarix', '📞 Mijoz tarixi · ' + i.tarixN, '']);
-  if (r.admin && (i.tel || i.mijoz)) b.push(['mkarta', '👤 Mijoz kartochkasi', '']);
+  if (r.admin && (i.tel || i.mijoz)) b.push(['mkarta', '👤 Mijoz kartoçkasi', '']);
   return b.length ? '<div class="acts">' + b.map(x => '<button class="act ' + x[2] + '" data-act="' + x[0] + '" data-h="' + esc(i.h) + '">' + x[1] + '</button>').join('') + '</div>' : '';
 }
 const ishlarHammasi = () => [].concat(D.barcha || [], D.meniki || [], D.ustaIshlari || []);
@@ -306,13 +308,13 @@ function amalBos(act, h) {
   if (/^ol[br]:/.test(act)) {
     const ok = act[2] === 'b', id = act.slice(4), u = (i.sorovlar.find(x => x.id === id) || {}).usta || '';
     const go = () => amal({ api: 'olamanHal', id, ok }, null, '');
-    return tg && tg.showConfirm ? tg.showConfirm(ok ? 'Ish ' + u + 'ga berilsinmi? Ustaga to\'liq ma\'lumot boradi.' : u + ' so\'rovi rad etilsinmi?', y => y && go()) : go();
+    return tg && tg.showConfirm ? tg.showConfirm(ok ? 'Iş ' + u + 'ga berilsinmi? Ustaga töliq maʼlumot boradi.' : u + ' sörovi rad etilsinmi?', y => y && go()) : go();
   }
   if (act === 'usta') {
     const band = {}; (D.ustalar || []).forEach(u => band[u.nom] = u);
-    oyna(i.usta ? 'Ustani almashtirish' : 'Usta biriktirish', '<p class="muted small" style="margin:0 2px 8px">' + esc(i.mijoz) + ' · ' + esc(i.ishlar.map(x => x.turi).join(', ')) + '</p>' +
+    oyna(i.usta ? 'Ustani almaştiriş' : 'Usta biriktiriş', '<p class="muted small" style="margin:0 2px 8px">' + esc(i.mijoz) + ' · ' + esc(i.ishlar.map(x => x.turi).join(', ')) + '</p>' +
       D.meta.ustalar.map(u => { const b = band[u] && (band[u].band || band[u].qarz != null) && u !== i.usta;
-        return '<button class="uitem' + (u === i.usta ? ' cur' : '') + '" data-u="' + esc(u) + '"' + (b || u === i.usta ? ' disabled' : '') + '><span>' + esc(u) + '</span><span class="st ' + (u === i.usta ? 'free">✓ hozirgi' : b ? (band[u].qarz != null ? 'busy">💸 qarzdor' : 'busy">🔒 band') : 'free">🟢 bo\'sh') + '</span></button>'; }).join(''));
+        return '<button class="uitem' + (u === i.usta ? ' cur' : '') + '" data-u="' + esc(u) + '"' + (b || u === i.usta ? ' disabled' : '') + '><span>' + esc(u) + '</span><span class="st ' + (u === i.usta ? 'free">✓ hozirgi' : b ? (band[u].qarz != null ? 'busy">💸 qarzdor' : 'busy">🔒 band') : 'free">🟢 böş') + '</span></button>'; }).join(''));
     document.querySelectorAll('[data-u]').forEach(b => b.onclick = () => {
       const u = b.dataset.u;
       const go = () => amal({ api: 'usta', h, usta: u }, b, 'Biriktirilmoqda…');
@@ -324,7 +326,7 @@ function amalBos(act, h) {
       i.ishlar.map((x, k) => '<label class="f">💰 ' + esc(x.turi) + ' × ' + x.soni + '</label><input class="in" inputmode="numeric" data-ts="' + k + '" value="' + (x.summa == null ? '' : String(x.summa).replace(/\B(?=(\d{3})+(?!\d))/g, ' ')) + '" placeholder="Summa, so\'m">').join('') +
       '<label class="f">📍 Manzil</label><input class="in" id="t_manzil" value="' + esc(i.manzil) + '">' +
       '<label class="f">📝 Izoh</label><textarea class="in" id="t_izoh">' + esc(i.izoh) + '</textarea>' +
-      '<button class="btn" id="t_saq">💾 Saqlash</button>');
+      '<button class="btn" id="t_saq">💾 Saqlaş</button>');
     document.querySelectorAll('[data-ts]').forEach(e => e.oninput = () => { const r = e.value.replace(/\D/g, ''); e.value = r ? r.replace(/\B(?=(\d{3})+(?!\d))/g, ' ') : ''; });
     $('t_saq').onclick = () => amal({ api: 'tahrir', h, d: { manzil: $('t_manzil').value, izoh: $('t_izoh').value,
       summalar: [...document.querySelectorAll('[data-ts]')].map(e => e.value.replace(/\D/g, '')) } }, $('t_saq'));
@@ -332,27 +334,27 @@ function amalBos(act, h) {
   if (act === 'otkaz') {
     let tanlov = '';
     const S = (D.meta.sabablar && D.meta.sabablar.length) ? D.meta.sabablar : ['Mijoz rad etdi', 'Narx kelishilmadi', 'Mijoz javob bermadi', 'Boshqa'];
-    oyna('Otkaz qilish', '<p class="muted small" style="margin:0 2px 8px">' + esc(i.mijoz) + ' · ' + esc(i.ishlar.map(x => x.turi).join(', ')) + '</p>' +
-      '<label class="f">Sabab</label><div class="chips">' + S.map(x => '<button class="chip" data-sb="' + esc(x) + '">' + esc(x) + '</button>').join('') + '</div>' +
-      '<label class="f">Yoki o\'zingiz yozing</label><input class="in" id="o_sabab" placeholder="Sabab…">' +
-      '<button class="btn" id="o_ok" style="background:var(--red)">❌ Otkaz qilish</button>');
+    oyna('Otkaz qiliş', '<p class="muted small" style="margin:0 2px 8px">' + esc(i.mijoz) + ' · ' + esc(i.ishlar.map(x => x.turi).join(', ')) + '</p>' +
+      '<label class="f">Sabab</label><div class="chips">' + S.map(x => '<button class="chip" data-sb="' + esc(x) + '">' + esc(ya(x)) + '</button>').join('') + '</div>' +
+      '<label class="f">Yoki özingiz yozing</label><input class="in" id="o_sabab" placeholder="Sabab…">' +
+      '<button class="btn" id="o_ok" style="background:var(--red)">❌ Otkaz qiliş</button>');
     document.querySelectorAll('[data-sb]').forEach(b => b.onclick = () => { tanlov = b.dataset.sb; document.querySelectorAll('[data-sb]').forEach(x => x.classList.toggle('on', x === b)); $('o_sabab').value = ''; hap('sel'); });
     $('o_ok').onclick = () => { const s = $('o_sabab').value.trim() || tanlov; if (!s) return xabar('Sababni tanlang yoki yozing.');
       const go = () => amal({ api: 'otkaz', h, sabab: s }, $('o_ok'), 'Bajarilmoqda…');
-      tg && tg.showConfirm ? tg.showConfirm('Ish otkaz qilinsinmi? Guruhga xabar ketadi.', y => y && go()) : go(); };
+      tg && tg.showConfirm ? tg.showConfirm('Iş otkaz qilinsinmi? Guruhga xabar ketadi.', y => y && go()) : go(); };
   }
   if (act === 'sabab') {
     let tanlov = i.sabab && !/ko.rsatilmagan/i.test(i.sabab) ? i.sabab : '';
     const S = (D.meta.sabablar && D.meta.sabablar.length) ? D.meta.sabablar : ['Mijoz fikridan qaytdi', 'Narx to\'g\'ri kelmadi', 'Mijoz javob bermadi', 'Usta bormadi', 'Boshqa'];
     oyna('Otkaz sababi', '<p class="muted small" style="margin:0 2px 8px">' + esc(i.mijoz) + ' · ' + esc(i.ishlar.map(x => x.turi).join(', ')) + '</p>' +
-      '<div class="chips">' + S.map(x => '<button class="chip' + (x === tanlov ? ' on' : '') + '" data-sb="' + esc(x) + '">' + esc(x) + '</button>').join('') + '</div>' +
-      '<label class="f">Yoki o\'zingiz yozing</label><input class="in" id="s_sabab" placeholder="Sabab…" value="' + (tanlov && !S.includes(tanlov) ? esc(tanlov) : '') + '">' +
-      '<button class="btn" id="s_ok">💾 Saqlash</button>');
+      '<div class="chips">' + S.map(x => '<button class="chip' + (x === tanlov ? ' on' : '') + '" data-sb="' + esc(x) + '">' + esc(ya(x)) + '</button>').join('') + '</div>' +
+      '<label class="f">Yoki özingiz yozing</label><input class="in" id="s_sabab" placeholder="Sabab…" value="' + (tanlov && !S.includes(tanlov) ? esc(tanlov) : '') + '">' +
+      '<button class="btn" id="s_ok">💾 Saqlaş</button>');
     document.querySelectorAll('[data-sb]').forEach(b => b.onclick = () => { tanlov = b.dataset.sb; document.querySelectorAll('[data-sb]').forEach(x => x.classList.toggle('on', x === b)); $('s_sabab').value = ''; hap('sel'); });
     $('s_ok').onclick = () => { const s = $('s_sabab').value.trim() || tanlov; if (!s) return xabar('Sababni tanlang yoki yozing.'); amal({ api: 'sabab', h, sabab: s }, $('s_ok')); };
   }
   if (act === 'tolov') {
-    oyna('💵 Mijozdan olingan to\'lov', '<p class="muted small" style="margin:0 2px 8px">' + esc(i.mijoz) + '</p>' + tolovMaydon(i) + '<button class="btn" id="tl_ok">💾 Yuborish</button>');
+    oyna('💵 Mijozdan olingan tölov', '<p class="muted small" style="margin:0 2px 8px">' + esc(i.mijoz) + '</p>' + tolovMaydon(i) + '<button class="btn" id="tl_ok">💾 Yuboriş</button>');
     tolovUlash();
     $('tl_ok').onclick = () => { const t = tolovOl(); if (!t) return; amal(Object.assign({ api: 'tolov', h }, t), $('tl_ok'), 'Yuborilmoqda…'); };
   }
@@ -360,8 +362,8 @@ function amalBos(act, h) {
   if (act === 'baho') bahoSorov(h);
   if (act === 'kech') kechiktir(h);
   if (act === 'kbekor') { const go = () => amal({ api: 'kechBekor', h }, null, '');
-    return tg && tg.showConfirm ? tg.showConfirm('Kechiktirish bekor qilinsinmi? Ish bugun bajariladi' + (i.kech && i.kech.usta && !i.usta ? ' va ' + i.kech.usta + 'ga qaytariladi' : '') + '.', y => y && go()) : go(); }
-  if (act === 'ktarix') oyna('⏸ Ko\'chirishlar tarixi', '<p class="muted small" style="margin:0 2px 8px">' + esc(i.mijoz) + '</p>' + (i.kechT || []).map((k, n) =>
+    return tg && tg.showConfirm ? tg.showConfirm('Keçiktiriş bekor qilinsinmi? Iş bugun bajariladi' + (i.kech && i.kech.usta && !i.usta ? ' va ' + i.kech.usta + 'ga qaytariladi' : '') + '.', y => y && go()) : go(); }
+  if (act === 'ktarix') oyna('⏸ Köçirişlar tarixi', '<p class="muted small" style="margin:0 2px 8px">' + esc(i.mijoz) + '</p>' + (i.kechT || []).map((k, n) =>
     '<div class="card" style="padding:12px"><div class="row"><b>' + (n + 1) + '. → ' + esc(k.sana) + (k.soat ? ' ' + esc(k.soat) : '') + '</b><span class="pill ' + (k.holat === 'Rad' ? 'otk' : k.holat === 'So\'rov' ? 'wait' : 'done') + '">' + esc(kechHolat(k.holat)) + '</span></div>' +
     '<div class="line small"><span class="i">📝</span><span>' + esc(k.sabab || '—') + '</span></div>' +
     '<div class="line small muted"><span class="i">🙋</span><span>' + esc(k.kim) + ' · ' + esc(k.vaqt) + (k.usta ? ' · 👷 ' + esc(k.usta) : '') + '</span></div></div>').join(''));
@@ -373,20 +375,20 @@ function amalBos(act, h) {
         const r = await api({ api: 'tarix', h }); if (!r.ok) throw new Error(r.xato);
         const el = $('ut'); if (!el) return;
         el.innerHTML = r.ishlar.length ? r.ishlar.map(x => '<div class="card"><div class="row"><div><div class="name">' + esc(x.ishlar.map(y => y.turi + ' × ' + y.soni).join(', ')) + '</div>' +
-          (x.otkaz ? '<span class="pill otk">❌ Otkaz' + (x.sabab ? ' · ' + esc(x.sabab) : '') + '</span>' : x.yopildi ? '<span class="pill done">✅ ' + esc(x.yopVaqt) + '</span>' : '<span class="pill work">🔧 Ochiq</span>') +
+          (x.otkaz ? '<span class="pill otk">❌ Otkaz' + (x.sabab ? ' · ' + esc(x.sabab) : '') + '</span>' : x.yopildi ? '<span class="pill done">✅ ' + esc(x.yopVaqt) + '</span>' : '<span class="pill work">🔧 Oçiq</span>') +
           '</div><div class="time">' + esc(x.sana) + '<br>' + esc(x.vaqt) + '</div></div>' +
           '<div class="line muted"><span class="i">👷</span><span>' + esc(x.usta || '—') + '</span></div>' +
           (x.manzil ? '<div class="line"><span class="i">📍</span><span>' + esc(x.manzil) + '</span></div>' : '') +
           (x.izoh ? '<div class="line"><span class="i">📝</span><span>' + esc(x.izoh) + '</span></div>' : '') +
           (x.rasm ? '<div class="acts"><button class="act" data-rk="' + esc(x.h) + '" data-n="' + x.rasm + '">📸 Rasmlar · ' + x.rasm + '</button></div>' : '') + '</div>').join('')
-          : bosh('📭', 'Bu mijozning oldingi ishlari yo\'q');
+          : bosh('📭', 'Bu mijozning oldingi işlari yöq');
         document.querySelectorAll('[data-rk]').forEach(b => b.onclick = () => rasmKor(b.dataset.rk, +b.dataset.n, esc(i.mijoz), () => amalBos('utarix', h)));
       } catch (e) { const el = $('ut'); if (el) el.innerHTML = '<div class="err">⚠️ ' + esc(e.message) + '</div>'; }
     })();
   }
   if (act === 'tarix') {
     const L = D.barcha.filter(x => x.tel === i.tel && x.h !== i.h);
-    oyna('📞 ' + i.tel + ' — oldingi ishlar', L.map(x => karta(x, false).replace(/<div class="acts">[\s\S]*?<\/div>(?=<\/div>$)/, '')).join(''));
+    oyna('📞 ' + i.tel + ' — oldingi işlar', L.map(x => karta(x, false).replace(/<div class="acts">[\s\S]*?<\/div>(?=<\/div>$)/, '')).join(''));
   }
 }
 /* 📈 Usta: o'z natijasi */
@@ -400,27 +402,27 @@ async function ekNatija() {
     const medal = n.orin === 1 ? '🥇' : n.orin === 2 ? '🥈' : n.orin === 3 ? '🥉' : '🏆';
     let h = '<h2 style="margin:14px 4px 8px">📈 ' + esc(n.oy) + ' — ' + esc(n.usta) + '</h2>';
     h += '<div class="kpis">' +
-      '<div class="kpi"><b>' + (n.orin ? medal + ' ' + n.orin : '—') + '</b><span>reytingdagi o\'rin' + (n.jami ? ' (' + n.jami + ' usta)' : '') + '</span></div>' +
-      '<div class="kpi"><b style="color:var(--teal)">' + m.ish + '</b><span>bu oy ishlar' + (n.oldin.ish || farq ? ' · o\'tgan oy ' + n.oldin.ish + (farq > 0 ? ' ↑' : farq < 0 ? ' ↓' : '') : '') + '</span></div>' +
-      '<div class="kpi"><b>' + (m.baho ? '⭐ ' + m.baho.o : '—') + '</b><span>' + (m.baho ? 'mijoz bahosi / 5 · ' + m.baho.n + ' ta' : 'hali baho yo\'q') + '</span></div>' +
-      '<div class="kpi"><b>' + (m.ort != null ? dav(m.ort) : '—') + '</b><span>o\'rtacha ish vaqti</span></div>' +
-      '<div class="kpi wide"><b style="color:' + (n.balans < 0 ? 'var(--red)' : 'var(--teal)') + '">' + (n.balans < 0 ? '−' : '') + pul(Math.abs(n.balans)) + '</b><span>joriy balans' + (n.balans < n.chegara ? ' · ⚠️ qarz chegarasidan oshgan — ish berilmaydi' : n.balans < 0 ? ' · depozitni to\'ldiring' : '') + '</span></div></div>';
+      '<div class="kpi"><b>' + (n.orin ? medal + ' ' + n.orin : '—') + '</b><span>reytingdagi örin' + (n.jami ? ' (' + n.jami + ' usta)' : '') + '</span></div>' +
+      '<div class="kpi"><b style="color:var(--teal)">' + m.ish + '</b><span>bu oy işlar' + (n.oldin.ish || farq ? ' · ötgan oy ' + n.oldin.ish + (farq > 0 ? ' ↑' : farq < 0 ? ' ↓' : '') : '') + '</span></div>' +
+      '<div class="kpi"><b>' + (m.baho ? '⭐ ' + m.baho.o : '—') + '</b><span>' + (m.baho ? 'mijoz bahosi / 5 · ' + m.baho.n + ' ta' : 'hali baho yöq') + '</span></div>' +
+      '<div class="kpi"><b>' + (m.ort != null ? dav(m.ort) : '—') + '</b><span>örtaça iş vaqti</span></div>' +
+      '<div class="kpi wide"><b style="color:' + (n.balans < 0 ? 'var(--red)' : 'var(--teal)') + '">' + (n.balans < 0 ? '−' : '') + pul(Math.abs(n.balans)) + '</b><span>joriy balans' + (n.balans < n.chegara ? ' · ⚠️ qarz çegarasidan oşgan — iş berilmaydi' : n.balans < 0 ? ' · depozitni töldiring' : '') + '</span></div></div>';
     const izoh = [];
-    if (n.orin === 1) izoh.push('🥇 Siz bu oy birinchi o\'rindasiz — shunday davom eting!');
-    else if (n.birinchiFarq > 0) izoh.push('🎯 1-o\'ringa <b>' + n.birinchiFarq + ' ta</b> ish qoldi.');
-    if (m.baho && m.baho.past) izoh.push('😞 ' + m.baho.past + ' ta mijoz qoniqmagan — sifatga e\'tibor bering.');
+    if (n.orin === 1) izoh.push('🥇 Siz bu oy birinçi örindasiz — şunday davom eting!');
+    else if (n.birinchiFarq > 0) izoh.push('🎯 1-öringa <b>' + n.birinchiFarq + ' ta</b> iş qoldi.');
+    if (m.baho && m.baho.past) izoh.push('😞 ' + m.baho.past + ' ta mijoz qoniqmagan — sifatga eʼtibor bering.');
     if (m.otkaz) izoh.push('❌ Bu oy otkaz: ' + m.otkaz + ' ta.');
-    if (n.oldin.orin) izoh.push('📅 ' + esc(n.oy0) + ': ' + n.oldin.orin + '-o\'rin, ' + n.oldin.ish + ' ta ish.');
+    if (n.oldin.orin) izoh.push('📅 ' + esc(n.oy0) + ': ' + n.oldin.orin + '-örin, ' + n.oldin.ish + ' ta iş.');
     if (izoh.length) h += '<div class="card">' + izoh.map(x => '<div class="line"><span>' + x + '</span></div>').join('') + '</div>';
-    h += '<p class="muted small" style="margin:12px 4px">Reyting ish soni bo\'yicha (teng bo\'lsa — baho). Ma\'lumot faqat sizga ko\'rinadi.</p>';
+    h += '<p class="muted small" style="margin:12px 4px">Reyting iş soni böyiça (teng bölsa — baho). Maʼlumot faqat sizga körinadi.</p>';
     $('main').innerHTML = h;
   } catch (e) { $('main').innerHTML = '<div class="err">⚠️ ' + esc(e.message) + '</div>'; }
 }
 /* ⏸ Ishni kechiktirish */
-const kechHolat = x => ({ '': 'Ustada qolgan', Faol: 'Kutmoqda', Taklif: 'Ustaga taklif', Ochiq: 'Bo\'sh ishlarda', Olindi: 'Bajarildi', Bekor: 'Bekor qilingan', 'So\'rov': 'Ruxsat kutmoqda', Rad: 'Rad etilgan' })[String(x || '').replace(/:.*/, '')] || x;
+const kechHolat = x => ({ '': 'Ustada qolgan', Faol: 'Kutmoqda', Taklif: 'Ustaga taklif', Ochiq: 'Böş işlarda', Olindi: 'Bajarildi', Bekor: 'Bekor qilingan', 'So\'rov': 'Ruxsat kutmoqda', Rad: 'Rad etilgan' })[String(x || '').replace(/:.*/, '')] || x;
 const kechMatn = k => k.holat === 'Taklif' ? '🔁 ' + k.usta + 'ga taklif qilindi' + (k.soat ? ' · ⏰ ' + k.soat : '')
-  : k.holat === 'Ochiq' ? 'Bugunga ko\'chirilgan — «Bo\'sh ishlar»da' + (k.soat ? ' · ⏰ ' + k.soat : '')
-  : (k.faol ? k.sana + (k.soat ? ' ' + k.soat : '') + ' ga ko\'chirilgan' : 'Bugunga ko\'chirilgan' + (k.soat ? ' · ⏰ ' + k.soat : '')) + (k.holat === 'Faol' && k.usta ? ' · ' + k.usta + 'ga qayta taklif qilinadi' : '');
+  : k.holat === 'Ochiq' ? 'Bugunga köçirilgan — «Böş işlar»da' + (k.soat ? ' · ⏰ ' + k.soat : '')
+  : (k.faol ? k.sana + (k.soat ? ' ' + k.soat : '') + ' ga köçirilgan' : 'Bugunga köçirilgan' + (k.soat ? ' · ⏰ ' + k.soat : '')) + (k.holat === 'Faol' && k.usta ? ' · ' + k.usta + 'ga qayta taklif qilinadi' : '');
 function kechiktir(h) {
   const i = ishTop(h); if (!i) return;
   const d = new Date(); d.setDate(d.getDate() + 1);
@@ -428,14 +430,14 @@ function kechiktir(h) {
   const mx = new Date(); mx.setDate(mx.getDate() + 60);
   let tanlov = '';
   const S = ['Mijoz ertaga so\'radi', 'Mijoz uyda yo\'q', 'Material/uskuna yo\'q', 'Ob-havo', 'Boshqa'];
-  oyna('⏸ Ishni kechiktirish', '<p class="muted small" style="margin:0 2px 8px">' + esc(i.mijoz) + ' · ' + esc(i.ishlar.map(x => x.turi).join(', ')) + '</p>' +
+  oyna('⏸ Işni keçiktiriş', '<p class="muted small" style="margin:0 2px 8px">' + esc(i.mijoz) + ' · ' + esc(i.ishlar.map(x => x.turi).join(', ')) + '</p>' +
     '<label class="f">📅 Yangi sana</label><input class="in" type="date" id="k_sana" value="' + iso(d) + '" min="' + iso(d) + '" max="' + iso(mx) + '">' +
     '<label class="f">🕑 Soat (ixtiyoriy)</label><input class="in" type="time" id="k_soat">' +
-    '<label class="f">Sabab</label><div class="chips">' + S.map(x => '<button class="chip" data-ks="' + esc(x) + '">' + esc(x) + '</button>').join('') + '</div>' +
-    '<label class="f">Yoki o\'zingiz yozing</label><input class="in" id="k_sabab" placeholder="Sabab…">' +
-    '<p class="muted small" style="margin:8px 2px">Ish otkaz bo\'lmaydi. ' + (i.usta ? 'Ish <b>' + esc(i.usta) + '</b>dan yechiladi — usta bo\'shaydi va yangi ish oladi. Sana kuni 09:00 da unga qayta taklif keladi (1 soatda olmasa — «Bo\'sh ishlar»ga chiqadi).' : 'Sana kelguncha «Bo\'sh ishlar»da ko\'rinmaydi.') + (i.kechN ? ' Bu ish avval ' + i.kechN + ' marta ko\'chirilgan.' : '') + '</p>' +
-    (i.kechN >= 2 && !D.rol.admin ? '<p class="small" style="margin:4px 2px;color:var(--red)">⚠️ 2 martadan ko\'p ko\'chirish uchun rahbar ruxsati kerak — so\'rov rahbarga boradi.</p>' : '') +
-    '<button class="btn" id="k_ok">⏸ Kechiktirish</button>');
+    '<label class="f">Sabab</label><div class="chips">' + S.map(x => '<button class="chip" data-ks="' + esc(x) + '">' + esc(ya(x)) + '</button>').join('') + '</div>' +
+    '<label class="f">Yoki özingiz yozing</label><input class="in" id="k_sabab" placeholder="Sabab…">' +
+    '<p class="muted small" style="margin:8px 2px">Iş otkaz bölmaydi. ' + (i.usta ? 'Iş <b>' + esc(i.usta) + '</b>dan yeçiladi — usta böşaydi va yangi iş oladi. Sana kuni 09:00 da unga qayta taklif keladi (1 soatda olmasa — «Böş işlar»ga çiqadi).' : 'Sana kelgunça «Böş işlar»da körinmaydi.') + (i.kechN ? ' Bu iş avval ' + i.kechN + ' marta köçirilgan.' : '') + '</p>' +
+    (i.kechN >= 2 && !D.rol.admin ? '<p class="small" style="margin:4px 2px;color:var(--red)">⚠️ 2 martadan köp köçiriş uçun rahbar ruxsati kerak — sörov rahbarga boradi.</p>' : '') +
+    '<button class="btn" id="k_ok">⏸ Keçiktiriş</button>');
   document.querySelectorAll('[data-ks]').forEach(b => b.onclick = () => { tanlov = b.dataset.ks; document.querySelectorAll('[data-ks]').forEach(x => x.classList.toggle('on', x === b)); $('k_sabab').value = ''; hap('sel'); });
   $('k_ok').onclick = () => { const s = $('k_sabab').value.trim() || tanlov; if (!s) return xabar('Sababni tanlang yoki yozing.'); if (!$('k_sana').value) return xabar('Sanani tanlang.');
     amal({ api: 'kechiktir', h, sana: $('k_sana').value, soat: $('k_soat').value, sabab: s }, $('k_ok'), 'Saqlanmoqda…'); };
@@ -446,8 +448,8 @@ let ES = null;
 let MJ = {}, mjQ = '', mjKun = 180, ARX = false;
 function ekEslatma() {
   const t = seg.mj || 'qongiroq';
-  const s = !D.rol.admin ? segChiz('mj', [['qidir', '🔎 Qidirish', ''], ['arxiv', '🗂 Arxiv', '']])   // xodim: qidiruv + arxiv
-    : segChiz('mj', [['qongiroq', '📞 Qo\'ng\'iroq', ES ? ES.length : ''], ['qidir', '🔎 Qidirish', ''], ['doimiy', '⭐ Doimiy', MJ.doimiy ? MJ.doimiy.jami : ''], ['uzoq', '😴 Kelmagan', ''], ['arxiv', '🗂 Arxiv', '']]);
+  const s = !D.rol.admin ? segChiz('mj', [['qidir', '🔎 Qidiriş', ''], ['arxiv', '🗂 Arxiv', '']])   // xodim: qidiruv + arxiv
+    : segChiz('mj', [['qongiroq', '📞 Qönğiroq', ES ? ES.length : ''], ['qidir', '🔎 Qidiriş', ''], ['doimiy', '⭐ Doimiy', MJ.doimiy ? MJ.doimiy.jami : ''], ['uzoq', '😴 Kelmagan', ''], ['arxiv', '🗂 Arxiv', '']]);
   if (seg.mj === 'qongiroq' || !seg.mj) return ekQongiroq(s);
   if (seg.mj === 'arxiv') return ekArxivStat(s);
   $('main').innerHTML = s + '<div id="mjb"></div>'; segUlash();
@@ -456,7 +458,7 @@ function ekEslatma() {
     let tm = null;
     const izla = async () => {
       const v = $('mq').value.trim(); mjQ = v;
-      if (v.replace(/\D/g, '').length < 4 && v.length < 2) { $('mr').innerHTML = '<p class="muted small" style="margin:8px 4px">Qo\'ng\'iroq kelganda raqamning oxirgi 4 ta yoki to\'liq raqamini yozing — mijozning butun tarixi chiqadi.</p>'; return; }
+      if (v.replace(/\D/g, '').length < 4 && v.length < 2) { $('mr').innerHTML = '<p class="muted small" style="margin:8px 4px">Qönğiroq kelganda raqamning oxirgi 4 ta yoki töliq raqamini yozing — mijozning butun tarixi çiqadi.</p>'; return; }
       $('mr').innerHTML = '<div class="spin"></div>';
       try { const r = await api({ api: 'mijozlar', tur: 'qidir', q: v }); if (!r.ok) throw new Error(r.xato); if ($('mq') && $('mq').value.trim() === v) mjRoyxat($('mr'), r, '🔎', 'Bunday mijoz topilmadi'); }
       catch (e) { $('mr').innerHTML = '<div class="err">⚠️ ' + esc(e.message) + '</div>'; }
@@ -468,9 +470,9 @@ function ekEslatma() {
   const tur = seg.mj, kalit = tur === 'uzoq' ? 'uzoq' + mjKun : tur;
   if (tur === 'uzoq') $('mjb').innerHTML = '<div class="chips" style="margin:8px 0 2px">' + [[90, '3 oydan beri'], [180, '6 oydan beri'], [365, '1 yildan beri']].map(x =>
     '<button class="chip' + (x[0] === mjKun ? ' on' : '') + '" data-mk="' + x[0] + '">' + x[1] + '</button>').join('') + '</div><div id="mr"></div>';
-  else $('mjb').innerHTML = '<p class="muted small" style="margin:8px 4px">3 va undan ko\'p marta murojaat qilgan mijozlar — chegirma, bayram tabrigi uchun.</p><div id="mr"></div>';
+  else $('mjb').innerHTML = '<p class="muted small" style="margin:8px 4px">3 va undan köp marta murojaat qilgan mijozlar — çegirma, bayram tabrigi uçun.</p><div id="mr"></div>';
   document.querySelectorAll('[data-mk]').forEach(b => b.onclick = () => { mjKun = +b.dataset.mk; hap('sel'); chiz(); });
-  if (MJ[kalit]) return mjRoyxat($('mr'), MJ[kalit], tur === 'uzoq' ? '😴' : '⭐', tur === 'uzoq' ? 'Bunday mijoz yo\'q' : 'Hali doimiy mijoz yo\'q');
+  if (MJ[kalit]) return mjRoyxat($('mr'), MJ[kalit], tur === 'uzoq' ? '😴' : '⭐', tur === 'uzoq' ? 'Bunday mijoz yöq' : 'Hali doimiy mijoz yöq');
   $('mr').innerHTML = '<div class="spin"></div>';
   api({ api: 'mijozlar', tur, kun: mjKun }).then(r => { if (!r.ok) throw new Error(r.xato); MJ[kalit] = r; if (ekran === 'eslatma' && seg.mj === tur) chiz(); })
     .catch(e => { const el = $('mr'); if (el) el.innerHTML = '<div class="err">⚠️ ' + esc(e.message) + '</div>'; });
@@ -479,11 +481,11 @@ let arxUsta = null;
 async function ekArxivStat(sg) {
   if (arxUsta != null) {
     const k = 'r:' + arxUsta;
-    $('main').innerHTML = sg + '<button class="act" id="ax_b" style="margin:8px 0">← Arxiv statistikasi</button><h2>👷 ' + esc(arxUsta || 'Usta yo\'q') + '</h2><div id="axl"><div class="spin"></div></div>'; segUlash();
+    $('main').innerHTML = sg + '<button class="act" id="ax_b" style="margin:8px 0">← Arxiv statistikasi</button><h2>👷 ' + esc(arxUsta || 'Usta yöq') + '</h2><div id="axl"><div class="spin"></div></div>'; segUlash();
     $('ax_b').onclick = () => { arxUsta = null; chiz(); };
     try { if (!ARXV[k]) { const r = await api({ api: 'arxiv', usta: arxUsta, n: 500 }); if (!r.ok) throw new Error(r.xato); ARXV[k] = r; }
       const R = ARXV[k], el = $('axl'); if (!el) return;
-      el.innerHTML = '<p class="muted small" style="margin:4px">' + R.jami + ' ta ish · ' + R.rasm + ' ta rasm' + (R.jami > R.royxat.length ? ' (oxirgi ' + R.royxat.length + ' tasi)' : '') + '</p>' + R.royxat.map(x => arxKarta(x, false)).join('');
+      el.innerHTML = '<p class="muted small" style="margin:4px">' + R.jami + ' ta iş · ' + R.rasm + ' ta rasm' + (R.jami > R.royxat.length ? ' (oxirgi ' + R.royxat.length + ' tasi)' : '') + '</p>' + R.royxat.map(x => arxKarta(x, false)).join('');
       arxRasmUlash(el, () => { $('ov') && $('ov').remove(); });
     } catch (e) { const el = $('axl'); if (el) el.innerHTML = '<div class="err">⚠️ ' + esc(e.message) + '</div>'; }
     return;
@@ -498,50 +500,50 @@ async function ekArxivStat(sg) {
   const bar = (L, bos) => L.map(u => '<div class="card" ' + (bos ? 'data-axu="' + esc(u[0].indexOf('—') === 0 ? '' : u[0]) + '" style="cursor:pointer;padding:10px 12px"' : 'style="padding:10px 12px"') + '><div class="row"><b>' + esc(u[0]) + (bos ? ' ›' : '') + '</b><b>' + u[1] + '</b></div>' +
     '<div style="height:7px;background:var(--line);border-radius:9px;margin-top:6px"><div style="height:7px;border-radius:9px;background:var(--teal);width:' + Math.max(2, Math.round(u[1] / mx * 100)) + '%"></div></div></div>').join('');
   let h = sg + '<div class="kpis"><div class="kpi"><b>' + S.jami + '</b><span>ish</span></div><div class="kpi"><b>' + S.rasm + '</b><span>rasm</span></div>' +
-    '<div class="kpi wide"><b>' + S.mijoz + '</b><span>mijoz (telefon bo\'yicha)</span></div></div>';
-  h += '<h2>👷 Ustalar bo\'yicha</h2>' + bar(S.ustalar, true);
-  h += '<h2>📂 Bosqich</h2><div class="card">' + S.bosqich.map(b => '<div class="mrow"><span>' + esc(b[0]) + '</span><b>' + b[1] + '</b></div>').join('') + '</div>';
+    '<div class="kpi wide"><b>' + S.mijoz + '</b><span>mijoz (telefon böyiça)</span></div></div>';
+  h += '<h2>👷 Ustalar böyiça</h2>' + bar(S.ustalar, true);
+  h += '<h2>📂 Bosqiç</h2><div class="card">' + S.bosqich.map(b => '<div class="mrow"><span>' + esc(b[0]) + '</span><b>' + b[1] + '</b></div>').join('') + '</div>';
   h += '<h2>📅 Yillar</h2><div class="card">' + S.yillar.map(b => '<div class="mrow"><span>' + esc(b[0]) + '</span><b>' + b[1] + '</b></div>').join('') + '</div>';
   h += '<h2>📣 Reklama manbasi</h2><div class="card">' + S.reklama.map(b => '<div class="mrow"><span>' + esc(b[0]) + '</span><b>' + b[1] + '</b></div>').join('') + '</div>';
-  h += '<p class="muted small" style="margin:12px 4px">Mijozni topish uchun «🔎 Qidirish» — arxivdagi mijozlar ham chiqadi.</p>';
+  h += '<p class="muted small" style="margin:12px 4px">Mijozni topiş uçun «🔎 Qidiriş» — arxivdagi mijozlar ham çiqadi.</p>';
   $('main').innerHTML = h; segUlash();
   document.querySelectorAll('[data-axu]').forEach(c => c.onclick = () => { hap('sel'); arxUsta = c.dataset.axu; chiz(); window.scrollTo(0, 0); });
 }
 function mjRoyxat(el, r, e, bo) {
   if (!el) return;
-  el.innerHTML = (r.jami ? '<p class="muted small" style="margin:6px 4px">' + r.jami + ' ta mijoz' + (r.jami > r.royxat.length ? ' (birinchi ' + r.royxat.length + ' tasi)' : '') + '</p>' : '') +
+  el.innerHTML = (r.jami ? '<p class="muted small" style="margin:6px 4px">' + r.jami + ' ta mijoz' + (r.jami > r.royxat.length ? ' (birinçi ' + r.royxat.length + ' tasi)' : '') + '</p>' : '') +
     (r.royxat.length ? r.royxat.map(x => '<div class="card" data-mkk="' + esc(x.k) + '" style="cursor:pointer"><div class="row"><div><div class="name">' + esc(x.ism) + '</div>' +
       '<span class="pill ' + (x.mur >= 3 ? 'done' : 'work') + '">🔁 ' + x.mur + ' marta</span>' + (x.otkaz ? ' <span class="pill otk">❌ ' + x.otkaz + '</span>' : '') + '</div>' +
       '<div class="time">' + esc(x.oxirgi) + (x.kun != null ? '<br>' + x.kun + ' kun oldin' : '') + '</div></div>' +
       (x.ustalar ? '<div class="line muted small"><span class="i">👷</span><span>' + esc(x.ustalar) + '</span></div>' : '') +
       (x.summa ? '<div class="line muted small"><span class="i">💰</span><span>' + pul(x.summa) + '</span></div>' : '') +
-      (x.tel ? '<a class="btn" style="display:block;text-align:center;text-decoration:none;margin:8px 0 0" href="tel:' + esc(x.tel) + '" data-tel="1">📞 ' + esc(x.tel) + '</a>' : '<div class="line" style="color:var(--orange)"><span class="i">📞</span><span>Telefon yo\'q</span></div>') +
+      (x.tel ? '<a class="btn" style="display:block;text-align:center;text-decoration:none;margin:8px 0 0" href="tel:' + esc(x.tel) + '" data-tel="1">📞 ' + esc(x.tel) + '</a>' : '<div class="line" style="color:var(--orange)"><span class="i">📞</span><span>Telefon yöq</span></div>') +
       '</div>').join('') : bosh(e, bo));
   el.querySelectorAll('[data-mkk]').forEach(c => c.onclick = ev => { if (ev.target.closest('[data-tel]')) return; hap('sel'); mijozKarta({ k: c.dataset.mkk }); });
 }
 /* 👤 Mijoz kartochkasi */
 function mijozKarta(q) {
-  oyna('👤 Mijoz kartochkasi', '<div id="mkb"><div class="spin"></div></div>');
+  oyna('👤 Mijoz kartoçkasi', '<div id="mkb"><div class="spin"></div></div>');
   (async () => {
     try {
       const r = await api(Object.assign({ api: 'mijozKarta' }, q)); if (!r.ok) throw new Error(r.xato);
       const m = r.m, el = $('mkb'); if (!el) return;
-      const holat = j => j.holat === 'otkaz' ? '<span class="pill otk">❌ Otkaz' + (j.sabab ? ' · ' + esc(j.sabab) : '') + '</span>' : j.holat === 'ochiq' ? '<span class="pill wait">⏳ Ochiq</span>' : '<span class="pill done">✅ Bajarilgan</span>';
+      const holat = j => j.holat === 'otkaz' ? '<span class="pill otk">❌ Otkaz' + (j.sabab ? ' · ' + esc(j.sabab) : '') + '</span>' : j.holat === 'ochiq' ? '<span class="pill wait">⏳ Oçiq</span>' : '<span class="pill done">✅ Bajarilgan</span>';
       el.innerHTML = '<div class="name" style="font-size:20px;margin:0 2px 6px">' + esc(m.ism) + '</div>' +
-        (m.tel ? '<a class="btn" style="display:block;text-align:center;text-decoration:none;margin:4px 0 10px" href="tel:' + esc(m.tel) + '">📞 Qo\'ng\'iroq qilish · ' + esc(m.tel) + '</a>' : '<div class="line" style="color:var(--orange)"><span class="i">📞</span><span>Telefon yo\'q</span></div>') +
-        '<div class="kpis"><div class="kpi"><b>' + m.mur + '</b><span>murojaat</span></div><div class="kpi"><b style="color:var(--teal)">' + m.ish + '</b><span>bajarilgan ish</span></div>' +
+        (m.tel ? '<a class="btn" style="display:block;text-align:center;text-decoration:none;margin:4px 0 10px" href="tel:' + esc(m.tel) + '">📞 Qönğiroq qiliş · ' + esc(m.tel) + '</a>' : '<div class="line" style="color:var(--orange)"><span class="i">📞</span><span>Telefon yöq</span></div>') +
+        '<div class="kpis"><div class="kpi"><b>' + m.mur + '</b><span>murojaat</span></div><div class="kpi"><b style="color:var(--teal)">' + m.ish + '</b><span>bajarilgan iş</span></div>' +
         (m.otkaz ? '<div class="kpi"><b style="color:var(--red)">' + m.otkaz + '</b><span>otkaz</span></div>' : '') +
         '<div class="kpi' + (m.otkaz ? '' : ' wide') + '"><b>' + (m.summa ? mln(m.summa) : '—') + '</b><span>jami summa</span></div></div>' +
-        '<div class="card"><div class="line"><span class="i">📅</span><span>Birinchi: <b>' + esc(m.birinchi) + '</b> · Oxirgi: <b>' + esc(m.oxirgi) + '</b>' + (m.kun != null ? ' (' + m.kun + ' kun oldin)' : '') + '</span></div>' +
+        '<div class="card"><div class="line"><span class="i">📅</span><span>Birinçi: <b>' + esc(m.birinchi) + '</b> · Oxirgi: <b>' + esc(m.oxirgi) + '</b>' + (m.kun != null ? ' (' + m.kun + ' kun oldin)' : '') + '</span></div>' +
         (m.ustalar ? '<div class="line"><span class="i">👷</span><span>' + esc(m.ustalar) + '</span></div>' : '') +
         (m.turlar ? '<div class="line"><span class="i">🛠</span><span>' + esc(m.turlar) + '</span></div>' : '') + '</div>' +
-        (m.ishlar.length ? '<h2 style="margin:14px 2px 6px">🗂 Ishlar tarixi</h2>' : '') +
-        m.ishlar.map(j => '<div class="card"><div class="row"><div><div class="name" style="font-size:15px">' + esc(j.ish.map(x => x.turi + (x.soni > 1 ? ' × ' + x.soni : '')).join(', ')) + '</div>' + holat(j) + (j.kechN ? ' <span class="pill wait">⏸ ' + j.kechN + ' marta ko\'chirilgan</span>' : '') + '</div>' +
+        (m.ishlar.length ? '<h2 style="margin:14px 2px 6px">🗂 Işlar tarixi</h2>' : '') +
+        m.ishlar.map(j => '<div class="card"><div class="row"><div><div class="name" style="font-size:15px">' + esc(j.ish.map(x => x.turi + (x.soni > 1 ? ' × ' + x.soni : '')).join(', ')) + '</div>' + holat(j) + (j.kechN ? ' <span class="pill wait">⏸ ' + j.kechN + ' marta köçirilgan</span>' : '') + '</div>' +
           '<div class="time">' + esc(j.sana) + '</div></div>' +
           '<div class="line muted"><span class="i">👷</span><span>' + esc(j.usta || '—') + '</span>' + (j.summa ? '<span style="margin-left:auto"><b>' + pul(j.summa) + '</b></span>' : '') + '</div>' +
           (j.izoh ? '<div class="line small"><span class="i">📝</span><span>' + esc(j.izoh) + '</span></div>' : '') +
           (j.rasm && j.h ? '<div class="acts"><button class="act" data-mrk="' + esc(j.h) + '" data-n="' + j.rasm + '">📸 Rasmlar · ' + j.rasm + '</button></div>' : '') + '</div>').join('');
-      if (m.arxiv && m.arxiv.length) { el.insertAdjacentHTML('beforeend', '<h2 style="margin:14px 2px 6px">📦 Eski ishlar (amoCRM) · ' + m.arxiv.length + '</h2>' + m.arxiv.map(x => arxKarta(Object.assign({}, x, { ism: null, tel: null }), true)).join('')); arxRasmUlash(el, () => mijozKarta(q)); }
+      if (m.arxiv && m.arxiv.length) { el.insertAdjacentHTML('beforeend', '<h2 style="margin:14px 2px 6px">📦 Eski işlar (amoCRM) · ' + m.arxiv.length + '</h2>' + m.arxiv.map(x => arxKarta(Object.assign({}, x, { ism: null, tel: null }), true)).join('')); arxRasmUlash(el, () => mijozKarta(q)); }
       el.querySelectorAll('[data-mrk]').forEach(b => b.onclick = () => rasmKor(b.dataset.mrk, +b.dataset.n, esc(m.ism), () => mijozKarta(q)));
     } catch (e) { const el = $('mkb'); if (el) el.innerHTML = '<div class="err">⚠️ ' + esc(e.message) + '</div>'; }
   })();
@@ -551,16 +553,16 @@ async function ekQongiroq(sg) {
   try {
     if (!ES) { const r = await api({ api: 'eslatma' }); if (!r.ok) throw new Error(r.xato); ES = r.royxat; return chiz(); }
     if (ekran !== 'eslatma' || (seg.mj && seg.mj !== 'qongiroq')) return;
-    let h = sg + '<div class="kpis"><div class="kpi"><b>' + ES.length + '</b><span>qo\'ng\'iroq kutilmoqda</span></div><div class="kpi"><b>180+</b><span>kun o\'rnatilganiga</span></div></div>';
-    h += '<p class="muted small" style="margin:0 4px 10px">Servisdan tashqari o\'rnatmalar. Qo\'ng\'iroq qilib, profilaktika/servis taklif qiling.</p>';
+    let h = sg + '<div class="kpis"><div class="kpi"><b>' + ES.length + '</b><span>qönğiroq kutilmoqda</span></div><div class="kpi"><b>180+</b><span>kun örnatilganiga</span></div></div>';
+    h += '<p class="muted small" style="margin:0 4px 10px">Servisdan taşqari örnatmalar. Qönğiroq qilib, profilaktika/servis taklif qiling.</p>';
     h += ES.length ? ES.map(x => '<div class="card"><div class="row"><div><div class="name" data-mki="' + esc(x.mijoz) + '" data-mkt="' + esc(x.tel) + '" style="cursor:pointer">' + esc(x.mijoz) + ' ›</div><span class="pill wait">📅 ' + esc(x.sana) + (x.kun != null ? ' · ' + x.kun + ' kun' : '') + '</span></div>' +
       '<div class="time">' + esc(x.usta) + '</div></div>' +
       '<div class="line"><span class="i">🛠</span><span>' + esc(x.ornatma) + '</span></div>' +
-      (x.tel ? '<a class="btn" style="display:block;text-align:center;text-decoration:none;margin:10px 0 2px" href="tel:' + esc(x.tel) + '">📞 Qo\'ng\'iroq qilish · ' + esc(x.tel) + '</a>'
-        : '<div class="line" style="color:var(--orange)"><span class="i">📞</span><span>Telefon topilmadi</span></div><button class="btn ghost" style="margin:6px 0 2px" data-st="' + x.row + '">✏️ Raqamni kiritish</button>') +
+      (x.tel ? '<a class="btn" style="display:block;text-align:center;text-decoration:none;margin:10px 0 2px" href="tel:' + esc(x.tel) + '">📞 Qönğiroq qiliş · ' + esc(x.tel) + '</a>'
+        : '<div class="line" style="color:var(--orange)"><span class="i">📞</span><span>Telefon topilmadi</span></div><button class="btn ghost" style="margin:6px 0 2px" data-st="' + x.row + '">✏️ Raqamni kiritiş</button>') +
       (x.manzil ? '<div class="line muted"><span class="i">📍</span><span>' + esc(x.manzil) + '</span></div>' : '') +
-      '<div class="acts"><button class="act" data-sq="' + x.row + '">✅ Qo\'ng\'iroq qilindi</button><button class="act" data-sk="' + x.row + '">⏭ Keyinroq</button></div></div>').join('')
-      : bosh('✅', 'Hozircha qo\'ng\'iroq qilinadigan mijoz yo\'q');
+      '<div class="acts"><button class="act" data-sq="' + x.row + '">✅ Qönğiroq qilindi</button><button class="act" data-sk="' + x.row + '">⏭ Keyinroq</button></div></div>').join('')
+      : bosh('✅', 'Hozirça qönğiroq qilinadigan mijoz yöq');
     $('main').innerHTML = h; segUlash();
     const hal = (row, holat, btn, izoh) => amal({ api: 'eslatmaHal', row, holat, izoh }, btn, 'Saqlanmoqda…').then(() => { ES = null; if (ekran === 'eslatma') chiz(); });
     document.querySelectorAll('[data-sk]').forEach(b => b.onclick = () => hal(+b.dataset.sk, 'keyin', b, ''));
@@ -569,13 +571,13 @@ async function ekQongiroq(sg) {
       const x = ES.find(e => e.row === +b.dataset.st) || {};
       oyna('📞 Mijoz raqami', '<p class="muted small" style="margin:0 2px 8px">' + esc(x.mijoz || '') + ' · ' + esc(x.ornatma || '') + '</p>' +
         '<label class="f">Telefon</label><input class="in" id="st_tel" type="tel" inputmode="tel" placeholder="90 123 45 67">' +
-        '<button class="btn" id="st_ok">💾 Saqlash</button>');
-      $('st_ok').onclick = () => { const v = $('st_tel').value; if (v.replace(/\D/g, '').length < 9) return xabar('Raqamni to\'liq kiriting.');
+        '<button class="btn" id="st_ok">💾 Saqlaş</button>');
+      $('st_ok').onclick = () => { const v = $('st_tel').value; if (v.replace(/\D/g, '').length < 9) return xabar('Raqamni töliq kiriting.');
         amal({ api: 'eslatmaTel', row: +b.dataset.st, tel: v }, $('st_ok'), 'Saqlanmoqda…').then(() => { ES = null; if (ekran === 'eslatma') chiz(); }); };
     });
     document.querySelectorAll('[data-sq]').forEach(b => b.onclick = () => {
-      oyna('✅ Qo\'ng\'iroq natijasi', '<label class="f">📝 Izoh (ixtiyoriy)</label><input class="in" id="sq_iz" placeholder="Masalan: servisga yozildi, keyinroq qo\'ng\'iroq…">' +
-        '<button class="btn" id="sq_ok">💾 Saqlash</button>');
+      oyna('✅ Qönğiroq natijasi', '<label class="f">📝 Izoh (ixtiyoriy)</label><input class="in" id="sq_iz" placeholder="Masalan: servisga yozildi, keyinroq qo\'ng\'iroq…">' +
+        '<button class="btn" id="sq_ok">💾 Saqlaş</button>');
       $('sq_ok').onclick = () => hal(+b.dataset.sq, 'qilindi', $('sq_ok'), $('sq_iz').value);
     });
   } catch (e) { $('main').innerHTML = '<div class="err">⚠️ ' + esc(e.message) + '</div>'; }
@@ -586,7 +588,7 @@ const fmtSon = v => { const r = String(v == null ? '' : v).replace(/\D/g, ''); r
 function tolovMaydon(i) {
   TU = '';
   return i.ishlar.map((x, k) => '<label class="f">💰 ' + esc(x.turi) + ' × ' + x.soni + ' — mijozdan olingan</label><input class="in" inputmode="numeric" data-tsm="' + k + '" value="' + fmtSon(x.summa) + '" placeholder="Summa, so\'m">').join('') +
-    '<label class="f">To\'lov usuli *</label><div class="chips"><button class="chip" data-tu="naqd">💵 Naqd</button><button class="chip" data-tu="karta">💳 Karta</button></div>';
+    '<label class="f">Tölov usuli *</label><div class="chips"><button class="chip" data-tu="naqd">💵 Naqd</button><button class="chip" data-tu="karta">💳 Karta</button></div>';
 }
 function tolovUlash() {
   document.querySelectorAll('[data-tsm]').forEach(e => e.oninput = () => { e.value = fmtSon(e.value); });
@@ -595,12 +597,12 @@ function tolovUlash() {
 function tolovOl() {
   const summalar = [...document.querySelectorAll('[data-tsm]')].map(e => e.value.replace(/\D/g, '') || '0');
   if (!summalar.some(x => +x > 0)) { xabar('💰 Mijozdan olingan summani kiriting.'); return null; }
-  if (!TU) { xabar('To\'lov usulini tanlang: naqd yoki karta.'); return null; }
+  if (!TU) { xabar('Tölov usulini tanlang: naqd yoki karta.'); return null; }
   return { summalar, usul: TU };
 }
 /* Rasmlarni ko'rsatish (ruxsat serverda tekshiriladi) */
 function rasmKor(h, n, sub, orqaga) {
-  oyna('📸 Ish rasmlari', (orqaga ? '<button class="act" id="rorqa" style="margin-bottom:8px">← Tarixga qaytish</button>' : '') +
+  oyna('📸 Iş rasmlari', (orqaga ? '<button class="act" id="rorqa" style="margin-bottom:8px">← Tarixga qaytiş</button>' : '') +
     '<p class="muted small" style="margin:0 2px 8px">' + sub + '</p>' + Array.from({ length: n }, (_, k) => '<div class="spin" id="rs' + k + '"></div>').join(''));
   if (orqaga) $('rorqa').onclick = orqaga;
   (async () => { for (let k = 0; k < n; k++) {
@@ -633,12 +635,12 @@ function ekIshlar() {
   if (ishFil && !FL.includes(ishFil)) ishFil = '';
   const L = ishFil ? D.barcha.filter(i => i.filial === ishFil) : D.barcha;
   let h = '<div class="chips" style="margin:12px 0 2px">' + [''].concat(FL).map(f => '<button class="chip' + (f === ishFil ? ' on' : '') + '" data-if="' + esc(f) + '">' +
-    (f ? '🏢 ' + esc(f.replace(/^Qo.qon\s*/i, '')) + ' · ' + filtr(D.barcha.filter(i => i.filial === f), 'ochiq').length : 'Barcha filiallar') + '</button>').join('') + '</div>';
+    (f ? '🏢 ' + esc(f.replace(/^Qo.qon\s*/i, '')) + ' · ' + filtr(D.barcha.filter(i => i.filial === f), 'ochiq').length : 'Barça filiallar') + '</button>').join('') + '</div>';
   h += segChiz('ishlar', [['kutish', 'Usta kutilmoqda', filtr(L, 'kutish').length], ['jarayon', 'Jarayonda', filtr(L, 'jarayon').length], ['yopilgan', 'Yopilgan', filtr(L, 'yopilgan').length], ['otkaz', 'Otkaz', filtr(L, 'otkaz').length]]);
   h += '<input class="search" id="q" placeholder="🔎 Mijoz, telefon, usta, manzil…" value="' + esc(qidir) + '">';
   const R = izla(filtr(L, seg.ishlar)).slice(0, 100);
-  h += R.length ? R.map(i => karta(i, false)).join('') : bosh('📭', 'Bu bo\'limda ish yo\'q');
-  if (D.arxivN && !ARX && (seg.ishlar === 'yopilgan' || seg.ishlar === 'otkaz')) h += '<button class="btn ghost" id="arx">📦 Arxiv: yana ' + D.arxivN + ' ta eski ish (90 kundan eski) — ko\'rsatish</button>';
+  h += R.length ? R.map(i => karta(i, false)).join('') : bosh('📭', 'Bu bölimda iş yöq');
+  if (D.arxivN && !ARX && (seg.ishlar === 'yopilgan' || seg.ishlar === 'otkaz')) h += '<button class="btn ghost" id="arx">📦 Arxiv: yana ' + D.arxivN + ' ta eski iş (90 kundan eski) — körsatiş</button>';
   $('main').innerHTML = h; segUlash();
   if ($('arx')) $('arx').onclick = () => { ARX = true; hap('sel'); yukla(); };
   document.querySelectorAll('[data-if]').forEach(b => b.onclick = () => { ishFil = b.dataset.if; hap('sel'); chiz(); });
@@ -649,18 +651,18 @@ function ekMening() {
   const L = D.meniki;
   const oy = D.meta.bugun.slice(0, 7);
   const buOy = L.filter(i => i.t.slice(0, 7) === oy);
-  let h = '<div class="kpis"><div class="kpi"><b>' + buOy.length + '</b><span>bu oy bergan ishlarim</span></div><div class="kpi"><b>' + buOy.filter(i => i.yopildi).length + '</b><span>shundan yopilgan</span></div></div>';
+  let h = '<div class="kpis"><div class="kpi"><b>' + buOy.length + '</b><span>bu oy bergan işlarim</span></div><div class="kpi"><b>' + buOy.filter(i => i.yopildi).length + '</b><span>şundan yopilgan</span></div></div>';
   h += segChiz('mening', [['kutish', 'Usta kutilmoqda', filtr(L, 'kutish').length], ['jarayon', 'Jarayonda', filtr(L, 'jarayon').length], ['yopilgan', 'Yopilgan', filtr(L, 'yopilgan').length], ['otkaz', 'Otkaz', filtr(L, 'otkaz').length]]);
   h += '<input class="search" id="q" placeholder="🔎 Mijoz yoki telefon…" value="' + esc(qidir) + '">';
   const R = izla(filtr(L, seg.mening)).slice(0, 100);
-  h += R.length ? R.map(i => karta(i, false)).join('') : bosh('📭', seg.mening === 'kutish' ? 'Usta kutayotgan ishingiz yo\'q' : seg.mening === 'jarayon' ? 'Jarayondagi ishingiz yo\'q' : 'Bu bo\'limda ish yo\'q');
+  h += R.length ? R.map(i => karta(i, false)).join('') : bosh('📭', seg.mening === 'kutish' ? 'Usta kutayotgan işingiz yöq' : seg.mening === 'jarayon' ? 'Jarayondagi işingiz yöq' : 'Bu bölimda iş yöq');
   $('main').innerHTML = h; segUlash();
 }
 
 /* ---------- Usta ---------- */
 function ekUsta() {
   const L = D.ustaIshlari.filter(i => !i.yopildi);
-  $('main').innerHTML = (L.length ? '<h2>Hozirgi ishlarim · ' + L.length + '</h2>' + L.map(i => karta(i, true)).join('') : bosh('✨', 'Hozircha sizga biriktirilgan ish yo\'q')) +
+  $('main').innerHTML = (L.length ? '<h2>Hozirgi işlarim · ' + L.length + '</h2>' + L.map(i => karta(i, true)).join('') : bosh('✨', 'Hozirça sizga biriktirilgan iş yöq')) +
     (D.rol.xodim ? '' : '');
   segUlash();
 }
@@ -703,10 +705,10 @@ async function ekArxivUsta(sg) {
     if (ekran !== 'bajarilgan' || seg.trx !== 'arxiv') return;
   }
   const R = ARXV[kalit];
-  let h = sg + '<div class="kpis"><div class="kpi"><b>' + R.jami + '</b><span>arxivdagi ishlar</span></div><div class="kpi"><b>' + esc(R.davr || '—') + '</b><span>davr</span></div>' +
+  let h = sg + '<div class="kpis"><div class="kpi"><b>' + R.jami + '</b><span>arxivdagi işlar</span></div><div class="kpi"><b>' + esc(R.davr || '—') + '</b><span>davr</span></div>' +
     '<div class="kpi wide"><b>' + R.rasm + '</b><span>rasm</span></div></div>';
-  h += R.royxat.length ? R.royxat.map(x => arxKarta(x, false)).join('') : bosh('🗂', 'Arxivda sizning ishingiz yo\'q');
-  h += '<p class="muted small" style="margin:12px 4px">🔒 Mijoz ismi va raqami yashirilgan. Bu eski (amoCRM) ishlar — balans va reytingga qo\'shilmaydi.</p>';
+  h += R.royxat.length ? R.royxat.map(x => arxKarta(x, false)).join('') : bosh('🗂', 'Arxivda sizning işingiz yöq');
+  h += '<p class="muted small" style="margin:12px 4px">🔒 Mijoz ismi va raqami yaşirilgan. Bu eski (amoCRM) işlar — balans va reytingga qöşilmaydi.</p>';
   $('main').innerHTML = h; segUlash(); arxRasmUlash($('main'));
 }
 /* 📜 Ishlar tarixi — oy bo'yicha: yopilgan ishlar (mijoz yashirin) + depozitlar */
@@ -739,7 +741,7 @@ async function ekBajarilgan() {
   const R = TRX[oy], J = R.jami, L = R.royxat || [];
   const hol = x => x === 'Tasdiqlandi' ? '<span class="pill done">✅ tasdiqlangan</span>' : x === 'Rad etildi' ? '<span class="pill otk">❌ rad etilgan</span>' : x ? '<span class="pill wait">⏳ kutilmoqda</span>' : '';
   const usul = x => x === 'karta' ? '💳 karta' : x === 'naqd' ? '💵 naqd' : '';
-  h += '<div class="kpis"><div class="kpi"><b>' + J.ish + '</b><span>bajarilgan ish</span></div><div class="kpi"><b>' + dav(J.min) + '</b><span>jami ish vaqti</span></div>' +
+  h += '<div class="kpis"><div class="kpi"><b>' + J.ish + '</b><span>bajarilgan iş</span></div><div class="kpi"><b>' + dav(J.min) + '</b><span>jami iş vaqti</span></div>' +
     '<div class="kpi"><b>' + pul(J.summa) + '</b><span>olingan summa</span></div><div class="kpi"><b>' + pul(J.depozit) + '</b><span>berilgan depozit</span></div>' +
     (J.balans != null ? '<div class="kpi wide"><b style="color:' + (J.balans < 0 ? 'var(--red)' : 'var(--teal)') + '">' + (J.balans < 0 ? '−' : '') + pul(Math.abs(J.balans)) + '</b><span>joriy balans</span></div>' : '') + '</div>';
   h += '<h2>' + oyNomi(oy) + ' · ' + L.length + ' ta yozuv</h2>';
@@ -749,10 +751,10 @@ async function ekBajarilgan() {
     : '<div class="card"><div class="row"><div><div class="name">👤 ' + esc(x.mijoz) + '</div><div class="muted small">📞 ' + esc(x.tel) + (x.filial ? ' · 🏢 ' + esc(x.filial) : '') + '</div></div>' +
       '<div class="time">' + esc(String(x.y || '').split(' ')[0]) + '<br>' + esc(String(x.y || '').split(' ')[1] || '') + '</div></div>' +
       '<div class="line small"><span class="i">🛠</span><span>' + esc(x.ishlar.map(j => j.turi + (j.soni > 1 ? ' ×' + j.soni : '')).join(', ')) + '</span></div>' +
-      '<div class="line small muted"><span class="i">⏱</span><span>' + (x.b ? 'Olgan: ' + esc(x.b) + ' · ' : '') + 'ishladi: <b>' + dav(x.min) + '</b></span></div>' +
+      '<div class="line small muted"><span class="i">⏱</span><span>' + (x.b ? 'Olgan: ' + esc(x.b) + ' · ' : '') + 'işladi: <b>' + dav(x.min) + '</b></span></div>' +
       '<div class="mrow"><span>' + (usul(x.usul) || 'Summa') + ' ' + hol(x.holat) + '</span><b>' + (x.summa ? pul(x.summa) : '—') + '</b></div></div>').join('')
-    : bosh('📭', 'Bu oyda yozuv yo\'q');
-  h += '<p class="muted small" style="margin:12px 4px">🔒 Mijoz ismi va raqami yashirilgan. Ochiq ishingizdagi mijoz ma\'lumoti «🔧 Ishlarim»da to\'liq ko\'rinadi.</p>';
+    : bosh('📭', 'Bu oyda yozuv yöq');
+  h += '<p class="muted small" style="margin:12px 4px">🔒 Mijoz ismi va raqami yaşirilgan. Oçiq işingizdagi mijoz maʼlumoti «🔧 Işlarim»da töliq körinadi.</p>';
   $('main').innerHTML = h; ulash();
 }
 
@@ -764,31 +766,31 @@ function ekBosh() {
   if (bT && !turlar.includes(bT)) bT = ''; if (bF && !filiallar.includes(bF)) bF = '';
   const R = L.filter(i => (!bT || i.ishlar.some(x => x.turi === bT)) && (!bF || i.filial === bF));
   const chip = (v, cur, k, n) => '<button class="chip' + (v === cur ? ' on' : '') + '" data-' + k + '="' + esc(v) + '">' + (v ? esc(v) : 'Hammasi') + (n != null ? ' · ' + n : '') + '</button>';
-  let h = '<label class="f">🛠 Ish turi</label><div class="chips">' + chip('', bT, 'bt', L.length) + turlar.map(t => chip(t, bT, 'bt', L.filter(i => i.ishlar.some(x => x.turi === t)).length)).join('') + '</div>';
+  let h = '<label class="f">🛠 Iş turi</label><div class="chips">' + chip('', bT, 'bt', L.length) + turlar.map(t => chip(t, bT, 'bt', L.filter(i => i.ishlar.some(x => x.turi === t)).length)).join('') + '</div>';
   if (filiallar.length > 1) h += '<label class="f">🏢 Filial</label><div class="chips">' + chip('', bF, 'bf') + filiallar.map(f => chip(f, bF, 'bf')).join('') + '</div>';
   const io = String(D.meta.ishOlish || ''), tel = (io.match(/\+?\d[\d\s]{8,}/) || [''])[0].replace(/\s/g, '');
   const menBand = !!(D.rol.usta && (D.ustalar || []).some(u => u.nom === D.rol.usta && u.band));
   const menQarz = D.rol.usta ? ((D.ustalar || []).find(u => u.nom === D.rol.usta) || {}).qarz : null;
-  h += R.length ? '<h2>Bo\'sh ishlar · ' + R.length + '</h2>' + R.map(i => {
+  h += R.length ? '<h2>Böş işlar · ' + R.length + '</h2>' + R.map(i => {
     const jami = i.ishlar.reduce((s, x) => s + (x.summa || 0), 0);
-    return '<div class="card"><div class="row"><div><div class="name">' + esc(i.mijoz) + '</div><span class="pill wait">⏳ ' + dav(i.tushganMin) + 'dan beri bo\'sh</span></div>' +
+    return '<div class="card"><div class="row"><div><div class="name">' + esc(i.mijoz) + '</div><span class="pill wait">⏳ ' + dav(i.tushganMin) + 'dan beri böş</span></div>' +
       '<div class="time">' + esc(i.sana) + '<br>' + esc(i.vaqt) + '</div></div>' +
       '<div class="jobs">' + i.ishlar.map(x => '<div class="job"><span><b>' + esc(x.turi) + '</b> × ' + x.soni + '</span><span>' + pul(x.summa) + '</span></div>').join('') +
         (i.ishlar.length > 1 && jami ? '<div class="job" style="border-top:1px solid var(--mist);margin-top:4px;padding-top:6px"><b>Jami</b><b>' + pul(jami) + '</b></div>' : '') + '</div>' +
       '<div class="line muted"><span class="i">📞</span><span>' + esc(i.tel) + '</span></div>' +
       '<div class="line muted"><span class="i">🏢</span><span>' + esc(i.filial || '—') + '</span></div>' +
-      (D.rol.usta ? (i.sorov ? '<button class="btn ghost" disabled>⏳ So\'rov yuborildi — Nematilloning javobini kuting</button>'
+      (D.rol.usta ? (i.sorov ? '<button class="btn ghost" disabled>⏳ Sörov yuborildi — Nematilloning javobini kuting</button>'
         : menQarz != null ? '<button class="btn ghost" disabled>💸 Balans ' + pul(menQarz) + ' — avval depozit kiriting</button>'
-        : menBand ? '<button class="btn ghost" disabled>🔒 Avval ochiq ishingizni yoping</button>'
-        : '<button class="btn" data-ol="' + esc(i.h) + '">🙋 Ishni olaman</button>') : '') +
-      '</div>'; }).join('') : bosh('✨', L.length ? 'Bu filtrda bo\'sh ish yo\'q' : 'Hozircha bo\'sh ish yo\'q');
-  h += '<p class="muted small" style="margin:12px 4px">Mijoz ismi va telefoni yashirilgan. «🙋 Ishni olaman» bosilsa rahbarga so\'rov boradi; berilgach to\'liq ma\'lumot «Ishlarim»da va botdagi xabarda chiqadi.</p>';
+        : menBand ? '<button class="btn ghost" disabled>🔒 Avval oçiq işingizni yoping</button>'
+        : '<button class="btn" data-ol="' + esc(i.h) + '">🙋 Işni olaman</button>') : '') +
+      '</div>'; }).join('') : bosh('✨', L.length ? 'Bu filtrda böş iş yöq' : 'Hozirça böş iş yöq');
+  h += '<p class="muted small" style="margin:12px 4px">Mijoz ismi va telefoni yaşirilgan. «🙋 Işni olaman» bosilsa rahbarga sörov boradi; berilgaç töliq maʼlumot «Işlarim»da va botdagi xabarda çiqadi.</p>';
   $('main').innerHTML = h;
   document.querySelectorAll('[data-bt]').forEach(b => b.onclick = () => { bT = b.dataset.bt; hap('sel'); chiz(); });
   document.querySelectorAll('[data-bf]').forEach(b => b.onclick = () => { bF = b.dataset.bf; hap('sel'); chiz(); });
   document.querySelectorAll('[data-ol]').forEach(b => b.onclick = () => {
     const go = () => amal({ api: 'olaman', h: b.dataset.ol }, b, 'Yuborilmoqda…');
-    tg && tg.showConfirm ? tg.showConfirm('Shu ishni olmoqchimisiz? Rahbarga so\'rov boradi.', y => y && go()) : go();
+    tg && tg.showConfirm ? tg.showConfirm('Şu işni olmoqçimisiz? Rahbarga sörov boradi.', y => y && go()) : go();
   });
 }
 
@@ -798,9 +800,9 @@ function ekUstalar() {
   $('main').innerHTML = '<div class="kpis"><div class="kpi"><b style="color:var(--green)">' + b + '</b><span>bo\'sh</span></div><div class="kpi"><b style="color:var(--orange)">' + (U.length - b) + '</b><span>band</span></div></div>' +
     '<div class="card">' + U.map(u => '<div class="u"><div><div style="font-weight:700">' + esc(u.nom) + '</div>' +
       (u.band ? '<div class="muted small">' + esc(u.mijoz) + ' · ' + esc(u.qachon) + ' dan</div>' : '') +
-      (u.kechlar ? '<div class="small" style="color:var(--orange)">⏸ Kechiktirilgan: ' + esc(u.kechlar.join(', ')) + '</div>' : '') +
-      (u.qarz != null ? '<div class="small" style="color:var(--red)">💸 Qarzdor: ' + pul(-u.qarz) + ' — ish berilmaydi</div>' : '') + '</div>' +
-      '<div class="st ' + (u.band ? 'busy">🔒 Band' : 'free">🟢 Bo\'sh') + '</div></div>').join('') + '</div>';
+      (u.kechlar ? '<div class="small" style="color:var(--orange)">⏸ Keçiktirilgan: ' + esc(u.kechlar.join(', ')) + '</div>' : '') +
+      (u.qarz != null ? '<div class="small" style="color:var(--red)">💸 Qarzdor: ' + pul(-u.qarz) + ' — iş berilmaydi</div>' : '') + '</div>' +
+      '<div class="st ' + (u.band ? 'busy">🔒 Band' : 'free">🟢 Böş') + '</div></div>').join('') + '</div>';
 }
 
 /* ---------- Rahbar: statistika ---------- */
@@ -821,39 +823,39 @@ function ekStat() {
   const kutO = ort(Y.map(i => i.kutishMin).filter(x => x != null)), ustO = ort(Y.map(i => i.ustaMin).filter(x => x != null)), jamO = ort(Y.map(i => i.jamiMin).filter(x => x != null));
   let h = '<div class="seg" id="dv">' + [['bugun', 'Bugun'], ['hafta', '7 kun'], ['oy', 'Bu oy'], ['hammasi', 'Hammasi']].map(x => '<button data-v="' + x[0] + '" class="' + (x[0] === davr ? 'on' : '') + '">' + x[1] + '</button>').join('') + '</div>';
   h += '<div class="kpis">' +
-    '<div class="kpi"><b>' + T.length + '</b><span>tushgan ish</span></div>' +
+    '<div class="kpi"><b>' + T.length + '</b><span>tuşgan iş</span></div>' +
     '<div class="kpi"><b style="color:var(--teal)">' + Y.length + '</b><span>yopilgan</span></div>' +
-    '<div class="kpi"><b style="color:var(--orange)">' + ochiq.length + '</b><span>hozir ochiq · ' + kut.length + ' tasi ustasiz</span></div>' +
+    '<div class="kpi"><b style="color:var(--orange)">' + ochiq.length + '</b><span>hozir oçiq · ' + kut.length + ' tasi ustasiz</span></div>' +
     '<div class="kpi"><b style="color:var(--red)">' + T.filter(i => i.otkaz).length + '</b><span>otkaz</span></div>' +
-    '<div class="kpi wide"><b>' + mln(summa) + '</b><span>ishga olingan summa · yopilgan ishlar' + (kutS ? '<br>⏳ ' + mln(kutS) + ' — to\'lov tasdig\'i kutilmoqda' : '') + (yoqN ? '<br>📝 ' + yoqN + ' ta yopilgan ishda summa kiritilmagan' : '') + '</span></div></div>';
+    '<div class="kpi wide"><b>' + mln(summa) + '</b><span>işga olingan summa · yopilgan işlar' + (kutS ? '<br>⏳ ' + mln(kutS) + ' — tölov tasdiği kutilmoqda' : '') + (yoqN ? '<br>📝 ' + yoqN + ' ta yopilgan işda summa kiritilmagan' : '') + '</span></div></div>';
   h += '<h2>⏱ Vaqt qayerda ketyapti</h2><div class="card">' +
-    '<div class="bar"><span>⏳ Ustaga berilguncha</span><div class="tr"><div class="fl" style="background:var(--orange);width:' + pr(kutO, jamO) + '%"></div></div><span class="v">' + dav(kutO) + '</span></div>' +
-    '<div class="bar"><span>🔧 Usta ishladi</span><div class="tr"><div class="fl" style="width:' + pr(ustO, jamO) + '%"></div></div><span class="v">' + dav(ustO) + '</span></div>' +
+    '<div class="bar"><span>⏳ Ustaga berilgunça</span><div class="tr"><div class="fl" style="background:var(--orange);width:' + pr(kutO, jamO) + '%"></div></div><span class="v">' + dav(kutO) + '</span></div>' +
+    '<div class="bar"><span>🔧 Usta işladi</span><div class="tr"><div class="fl" style="width:' + pr(ustO, jamO) + '%"></div></div><span class="v">' + dav(ustO) + '</span></div>' +
     '<div class="bar"><span><b>⏱ Jami</b></span><div class="tr"><div class="fl" style="background:var(--charcoal);width:' + (jamO ? 100 : 0) + '%"></div></div><span class="v">' + dav(jamO) + '</span></div></div>';
   // ustalar
   const us = {};
   L.forEach(i => { if (!i.usta || i.otkaz) return; const x = us[i.usta] || (us[i.usta] = { y: 0, t: [], o: 0 });
     if (i.yopildi && ichida(i.y)) { x.y++; if (i.ustaMin != null) x.t.push(i.ustaMin); } if (!i.yopildi) x.o++; });
   const ul = Object.keys(us).sort((a, b) => us[b].y - us[a].y);
-  h += '<h2>👷 Ustalar</h2><div class="card">' + (ul.length ? '<table class="tbl"><tr><th>Usta</th><th>Yopgan</th><th>O\'rt. vaqt</th><th>Hozir</th></tr>' +
-    ul.map(u => '<tr><td>' + esc(u) + '</td><td>' + us[u].y + '</td><td>' + dav(ort(us[u].t)) + '</td><td>' + (us[u].o ? '🔒 ' + us[u].o : '🟢') + '</td></tr>').join('') + '</table>' : '<div class="muted">Ma\'lumot yo\'q</div>') + '</div>';
-  h += barlar('🏢 Filiallar', sana(T, i => i.filial)) + barlar('🙋 Ish bergan xodimlar', sana(T, i => i.shaxs)) +
-    barlar('🛠 Ish turlari', (() => { const m = {}; T.filter(i => !i.otkaz).forEach(i => i.ishlar.forEach(x => m[x.turi] = (m[x.turi] || 0) + 1)); return m; })());
+  h += '<h2>👷 Ustalar</h2><div class="card">' + (ul.length ? '<table class="tbl"><tr><th>Usta</th><th>Yopgan</th><th>Ört. vaqt</th><th>Hozir</th></tr>' +
+    ul.map(u => '<tr><td>' + esc(u) + '</td><td>' + us[u].y + '</td><td>' + dav(ort(us[u].t)) + '</td><td>' + (us[u].o ? '🔒 ' + us[u].o : '🟢') + '</td></tr>').join('') + '</table>' : '<div class="muted">Maʼlumot yöq</div>') + '</div>';
+  h += barlar('🏢 Filiallar', sana(T, i => i.filial)) + barlar('🙋 Iş bergan xodimlar', sana(T, i => i.shaxs)) +
+    barlar('🛠 Iş turlari', (() => { const m = {}; T.filter(i => !i.otkaz).forEach(i => i.ishlar.forEach(x => m[x.turi] = (m[x.turi] || 0) + 1)); return m; })());
   const otk = T.filter(i => i.otkaz);
   if (otk.length) h += barlar('❌ Otkaz sabablari', sana(otk, i => !i.sabab || /ko.rsatilmagan/i.test(i.sabab) ? 'Belgilanmagan' : i.sabab));
-  h += '<button class="btn ghost" id="exp">📄 Shu davrni Excel\'ga yuklash</button>';
-  h += '<p class="muted small" style="margin:14px 4px">Hisob «Yangi Ishlar» varag\'idagi ishlardan. Davr: tushgan ishlar — tushgan sanasi bo\'yicha, yopilganlar — yopilgan sanasi bo\'yicha.</p>';
+  h += '<button class="btn ghost" id="exp">📄 Şu davrni Excel\'ga yuklaş</button>';
+  h += '<p class="muted small" style="margin:14px 4px">Hisob «Yangi Işlar» varağidagi işlardan. Davr: tuşgan işlar — tuşgan sanasi böyiça, yopilganlar — yopilgan sanasi böyiça.</p>';
   $('main').innerHTML = h;
   [...$('dv').children].forEach(b => b.onclick = () => { davr = b.dataset.v; hap('sel'); if (davr === 'hammasi' && D.arxivN && !ARX) { ARX = true; return yukla(); } chiz(); });
   $('exp').onclick = async () => { const b = $('exp'); b.disabled = true; b.textContent = 'Tayyorlanmoqda…';
     try { const r = await api({ api: 'export', dan: chegara === '0000' ? '' : chegara }); if (!r.ok) throw new Error(r.xato); hap('success'); xabar(r.natija.join('\n')); }
-    catch (e) { xabar('⚠️ ' + e.message); } b.disabled = false; b.textContent = '📄 Shu davrni Excel\'ga yuklash'; };
+    catch (e) { xabar('⚠️ ' + e.message); } b.disabled = false; b.textContent = '📄 Şu davrni Excel\'ga yuklaş'; };
 }
 const pr = (a, b) => a == null || !b ? 0 : Math.max(3, Math.round(a / b * 100));
 const sana = (L, f) => { const m = {}; L.forEach(i => { const k = f(i) || '—'; m[k] = (m[k] || 0) + 1; }); return m; };
 function barlar(t, m) {
   const k = Object.keys(m).sort((a, b) => m[b] - m[a]); const mx = Math.max(1, ...k.map(x => m[x]));
-  return '<h2>' + t + '</h2><div class="card">' + (k.length ? k.map(x => '<div class="bar"><span>' + esc(x) + '</span><div class="tr"><div class="fl" style="width:' + Math.round(m[x] / mx * 100) + '%"></div></div><span class="v">' + m[x] + '</span></div>').join('') : '<div class="muted">Ma\'lumot yo\'q</div>') + '</div>';
+  return '<h2>' + t + '</h2><div class="card">' + (k.length ? k.map(x => '<div class="bar"><span>' + esc(x) + '</span><div class="tr"><div class="fl" style="width:' + Math.round(m[x] / mx * 100) + '%"></div></div><span class="v">' + m[x] + '</span></div>').join('') : '<div class="muted">Maʼlumot yöq</div>') + '</div>';
 }
 
 /* ---------- 💰 Moliya / Balans ---------- */
@@ -883,25 +885,25 @@ async function ekMoliya() {
     if (ekran !== 'moliya' || moliyaOy !== oy) return;
     const MR = MOL[oy], M = MR.moliya, j = k => M.reduce((s, x) => s + (x[k] || 0), 0);
     const KT = MR.kutish || [], TR = MR.tarix || [];
-    const tlKarta = (t, tug) => '<div class="card"><div class="row"><div><div class="name">' + (t.turi === 'ish' ? '💵 Ish to\'lovi' : '🏦 Depozit') + ' · ' + esc(t.usta) + '</div>' +
+    const tlKarta = (t, tug) => '<div class="card"><div class="row"><div><div class="name">' + (t.turi === 'ish' ? '💵 Iş tölovi' : '🏦 Depozit') + ' · ' + esc(t.usta) + '</div>' +
       '<span class="pill ' + (t.holat === 'Tasdiqlandi' ? 'done' : t.holat === 'Rad etildi' ? 'otk' : 'wait') + '">' + (t.holat === 'Tasdiqlandi' ? '✅' : t.holat === 'Rad etildi' ? '❌' : '⏳') + ' ' + esc(t.holat) + '</span></div>' +
       '<div class="time">' + esc(t.vaqt) + '</div></div>' +
       '<div class="mrow"><span>' + (t.mijoz ? esc(t.mijoz) : 'Summa') + '</span><b>' + pul(t.summa) + ' · ' + (t.usul === 'karta' ? '💳 karta' : '💵 naqd') + '</b></div>' +
       (t.izoh ? '<div class="line small"><span class="i">📝</span><span>' + esc(t.izoh) + '</span></div>' : '') +
       (t.kim ? '<div class="line muted small"><span class="i">👤</span><span>' + esc(t.kim) + ' · ' + esc(t.tvaqt) + '</span></div>' : '') +
-      (tug ? '<div class="acts"><button class="act" data-tq="1" data-id="' + esc(t.id) + '">✅ Tasdiqlash</button><button class="act red" data-tq="0" data-id="' + esc(t.id) + '">❌ Rad etish</button></div>' : '') + '</div>';
+      (tug ? '<div class="acts"><button class="act" data-tq="1" data-id="' + esc(t.id) + '">✅ Tasdiqlaş</button><button class="act red" data-tq="0" data-id="' + esc(t.id) + '">❌ Rad etiş</button></div>' : '') + '</div>';
     if (D.rol.admin && KT.length) h += '<h2>⏳ Tasdiq kutayotganlar · ' + KT.length + '</h2>' + KT.map(t => tlKarta(t, true)).join('');
-    if (!D.rol.admin && D.rol.usta) h += '<button class="btn" id="dp_yangi">🏦 Depozit kiritish</button>' + (KT.length ? '<h2>⏳ Tasdiq kutilmoqda</h2>' + KT.map(t => tlKarta(t, false)).join('') : '');
-    if (D.rol.admin) h += '<div class="kpis"><div class="kpi"><b>' + j('oyIsh') + '</b><span>yopilgan ish (pul olingan oy)</span></div><div class="kpi"><b>' + mln(j('oySumma')) + '</b><span>ishga olingan summa' + (j('oyKutish') ? '<br>⏳ +' + mln(j('oyKutish')) + ' tasdiq kutmoqda' : '') + '</span></div>' +
+    if (!D.rol.admin && D.rol.usta) h += '<button class="btn" id="dp_yangi">🏦 Depozit kiritiş</button>' + (KT.length ? '<h2>⏳ Tasdiq kutilmoqda</h2>' + KT.map(t => tlKarta(t, false)).join('') : '');
+    if (D.rol.admin) h += '<div class="kpis"><div class="kpi"><b>' + j('oyIsh') + '</b><span>yopilgan iş (pul olingan oy)</span></div><div class="kpi"><b>' + mln(j('oySumma')) + '</b><span>işga olingan summa' + (j('oyKutish') ? '<br>⏳ +' + mln(j('oyKutish')) + ' tasdiq kutmoqda' : '') + '</span></div>' +
       '<div class="kpi"><b>' + mln(j('oyServis')) + '</b><span>servis daromadi 10%</span></div><div class="kpi"><b>' + mln(j('oyDepozit')) + '</b><span>depozit</span></div></div>';
-    h += M.slice().sort((a, b) => b.oySumma - a.oySumma).map(x => '<div class="card"><div class="row"><div class="name">' + esc(x.nom) + '</div><div class="time">' + x.oyIsh + ' ta ish</div></div>' +
-      '<div class="mrow"><span>Ishga olingan summa</span><b>' + pul(x.oySumma) + '</b></div>' +
+    h += M.slice().sort((a, b) => b.oySumma - a.oySumma).map(x => '<div class="card"><div class="row"><div class="name">' + esc(x.nom) + '</div><div class="time">' + x.oyIsh + ' ta iş</div></div>' +
+      '<div class="mrow"><span>Işga olingan summa</span><b>' + pul(x.oySumma) + '</b></div>' +
       (x.oyKutish ? '<div class="mrow" style="color:var(--orange)"><span>⏳ Tasdiq kutmoqda</span><b>' + pul(x.oyKutish) + '</b></div>' : '') +
       '<div class="mrow"><span>Servis daromadi 10%</span><b>' + pul(x.oyServis) + '</b></div>' +
-      '<div class="mrow"><span>Depozit (shu oy)</span><b>' + pul(x.oyDepozit) + '</b></div>' +
+      '<div class="mrow"><span>Depozit (şu oy)</span><b>' + pul(x.oyDepozit) + '</b></div>' +
       '<div class="mrow" style="border-top:1px solid var(--line);margin-top:4px;padding-top:8px"><span>Umumiy balans</span><b class="' + (x.balans < 0 ? 'neg' : 'pos') + '">' + pul(x.balans) + '</b></div></div>').join('');
-    h += '<p class="muted small" style="margin:12px 4px">Balans = barcha depozitlar − barcha servis daromadi (10%), ustaning varag\'idagi hamma qatorlar bo\'yicha. Manfiy bo\'lsa — usta qarzdor.</p>';
-    if (TR.length) h += '<h2>So\'nggi to\'lov va depozitlar</h2>' + TR.slice(0, 15).map(t => tlKarta(t, false)).join('');
+    h += '<p class="muted small" style="margin:12px 4px">Balans = barça depozitlar − barça servis daromadi (10%), ustaning varağidagi hamma qatorlar böyiça. Manfiy bölsa — usta qarzdor.</p>';
+    if (TR.length) h += '<h2>Sönggi tölov va depozitlar</h2>' + TR.slice(0, 15).map(t => tlKarta(t, false)).join('');
     $('main').innerHTML = h;
     document.querySelectorAll('[data-tq]').forEach(b => b.onclick = () => {
       const ok = b.dataset.tq === '1', id = b.dataset.id;
@@ -910,16 +912,16 @@ async function ekMoliya() {
     });
     if ($('dp_yangi')) $('dp_yangi').onclick = () => {
       TU = '';
-      oyna('🏦 Depozit kiritish', '<label class="f">💰 Summa *</label><input class="in" inputmode="numeric" id="dp_s" placeholder="Summa, so\'m">' +
-        '<label class="f">To\'lov usuli *</label><div class="chips"><button class="chip" data-tu="naqd">💵 Naqd</button><button class="chip" data-tu="karta">💳 Karta</button></div>' +
-        '<label class="f">📝 Izoh</label><input class="in" id="dp_i" placeholder="Kimga topshirildi va h.k.">' +
-        '<button class="btn" id="dp_ok">💾 Yuborish</button><p class="muted small" style="margin:8px 2px">Rahbar tasdiqlagach balansga qo\'shiladi.</p>');
+      oyna('🏦 Depozit kiritiş', '<label class="f">💰 Summa *</label><input class="in" inputmode="numeric" id="dp_s" placeholder="Summa, so\'m">' +
+        '<label class="f">Tölov usuli *</label><div class="chips"><button class="chip" data-tu="naqd">💵 Naqd</button><button class="chip" data-tu="karta">💳 Karta</button></div>' +
+        '<label class="f">📝 Izoh</label><input class="in" id="dp_i" placeholder="Kimga topşirildi va h.k.">' +
+        '<button class="btn" id="dp_ok">💾 Yuboriş</button><p class="muted small" style="margin:8px 2px">Rahbar tasdiqlagaç balansga qöşiladi.</p>');
       tolovUlash();
       $('dp_s').oninput = () => { $('dp_s').value = fmtSon($('dp_s').value); };
       $('dp_ok').onclick = () => {
         const sm = $('dp_s').value.replace(/\D/g, '');
         if (!(+sm > 0)) return xabar('💰 Summani kiriting.');
-        if (!TU) return xabar('To\'lov usulini tanlang.');
+        if (!TU) return xabar('Tölov usulini tanlang.');
         amal({ api: 'depozit', summa: sm, usul: TU, izoh: $('dp_i').value }, $('dp_ok'), 'Yuborilmoqda…');
       };
     };
@@ -933,7 +935,7 @@ function yangiForma() { return { sana: D.meta.bugun, mijoz: '', tel: '', manzil:
 function ekYangi() {
   if (!F) F = yangiForma();
   if (natija) {
-    $('main').innerHTML = '<div class="ok">' + natija.map(esc).join('<br>') + '</div><button class="btn" id="yana">➕ Yana yangi ish</button>';
+    $('main').innerHTML = '<div class="ok">' + natija.map(esc).join('<br>') + '</div><button class="btn" id="yana">➕ Yana yangi iş</button>';
     $('yana').onclick = () => { natija = null; F = yangiForma(); chiz(); };
     return;
   }
@@ -943,8 +945,8 @@ function ekYangi() {
   h += '<label class="f">👤 Mijoz ismi *</label><input class="in" id="f_mijoz" placeholder="Masalan: Abdulloh aka" value="' + esc(F.mijoz) + '">';
   h += '<label class="f">📞 Telefon</label><input class="in" id="f_tel" type="tel" inputmode="tel" placeholder="90 123 45 67" value="' + esc(F.tel) + '"><div id="f_tarix">' + (F.tarixHtml || '') + '</div>';
   h += '<label class="f">📍 Manzil</label><input class="in" id="f_manzil" placeholder="Mahalla, ko\'cha, mo\'ljal" value="' + esc(F.manzil) + '">';
-  h += '<label class="f">🛠 Ish turi * — bir nechtasini tanlash mumkin</label><div class="chips">' +
-    m.turlar.map(t => '<button class="chip' + (F.turlar.includes(t) ? ' on' : '') + '" data-tur="' + esc(t) + '">' + esc(t) + '</button>').join('') + '</div>';
+  h += '<label class="f">🛠 Iş turi * — bir neçtasini tanlaş mumkin</label><div class="chips">' +
+    m.turlar.map(t => '<button class="chip' + (F.turlar.includes(t) ? ' on' : '') + '" data-tur="' + esc(t) + '">' + esc(ya(t)) + '</button>').join('') + '</div>';
   F.turlar.forEach(t => {
     h += '<div class="tur"><div class="tn">' + esc(t) + '</div><div class="g">' +
       '<div class="step"><button data-m="' + esc(t) + '">−</button><span>' + (F.soni[t] || 1) + '</span><button data-p="' + esc(t) + '">+</button></div>' +
@@ -954,12 +956,12 @@ function ekYangi() {
     '<button class="chip' + (!F.usta ? ' on' : '') + '" data-usta="">⏳ Keyin tanlanadi</button>' +
     m.ustalar.map(u => '<button class="chip' + (F.usta === u ? ' on' : '') + '" data-usta="' + esc(u) + '"' + (band[u] ? ' disabled' : '') + '>' + (band[u] ? ((D.ustalar.find(x => x.nom === u) || {}).qarz != null ? '💸 ' : '🔒 ') : '') + esc(u) + '</button>').join('') + '</div>';
   if (!D.rol.xodim) {
-    h += '<label class="f">🙋 Ishni bergan</label><select class="in" id="f_shaxs"><option value="">— tanlang —</option>' + m.shaxslar.map(s => '<option' + (F.shaxs === s ? ' selected' : '') + '>' + esc(s) + '</option>').join('') + '</select>';
+    h += '<label class="f">🙋 Işni bergan</label><select class="in" id="f_shaxs"><option value="">— tanlang —</option>' + m.shaxslar.map(s => '<option' + (F.shaxs === s ? ' selected' : '') + '>' + esc(s) + '</option>').join('') + '</select>';
     h += '<label class="f">🏢 Filial</label><select class="in" id="f_filial"><option value="">— tanlang —</option>' + m.filiallar.map(s => '<option' + (F.filial === s ? ' selected' : '') + '>' + esc(s) + '</option>').join('') + '</select>';
-  } else h += '<p class="muted small" style="margin:12px 4px 0">🙋 Ishni bergan: <b>' + esc(D.rol.xodim) + '</b> · ' + esc(D.rol.filial) + '</p>';
-  h += '<label class="f">📝 Izoh</label><textarea class="in" id="f_izoh" placeholder="Nima qilish kerak, qachon borish…">' + esc(F.izoh) + '</textarea>';
+  } else h += '<p class="muted small" style="margin:12px 4px 0">🙋 Işni bergan: <b>' + esc(D.rol.xodim) + '</b> · ' + esc(D.rol.filial) + '</p>';
+  h += '<label class="f">📝 Izoh</label><textarea class="in" id="f_izoh" placeholder="Nima qiliş kerak, qaçon boriş…">' + esc(F.izoh) + '</textarea>';
   const jami = F.turlar.reduce((s, t) => s + (Number(String(F.summa[t] || '').replace(/\D/g, '')) || 0), 0);
-  h += '<button class="btn" id="f_yubor">💾 Saqlash va yuborish' + (jami ? ' · ' + pul(jami) : '') + '</button>';
+  h += '<button class="btn" id="f_yubor">💾 Saqlaş va yuboriş' + (jami ? ' · ' + pul(jami) : '') + '</button>';
   $('main').innerHTML = h;
 
   const oqi = () => ['sana', 'mijoz', 'tel', 'manzil', 'izoh', 'shaxs', 'filial'].forEach(k => { const e = $('f_' + k); if (e) F[k] = e.value; });
@@ -969,7 +971,7 @@ function ekYangi() {
   document.querySelectorAll('[data-sm]').forEach(e => e.oninput = () => {
     const raw = e.value.replace(/\D/g, ''); F.summa[e.dataset.sm] = raw ? raw.replace(/\B(?=(\d{3})+(?!\d))/g, ' ') : ''; e.value = F.summa[e.dataset.sm];
     const j = F.turlar.reduce((s, t) => s + (Number(String(F.summa[t] || '').replace(/\D/g, '')) || 0), 0);
-    $('f_yubor').textContent = '💾 Saqlash va yuborish' + (j ? ' · ' + pul(j) : ''); });
+    $('f_yubor').textContent = '💾 Saqlaş va yuboriş' + (j ? ' · ' + pul(j) : ''); });
   document.querySelectorAll('[data-usta]').forEach(b => b.onclick = () => { oqi(); F.usta = b.dataset.usta; hap('sel'); chiz(); });
   let _tt = null;
   const tBog = () => { const b = $('f_mk'); if (b) b.onclick = () => mijozKarta({ k: b.dataset.k }); };
@@ -986,14 +988,14 @@ function ekYangi() {
   $('f_yubor').onclick = async () => {
     oqi();
     if (!F.mijoz.trim()) return xabar('Mijoz ismini yozing.');
-    if (!F.turlar.length) return xabar('Kamida bitta ish turini tanlang.');
+    if (!F.turlar.length) return xabar('Kamida bitta iş turini tanlang.');
     const btn = $('f_yubor'); btn.disabled = true; btn.textContent = 'Saqlanmoqda…';
     try {
       const r = await api({ api: 'yangi', d: { sana: F.sana, mijoz: F.mijoz, tel: F.tel, manzil: F.manzil, izoh: F.izoh, usta: F.usta, shaxs: F.shaxs, filial: F.filial,
         ishlar: F.turlar.map(t => ({ turi: t, soni: F.soni[t] || 1, summa: String(F.summa[t] || '').replace(/\D/g, '') })) } });
       if (!r.ok) throw new Error(r.xato || 'Saqlanmadi');
       hap('success'); natija = r.natija; F = null; yukla(true);
-    } catch (e) { btn.disabled = false; btn.textContent = '💾 Saqlash va yuborish'; hap('error'); xabar('⚠️ ' + e.message); }
+    } catch (e) { btn.disabled = false; btn.textContent = '💾 Saqlaş va yuboriş'; hap('error'); xabar('⚠️ ' + e.message); }
   };
 }
 
@@ -1005,23 +1007,23 @@ function mijozFormaHtml(r) {
     const m = r.m, x = m.ox, ism = String(m.ism || '').replace(/\s+\d{4}$/, '');
     return '<div class="card" style="margin:8px 0 0;padding:12px 12px 10px;border-left:4px solid var(--orange)">' +
       '<div style="font-weight:800;color:var(--orange);margin-bottom:4px">🔁 Takroriy mijoz — ' + (m.mur + 1) + '-marta murojaat</div>' +
-      qat('👤', '<b>' + esc(ism) + '</b>' + (m.birinchi ? ' · birinchi ish: ' + esc(m.birinchi) : '')) +
-      qat('💰', 'Jami: <b>' + (m.summa ? pul(m.summa) : '—') + '</b> · ✅ ' + m.ish + ' ta ish' + (m.otkaz ? ' · ❌ ' + m.otkaz + ' otkaz' : '')) +
+      qat('👤', '<b>' + esc(ism) + '</b>' + (m.birinchi ? ' · birinçi iş: ' + esc(m.birinchi) : '')) +
+      qat('💰', 'Jami: <b>' + (m.summa ? pul(m.summa) : '—') + '</b> · ✅ ' + m.ish + ' ta iş' + (m.otkaz ? ' · ❌ ' + m.otkaz + ' otkaz' : '')) +
       (x ? qat('🛠', 'Oxirgi: <b>' + esc(x.sana) + '</b> · ' + esc(x.turi) + (x.usta ? ' · usta <b>' + esc(x.usta) + '</b>' : '') +
         (x.baho ? ' · ⭐ ' + x.baho.o + ' / 5' + (x.baho.past ? ' 😞' : '') : '')) : '') +
-      (m.ochiq ? qat('⏳', '<b>Hozir ochiq ishi bor</b>' + (m.ochiqTuri ? ' — ' + esc(m.ochiqTuri) : '') + (m.ochiqUsta ? ' · usta <b>' + esc(m.ochiqUsta) + '</b>' : ' · usta hali yo\'q') + '. Ikki marta kiritmang!', 'color:var(--red)')
-        : x && x.holat !== 'otkaz' && x.kun != null && x.kun <= 30 ? qat('⚠️', '<b>' + x.kun + ' kun oldin</b> ish qilingan — takroriy nosozlik bo\'lishi mumkin', 'color:var(--red)') : '') +
-      '<button class="act" id="f_mk" data-k="' + esc(m.k) + '" style="margin-top:8px">👤 Kartochkani ochish</button></div>';
+      (m.ochiq ? qat('⏳', '<b>Hozir oçiq işi bor</b>' + (m.ochiqTuri ? ' — ' + esc(m.ochiqTuri) : '') + (m.ochiqUsta ? ' · usta <b>' + esc(m.ochiqUsta) + '</b>' : ' · usta hali yöq') + '. Ikki marta kiritmang!', 'color:var(--red)')
+        : x && x.holat !== 'otkaz' && x.kun != null && x.kun <= 30 ? qat('⚠️', '<b>' + x.kun + ' kun oldin</b> iş qilingan — takroriy nosozlik bölişi mumkin', 'color:var(--red)') : '') +
+      '<button class="act" id="f_mk" data-k="' + esc(m.k) + '" style="margin-top:8px">👤 Kartoçkani oçiş</button></div>';
   }
-  const och = r.ochiq ? qat('⏳', '<b>Hozir ochiq ishi bor</b>. Ikki marta kiritmang!', 'color:var(--red);margin:6px 2px') : '';
+  const och = r.ochiq ? qat('⏳', '<b>Hozir oçiq işi bor</b>. Ikki marta kiritmang!', 'color:var(--red);margin:6px 2px') : '';
   if (r.tarix) { const t = r.tarix;
     return och + qat('🔁', '<b>Takroriy mijoz</b> — oldin ' + t.n + ' marta. Oxirgisi: ' + esc(t.sana) + (t.usta ? ', ' + esc(t.usta) : '') + (t.turi ? ' (' + esc(t.turi) + ')' : '') + (t.mijoz ? ' — ' + esc(t.mijoz) : ''), 'color:var(--orange);margin:6px 2px'); }
-  if (r.yangi) return qat('🆕', '<b>Yangi mijoz</b> — bazada yo\'q', 'color:var(--teal);margin:6px 2px');
+  if (r.yangi) return qat('🆕', '<b>Yangi mijoz</b> — bazada yöq', 'color:var(--teal);margin:6px 2px');
   return '';
 }
 /* ---------- Ishni tugatdim ---------- */
 /* ⭐ Mijoz bahosi — usta ishni yopgach telefonni mijozga beradi */
-const BAHO_S = ['⏰ Usta vaqtida keldimi?', '🛠 Ish sifati sizni qoniqtirdimi?', '🧹 Usta ishdan keyin joyni toza qoldirdimi?', '🤝 Ustaning muomalasi qanday bo\'ldi?', '📱 Usta tizimdan foydalanishni tushuntirib berdimi?'];
+const BAHO_S = ['⏰ Usta vaqtida keldimi?', '🛠 Iş sifati sizni qoniqtirdimi?', '🧹 Usta işdan keyin joyni toza qoldirdimi?', '🤝 Ustaning muomalasi qanday böldi?', '📱 Usta tizimdan foydalanişni tuşuntirib berdimi?'];
 const BAHO_T = [[1, '😞', 'Qoniqarsiz'], [3, '🙂', 'Qoniqarli'], [5, '🤩', 'A\'lo']];
 function bahoSorov(h, keyin) {
   const J = BAHO_S.map(() => 0);
@@ -1029,7 +1031,7 @@ function bahoSorov(h, keyin) {
   oyna('⭐ Mijoz bahosi', '<p class="muted small" style="margin:0 2px 10px">Telefonni mijozga bering. Har savolga bittadan javob tanlang' + (i ? ' — <b>' + esc(i.mijoz) + '</b>' : '') + '.</p>' +
     BAHO_S.map((s, k) => '<div class="card" style="padding:12px"><div style="font-weight:700;margin-bottom:8px">' + (k + 1) + '. ' + esc(s) + '</div>' +
       '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px">' + BAHO_T.map(t => '<button class="chip" data-bq="' + k + '" data-bv="' + t[0] + '" style="display:flex;flex-direction:column;align-items:center;padding:10px 4px;font-size:13px"><span style="font-size:24px">' + t[1] + '</span>' + t[2] + '</button>').join('') + '</div></div>').join('') +
-    '<button class="btn" id="bh_ok" disabled>✅ Yuborish</button><button class="btn ghost" id="bh_otk" style="margin-top:8px">⏭ O\'tkazib yuborish</button>');
+    '<button class="btn" id="bh_ok" disabled>✅ Yuboriş</button><button class="btn ghost" id="bh_otk" style="margin-top:8px">⏭ Ötkazib yuboriş</button>');
   document.querySelectorAll('[data-bq]').forEach(b => b.onclick = () => {
     const k = +b.dataset.bq; J[k] = +b.dataset.bv; hap('sel');
     document.querySelectorAll('[data-bq="' + k + '"]').forEach(x => x.classList.toggle('on', x === b));
@@ -1038,22 +1040,22 @@ function bahoSorov(h, keyin) {
   const yubor = async (body, btn) => {
     btn.disabled = true; const t0 = btn.textContent; btn.textContent = 'Yuborilmoqda…';
     try { const r = await api(Object.assign({ api: 'baho', h }, body)); if (!r.ok) throw new Error(r.xato);
-      hap('success'); yop(); const t = body.otkaz ? '' : '🙏 Rahmat! Fikringiz biz uchun muhim.'; if (keyin) keyin(t); else { if (t) xabar(t); molTozala(); yukla(true); }
+      hap('success'); yop(); const t = body.otkaz ? '' : '🙏 Rahmat! Fikringiz biz uçun muhim.'; if (keyin) keyin(t); else { if (t) xabar(t); molTozala(); yukla(true); }
     } catch (e) { btn.disabled = false; btn.textContent = t0; hap('error'); xabar('⚠️ ' + e.message); }
   };
   $('bh_ok').onclick = () => yubor({ javob: J }, $('bh_ok'));
   $('bh_otk').onclick = () => { const go = () => yubor({ otkaz: true }, $('bh_otk'));
     tg && tg.showConfirm ? tg.showConfirm('Mijoz bahosiz qoldirilsinmi? Bu ham qayd qilinadi.', y => y && go()) : go(); };
 }
-const bahoBelgi = b => !b ? '' : b.holat === 'O\'tkazildi' ? '⏭ Baho o\'tkazilgan' : '⭐ Mijoz bahosi: ' + b.o + ' / 5' + (b.past ? ' · 😞 qoniqmagan' : '');
+const bahoBelgi = b => !b ? '' : b.holat === 'O\'tkazildi' ? '⏭ Baho ötkazilgan' : '⭐ Mijoz bahosi: ' + b.o + ' / 5' + (b.past ? ' · 😞 qoniqmagan' : '');
 function tugat(h, btn) {
   const R = [];   // tayyor JPEG (dataURL)
-  oyna('✅ Ishni tugatish', '<p class="muted small" style="margin:0 2px 10px">📸 O\'rnatilgan <b>har bir joyning</b> rasmini yuklang (20 tagacha). <b>Rasmsiz ish yopilmaydi.</b></p>' +
+  oyna('✅ Işni tugatiş', '<p class="muted small" style="margin:0 2px 10px">📸 Örnatilgan <b>har bir joyning</b> rasmini yuklang (20 tagaça). <b>Rasmsiz iş yopilmaydi.</b></p>' +
     '<div id="rp" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px"></div>' +
-    '<label class="btn ghost" id="rl" style="display:block;text-align:center;cursor:pointer">📷 Rasm qo\'shish<input type="file" accept="image/*" multiple id="rf" style="display:none"></label>' +
-    '<div id="stk"><div class="card muted small" style="padding:12px">🏷 Stiker tekshirilmoqda…</div></div>' +
+    '<label class="btn ghost" id="rl" style="display:block;text-align:center;cursor:pointer">📷 Rasm qöşiş<input type="file" accept="image/*" multiple id="rf" style="display:none"></label>' +
+    '<div id="stk"><div class="card muted small" style="padding:12px">🏷 Stiker tekşirilmoqda…</div></div>' +
     (ishTop(h) ? tolovMaydon(ishTop(h)) : '') +
-    '<button class="btn" id="r_ok" disabled>✅ Ishni yopish</button>');
+    '<button class="btn" id="r_ok" disabled>✅ Işni yopiş</button>');
   tolovUlash();
   /* 🏷 Stiker: mijozda hali bo'lmasa — yopishtirilgan stiker rasmi yoki sabab majburiy */
   const S = { kerak: null, rasm: '', sabab: '' };
@@ -1063,11 +1065,11 @@ function tugat(h, btn) {
     const el = $('stk'); if (!el) return;
     if (!S.kerak) { el.innerHTML = '<div class="card small" style="padding:12px">🏷 Bu mijozda Halowatt stikeri bor ✅</div>'; return tugmaYangila(); }
     el.innerHTML = '<div class="card" style="padding:12px"><div style="font-weight:700;margin-bottom:6px">🏷 Stiker</div>' +
-      '<p class="muted small" style="margin:0 0 10px">Mijozning NVR / kamera yoniga yangi Halowatt stikerini yopishtiring (eski stiker bo\'lsa — ustidan) va <b>rasmini</b> yuklang.</p>' +
+      '<p class="muted small" style="margin:0 0 10px">Mijozning NVR / kamera yoniga yangi Halowatt stikerini yopiştiring (eski stiker bölsa — ustidan) va <b>rasmini</b> yuklang.</p>' +
       (S.rasm ? '<div style="position:relative;margin-bottom:8px"><img src="' + S.rasm + '" style="width:100%;max-height:220px;object-fit:cover;border-radius:10px;display:block"><button id="sx" style="position:absolute;top:6px;right:6px;border:0;border-radius:50%;width:26px;height:26px;background:rgba(0,0,0,.6);color:#fff">✕</button></div>' :
         S.sabab ? '' : '<label class="btn ghost" style="display:block;text-align:center;cursor:pointer;margin-bottom:8px">📷 Stiker rasmi<input type="file" accept="image/*" capture="environment" id="sf" style="display:none"></label>') +
-      (S.rasm ? '' : '<div class="muted small" style="margin:4px 2px 6px">Yopishtira olmadingizmi? Sababini tanlang:</div><div style="display:flex;flex-wrap:wrap;gap:6px">' +
-        sabablar.map(x => '<button class="chip' + (S.sabab === x ? ' on' : '') + '" data-ss="' + esc(x) + '">' + esc(x) + '</button>').join('') + '</div>') + '</div>';
+      (S.rasm ? '' : '<div class="muted small" style="margin:4px 2px 6px">Yopiştira olmadingizmi? Sababini tanlang:</div><div style="display:flex;flex-wrap:wrap;gap:6px">' +
+        sabablar.map(x => '<button class="chip' + (S.sabab === x ? ' on' : '') + '" data-ss="' + esc(x) + '">' + esc(ya(x)) + '</button>').join('') + '</div>') + '</div>';
     if ($('sx')) $('sx').onclick = () => { S.rasm = ''; chizS(sabablar); };
     if ($('sf')) $('sf').onchange = async e => { const f = e.target.files[0]; if (!f) return; try { S.rasm = await kichrayt(f); S.sabab = ''; hap('sel'); } catch (x) { xabar('⚠️ ' + x.message); } chizS(sabablar); };
     document.querySelectorAll('[data-ss]').forEach(b => b.onclick = () => { S.sabab = S.sabab === b.dataset.ss ? '' : b.dataset.ss; hap('sel'); chizS(sabablar); });
@@ -1079,14 +1081,14 @@ function tugat(h, btn) {
     $('rp').innerHTML = R.map((d, k) => '<div style="position:relative"><img src="' + d + '" style="width:100%;aspect-ratio:1;object-fit:cover;border-radius:10px;display:block">' +
       '<button data-rx="' + k + '" style="position:absolute;top:4px;right:4px;border:0;border-radius:50%;width:24px;height:24px;background:rgba(0,0,0,.6);color:#fff">✕</button></div>').join('');
     document.querySelectorAll('[data-rx]').forEach(b => b.onclick = () => { R.splice(+b.dataset.rx, 1); chizR(); });
-    $('r_ok').disabled = !tayyor(); $('rl').style.display = R.length >= 20 ? 'none' : 'block'; $('rl').firstChild.textContent = R.length ? '📷 Yana rasm qo\'shish (' + R.length + ' / 20)' : '📷 Rasm qo\'shish';
+    $('r_ok').disabled = !tayyor(); $('rl').style.display = R.length >= 20 ? 'none' : 'block'; $('rl').firstChild.textContent = R.length ? '📷 Yana rasm qöşiş (' + R.length + ' / 20)' : '📷 Rasm qöşiş';
   };
   const kichrayt = f => new Promise((ok, no) => {
     const u = URL.createObjectURL(f), im = new Image();
     im.onload = () => { const k = Math.min(1, 1024 / Math.max(im.width, im.height)), c = document.createElement('canvas');
       c.width = Math.round(im.width * k); c.height = Math.round(im.height * k);
       c.getContext('2d').drawImage(im, 0, 0, c.width, c.height); URL.revokeObjectURL(u); ok(c.toDataURL('image/jpeg', 0.7)); };
-    im.onerror = () => { URL.revokeObjectURL(u); no(new Error('Rasmni o\'qib bo\'lmadi')); };
+    im.onerror = () => { URL.revokeObjectURL(u); no(new Error('Rasmni öqib bölmadi')); };
     im.src = u;
   });
   $('rf').onchange = async e => {
@@ -1107,10 +1109,10 @@ function tugat(h, btn) {
         try { const q = await api({ api: 'rasmQosh', h, rasmlar: R.slice(i, i + 10) }); if (q.ok) r.rasm = q.jami; } catch (x) {}
       }
       hap('success'); yop(); if (btn) { btn.disabled = true; btn.textContent = '✅ Yopildi'; }
-      const m = r.oldin ? '✅ Bu ish allaqachon yopilgan.' : '✅ Ish yopildi — ' + r.vaqt + '\n📸 ' + r.rasm + ' ta rasm saqlandi.' + (r.stiker === 'Yopishtirildi' ? '\n🏷 Stiker rasmi saqlandi.' : r.stiker ? '\n🏷 Stiker o\'tkazildi (sabab rahbarga yuborildi).' : '') + (r.tolov ? '\n💵 To\'lov rahbar tasdig\'iga yuborildi.' : r.tolovXato ? '\n⚠️ To\'lov: ' + r.tolovXato : '');
+      const m = r.oldin ? '✅ Bu iş allaqaçon yopilgan.' : '✅ Iş yopildi — ' + r.vaqt + '\n📸 ' + r.rasm + ' ta rasm saqlandi.' + (r.stiker === 'Yopishtirildi' ? '\n🏷 Stiker rasmi saqlandi.' : r.stiker ? '\n🏷 Stiker ötkazildi (sabab rahbarga yuborildi).' : '') + (r.tolov ? '\n💵 Tölov rahbar tasdiğiga yuborildi.' : r.tolovXato ? '\n⚠️ Tölov: ' + r.tolovXato : '');
       if (r.oldin) { xabar(m); molTozala(); await yukla(true); }
       else bahoSorov(h, t => { xabar((t ? t + '\n\n' : '') + m); molTozala(); yukla(true); });
-    } catch (x) { b.textContent = '✅ Ishni yopish'; b.disabled = !tayyor(); hap('error'); xabar('⚠️ ' + x.message); }
+    } catch (x) { b.textContent = '✅ Işni yopiş'; b.disabled = !tayyor(); hap('error'); xabar('⚠️ ' + x.message); }
   };
 }
 
@@ -1122,9 +1124,9 @@ function testBanner() {
   const c = T.chempion, b = T.bugun;
   el.hidden = false;
   const ou = T.oyUstasi, bh = x => x && x.baho ? ' · ⭐ ' + x.baho.o : '';
-  el.innerHTML = '<div class="champs' + (ou ? '' : ' bir') + '"><button class="chc" id="tbtn"><span class="small">🏆 Hafta chempioni · ' + esc(T.chempionHafta) + '</span><b>' + (c ? esc(c.ism) + ' · ' + c.ball + ' ball' : 'Hali aniqlanmagan') + '</b>' +
+  el.innerHTML = '<div class="champs' + (ou ? '' : ' bir') + '"><button class="chc" id="tbtn"><span class="small">🏆 Hafta çempioni · ' + esc(T.chempionHafta) + '</span><b>' + (c ? esc(c.ism) + ' · ' + c.ball + ' ball' : 'Hali aniqlanmagan') + '</b>' +
     '<i>' + (b.mumkin && T.ochiq && !b.tugadi ? '🧠 Bugungi test ›' : '📊 Test reytingi ›') + '</i></button>' +
-    (ou ? '<button class="chc o" id="rbtn"><span class="small">🏅 Oy ustasi · ' + esc(ou.oy) + '</span><b>' + esc(ou.u) + '</b><i>' + ou.ish + ' ta ish' + bh(ou) + ' ›</i></button>' : '') + '</div>';
+    (ou ? '<button class="chc o" id="rbtn"><span class="small">🏅 Oy ustasi · ' + esc(ou.oy) + '</span><b>' + esc(ou.u) + '</b><i>' + ou.ish + ' ta iş' + bh(ou) + ' ›</i></button>' : '') + '</div>';
   if ($('rbtn')) $('rbtn').onclick = () => { ekran = 'reyting'; hap('sel'); chiz(); window.scrollTo(0, 0); };
   $('tbtn').onclick = () => { ekran = 'test'; hap('sel'); chiz(); window.scrollTo(0, 0); };
 }
@@ -1156,14 +1158,14 @@ async function ekReyting() {
   } else if (!RYY[oy]) rytYangi(oy);
   const R = RYT[oy], L = R.royxat || [], med = ['🥇', '🥈', '🥉'], ou = R.oyUstasi;
   if (ou && oy === bu) h += '<div class="card" style="background:linear-gradient(135deg,#E6F7F0,#C8ECDF)"><div class="row"><div><span class="small muted">🏅 Oy ustasi · ' + esc(ou.oy) + '</span><div class="name" style="margin-top:2px">' + esc(ou.u) + '</div></div>' +
-    '<div style="text-align:right"><b>' + ou.ish + ' ta ish</b>' + (ou.baho ? '<div class="small">⭐ ' + ou.baho.o + ' / 5</div>' : '') + '</div></div></div>';
+    '<div style="text-align:right"><b>' + ou.ish + ' ta iş</b>' + (ou.baho ? '<div class="small">⭐ ' + ou.baho.o + ' / 5</div>' : '') + '</div></div></div>';
   h += L.length ? L.map(x => '<div class="ry' + (x.orin <= 3 ? ' top' : '') + (x.men ? ' men' : '') + '"><div class="o">' + (med[x.orin - 1] || x.orin) + '</div>' +
-      '<div class="n"><b>' + esc(x.u) + (x.men ? ' (siz)' : '') + '</b><span>' + (x.baho ? '⭐ ' + x.baho.o + ' / 5 · ' + x.baho.n + ' ta baho' : '⭐ hali baho yo\'q') + '</span></div>' +
-      '<div class="s"><b>' + x.ish + '</b><span>ta ish</span></div></div>').join('')
-    : bosh('📭', 'Bu oyda hali yopilgan ish yo\'q');
+      '<div class="n"><b>' + esc(x.u) + (x.men ? ' (siz)' : '') + '</b><span>' + (x.baho ? '⭐ ' + x.baho.o + ' / 5 · ' + x.baho.n + ' ta baho' : '⭐ hali baho yöq') + '</span></div>' +
+      '<div class="s"><b>' + x.ish + '</b><span>ta iş</span></div></div>').join('')
+    : bosh('📭', 'Bu oyda hali yopilgan iş yöq');
   const men = L.find(x => x.men);
-  if (men && men.orin > 1 && oy === bu) h += '<div class="card"><div class="line"><span>🎯 1-o\'ringa chiqish uchun yana <b>' + (L[0].ish - men.ish + 1) + ' ta ish</b> kerak.</span></div></div>';
-  h += '<p class="muted small" style="margin:12px 4px">Tartib: oyda yopilgan ishlar soni; teng bo\'lsa — mijozlar bahosi (⭐ 5 dan). Oy yakunida 1-o\'rindagi usta keyingi oy davomida ilova tepasida «🏅 Oy ustasi» bo\'lib turadi.</p>';
+  if (men && men.orin > 1 && oy === bu) h += '<div class="card"><div class="line"><span>🎯 1-öringa çiqiş uçun yana <b>' + (L[0].ish - men.ish + 1) + ' ta iş</b> kerak.</span></div></div>';
+  h += '<p class="muted small" style="margin:12px 4px">Tartib: oyda yopilgan işlar soni; teng bölsa — mijozlar bahosi (⭐ 5 dan). Oy yakunida 1-örindagi usta keyingi oy davomida ilova tepasida «🏅 Oy ustasi» bölib turadi.</p>';
   $('main').innerHTML = h; ulash();
 }
 /* 📘 Qo'llanmalar — «Qo'llanmalar» varag'idan; test mavzulari bilan bog'langan */
@@ -1188,12 +1190,12 @@ function qlnHtml(t) {
 function qlnOch(q) { hap('sel'); oyna('📘 ' + q.s, '<span class="pill">' + esc(q.m) + '</span>' + qlnHtml(q.t)); }
 async function ekQollanma() {
   [...$('nav').children].forEach(x => x.classList.remove('on'));
-  let h = '<h2 style="margin:14px 4px 8px">📘 Qo\'llanmalar</h2>';
+  let h = '<h2 style="margin:14px 4px 8px">📘 Qöllanmalar</h2>';
   if (!QLN) $('main').innerHTML = h + '<div class="spin"></div>';
   const L = await qlnYukla(); if (ekran !== 'qollanma') return;
-  h += '<p class="muted small" style="margin:0 4px 10px">Qisqa yo\'riqnomalar — ishda va bilim testiga tayyorlanishda yordam beradi.</p>';
+  h += '<p class="muted small" style="margin:0 4px 10px">Qisqa yöriqnomalar — işda va bilim testiga tayyorlanişda yordam beradi.</p>';
   h += L.length ? L.map((q, i) => '<div class="card" data-q="' + i + '" style="cursor:pointer"><div class="row"><div><span class="small muted">' + esc(q.m) + '</span><div class="name" style="margin-top:2px">' + esc(q.s) + '</div></div><b style="color:var(--teal)">›</b></div></div>').join('')
-    : bosh('📭', 'Hozircha qo\'llanma yo\'q');
+    : bosh('📭', 'Hozirça qöllanma yöq');
   $('main').innerHTML = h;
   document.querySelectorAll('[data-q]').forEach(x => x.onclick = () => qlnOch(L[+x.dataset.q]));
 }
@@ -1202,18 +1204,18 @@ async function ekTest() {
   if (!T) { $('main').innerHTML = '<div class="spin"></div>'; try { await testYukla(); } catch (e) { $('main').innerHTML = '<div class="err">⚠️ ' + esc(e.message) + '</div>'; return; } if (ekran !== 'test') return; }
   const b = T.bugun, med = ['🥇', '🥈', '🥉'];
   let h = '<h2 style="margin:14px 4px 8px">🧠 Kunlik bilim testi</h2><div class="card">';
-  if (!b.mumkin) h += '<div class="line"><span>Test ustalar va xodimlar uchun. Siz reytingni kuzatishingiz mumkin.</span></div>';
-  else if (b.tugadi) h += '<div class="row"><b>✅ Bugungi test topshirildi</b><span class="pill done">+' + b.ball + ' ball</span></div><div class="line small muted"><span>' + b.togri + ' / ' + b.soni + ' to\'g\'ri javob. Ertaga yangi savollar.</span></div>';
-  else if (!T.ochiq) h += '<div class="line"><span>' + (T.juma ? '🕌 Juma — dam olish kuni. Bugun haftaning g\'olibi e\'lon qilinadi. Yangi hafta testi shanba kuni <b>' + esc(T.soat) + '</b> da.' : '⏰ Test har kuni <b>' + esc(T.soat) + '</b> da ochiladi va 23:59 gacha davom etadi. Botdan xabar keladi.') + '</span></div>';
-  else h += '<div class="line"><span>' + b.soni + ' ta savol · har biriga <b>' + T.vaqt + ' soniya</b>. Javobni bosgach o\'zgartirib bo\'lmaydi. Test kuniga 1 marta.</span></div>' +
+  if (!b.mumkin) h += '<div class="line"><span>Test ustalar va xodimlar uçun. Siz reytingni kuzatişingiz mumkin.</span></div>';
+  else if (b.tugadi) h += '<div class="row"><b>✅ Bugungi test topşirildi</b><span class="pill done">+' + b.ball + ' ball</span></div><div class="line small muted"><span>' + b.togri + ' / ' + b.soni + ' töğri javob. Ertaga yangi savollar.</span></div>';
+  else if (!T.ochiq) h += '<div class="line"><span>' + (T.juma ? '🕌 Juma — dam oliş kuni. Bugun haftaning ğolibi eʼlon qilinadi. Yangi hafta testi şanba kuni <b>' + esc(T.soat) + '</b> da.' : '⏰ Test har kuni <b>' + esc(T.soat) + '</b> da oçiladi va 23:59 gaça davom etadi. Botdan xabar keladi.') + '</span></div>';
+  else h += '<div class="line"><span>' + b.soni + ' ta savol · har biriga <b>' + T.vaqt + ' soniya</b>. Javobni bosgaç özgartirib bölmaydi. Test kuniga 1 marta.</span></div>' +
     (b.javob ? '<div class="line small muted"><span>' + b.javob + ' ta savolga javob berilgan (+' + b.ball + ' ball) — davom eting.</span></div>' : '') +
-    '<button class="btn" id="tbosh">' + (b.javob ? '▶️ Davom etish' : '▶️ Testni boshlash') + '</button>';
+    '<button class="btn" id="tbosh">' + (b.javob ? '▶️ Davom etiş' : '▶️ Testni boşlaş') + '</button>';
   h += '</div>';
-  h += '<button class="btn ghost" id="tqln">📘 Qo\'llanmalar — testga tayyorlaning</button>';
-  if (T.chempion) h += '<div class="card"><div class="row"><b>🏆 Hafta chempioni · ' + esc(T.chempionHafta) + '</b><span class="pill done">' + T.chempion.ball + ' ball</span></div><div class="line"><span>' + esc(T.chempion.ism) + ' · ' + T.chempion.togri + '/' + T.chempion.jami + ' to\'g\'ri</span></div></div>';
-  h += '<h2>📊 ' + (T.juma ? 'Haftaning yakuniy natijasi' : 'Shu hafta reytingi') + ' · ' + esc(T.hafta) + '</h2><div class="card">' + (T.reyting.length ? T.reyting.map(x => '<div class="mrow"' + (x.men ? ' style="font-weight:800;color:var(--teal)"' : '') + '><span>' + (x.orin <= 3 ? med[x.orin - 1] : x.orin + '.') + ' ' + esc(x.ism) + (x.men ? ' (siz)' : '') + '</span><b>' + x.ball + '</b></div>').join('') : '<div class="muted">Bu hafta hali hech kim test topshirmagan — birinchi bo\'ling!</div>') +
+  h += '<button class="btn ghost" id="tqln">📘 Qöllanmalar — testga tayyorlaning</button>';
+  if (T.chempion) h += '<div class="card"><div class="row"><b>🏆 Hafta çempioni · ' + esc(T.chempionHafta) + '</b><span class="pill done">' + T.chempion.ball + ' ball</span></div><div class="line"><span>' + esc(T.chempion.ism) + ' · ' + T.chempion.togri + '/' + T.chempion.jami + ' töğri</span></div></div>';
+  h += '<h2>📊 ' + (T.juma ? 'Haftaning yakuniy natijasi' : 'Şu hafta reytingi') + ' · ' + esc(T.hafta) + '</h2><div class="card">' + (T.reyting.length ? T.reyting.map(x => '<div class="mrow"' + (x.men ? ' style="font-weight:800;color:var(--teal)"' : '') + '><span>' + (x.orin <= 3 ? med[x.orin - 1] : x.orin + '.') + ' ' + esc(x.ism) + (x.men ? ' (siz)' : '') + '</span><b>' + x.ball + '</b></div>').join('') : '<div class="muted">Bu hafta hali heç kim test topşirmagan — birinçi böling!</div>') +
     (T.men && T.men.orin > T.reyting.length ? '<div class="mrow" style="font-weight:800;color:var(--teal);border-top:1px solid var(--mist);margin-top:4px"><span>' + T.men.orin + '. Siz</span><b>' + T.men.ball + '</b></div>' : '') + '</div>';
-  h += '<p class="muted small" style="margin:12px 4px">Ball: oson savol — 10, o\'rtacha — 20, qiyin — 30; tez javob (≈10 soniyagacha) +5. Test shanbadan payshanbagacha, har kuni 5 savol (haftasiga 30). Juma — dam olish: haftaning eng ko\'p ball to\'plagani e\'lon qilinadi va keyingi hafta davomida «🏆 Hafta chempioni» bo\'lib ilova tepasida turadi. Ballar har shanba yangilanadi.</p>';
+  h += '<p class="muted small" style="margin:12px 4px">Ball: oson savol — 10, örtaça — 20, qiyin — 30; tez javob (≈10 soniyagaça) +5. Test şanbadan payşanbagaça, har kuni 5 savol (haftasiga 30). Juma — dam oliş: haftaning eng köp ball töplagani eʼlon qilinadi va keyingi hafta davomida «🏆 Hafta çempioni» bölib ilova tepasida turadi. Ballar har şanba yangilanadi.</p>';
   $('main').innerHTML = h;
   if ($('tbosh')) $('tbosh').onclick = () => { hap('sel'); testSavol(); };
   if ($('tqln')) $('tqln').onclick = () => { ekran = 'qollanma'; hap('sel'); chiz(); window.scrollTo(0, 0); };
@@ -1242,13 +1244,13 @@ function testChiz() {
       if (r.togriJ >= 0 && B[r.togriJ]) B[r.togriJ].classList.add('ok');
       if (j >= 0 && !r.togri && B[j]) B[j].classList.add('no');
       hap(r.togri ? 'success' : 'error');
-      $('tnat').innerHTML = '<div class="card" style="margin-top:10px"><b>' + (r.togri ? '✅ To\'g\'ri! +' + r.ball + ' ball' : j < 0 || r.vaqtOtdi ? '⏰ Vaqt tugadi' : '❌ Noto\'g\'ri') + '</b>' +
+      $('tnat').innerHTML = '<div class="card" style="margin-top:10px"><b>' + (r.togri ? '✅ Töğri! +' + r.ball + ' ball' : j < 0 || r.vaqtOtdi ? '⏰ Vaqt tugadi' : '❌ Notöğri') + '</b>' +
         (r.izoh ? '<div class="line small"><span>💡 ' + esc(r.izoh) + '</span></div>' : '') +
-        (!r.togri && (QLN || []).some(x => x.m === q.mavzu) ? '<button class="act" id="tqm" style="margin-top:8px">📘 Qo\'llanma: ' + esc(q.mavzu) + '</button>' : '') + '</div>' +
-        '<button class="btn" id="tkey">' + (r.tugadi ? '🏁 Natijani ko\'rish' : '➡️ Keyingi savol') + '</button>';
+        (!r.togri && (QLN || []).some(x => x.m === q.mavzu) ? '<button class="act" id="tqm" style="margin-top:8px">📘 Qöllanma: ' + esc(q.mavzu) + '</button>' : '') + '</div>' +
+        '<button class="btn" id="tkey">' + (r.tugadi ? '🏁 Natijani köriş' : '➡️ Keyingi savol') + '</button>';
       if ($('tqm')) $('tqm').onclick = () => qlnOch(QLN.find(x => x.m === q.mavzu));
       $('tkey').onclick = () => { hap('sel'); if (r.tugadi) { T = null; ekTest().then(testBanner); } else testSavol(); };
-    } catch (e) { $('tnat').innerHTML = '<div class="err">⚠️ ' + esc(e.message) + '</div><button class="btn" id="tkey">🔄 Qayta urinish</button>'; $('tkey').onclick = () => testSavol(); }
+    } catch (e) { $('tnat').innerHTML = '<div class="err">⚠️ ' + esc(e.message) + '</div><button class="btn" id="tkey">🔄 Qayta uriniş</button>'; $('tkey').onclick = () => testSavol(); }
   };
   [...document.querySelectorAll('.tv')].forEach(x => x.onclick = () => { hap('sel'); yubor(+x.dataset.j); });
   const tick = () => {
@@ -1268,7 +1270,7 @@ try { tg && tg.onEvent && tg.onEvent('activated', jimYangila); } catch (e) {}
 setInterval(() => { if (!document.hidden && D && (D.boshIshlar || []).some(i => i.sorov)) jimYangila(); }, 30000);
 if (!tg || !tg.initData) {
   $('sub').textContent = '';
-  $('main').innerHTML = bosh('📱', 'Bu sahifa faqat Telegram ichida ishlaydi.<br><br>@halowatt_servis_bot ni oching va «📱 Ochish» tugmasini bosing.');
+  $('main').innerHTML = bosh('📱', 'Bu sahifa faqat Telegram içida işlaydi.<br><br>@halowatt_servis_bot ni oçing va «📱 Oçiş» tugmasini bosing.');
 } else { $('ref').hidden = false; yukla(); }
 </script>
 </body>

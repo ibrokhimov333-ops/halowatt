@@ -53,7 +53,7 @@
 <body>
 <div id="yb"></div>
 <header><div class="t">Halowatt Servis</div><div class="s" id="sub">Xavfsizlik tizimlari xizmati</div></header>
-<button class="sayt" id="sayt">🌐 halowatt.uz — saytga o'tish<span>Katalog, narxlar va do'konlarimiz ›</span></button>
+<button class="sayt" id="sayt">🌐 halowatt.uz — saytga ötiş<span>Katalog, narxlar va dökonlarimiz ›</span></button>
 <main id="main"><div class="spin"></div></main>
 <script>
 const API = 'https://script.google.com/macros/s/AKfycbytPwCL-MZPwtpr3swxDePb4oKkduTxQmbasS2ZC251Wr2sI0lDcvwIHyBYCd1LJEyeSg/exec';
@@ -61,6 +61,8 @@ const tg = window.Telegram && Telegram.WebApp;
 if (tg) { tg.ready(); tg.expand(); try { tg.setHeaderColor('#01825F'); } catch (e) {} }
 const $ = id => document.getElementById(id);
 const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+/* 🔤 Yangi alifbo (2026) — server/jadvaldan keladigan yorliqlarni faqat KO'RSATISHDA o'giradi (qiymat o'zgarmaydi) */
+const ya = s => String(s == null ? '' : s).replace(/([OoGg])['’‘`ʻ]/g, (m, h) => ({ O: 'Ö', o: 'ö', G: 'Ğ', g: 'ğ' })[h]).replace(/SH|Sh|sh|CH|Ch|ch/g, m => ({ SH: 'Ş', Sh: 'Ş', sh: 'ş', CH: 'Ç', Ch: 'Ç', ch: 'ç' })[m]).replace(/([A-Za-zÖöĞğŞşÇç])['’](?=[a-zöğşç])/g, '$1ʼ');
 const hap = t => { try { t === 'ok' ? tg.HapticFeedback.notificationOccurred('success') : tg.HapticFeedback.selectionChanged(); } catch (e) {} };
 let S = null, F = {}, SAYT = 'https://halowatt.uz';
 const yuk = (b, matn) => { if (!b) return; b.dataset.m = b.dataset.m || b.textContent; b.disabled = true; b.classList.add('yuk'); b.textContent = matn; };
@@ -71,14 +73,14 @@ async function api(body) {
   return r.json();
 }
 $('sayt').onclick = () => { hap(); try { tg.openLink(SAYT); } catch (e) { location.href = SAYT; } };
-function xato(m) { $('main').innerHTML = '<div class="err">⚠️ ' + esc(m) + '</div><button class="btn ghost" onclick="yukla()">🔄 Qayta urinish</button>'; }
+function xato(m) { $('main').innerHTML = '<div class="err">⚠️ ' + esc(m) + '</div><button class="btn ghost" onclick="yukla()">🔄 Qayta uriniş</button>'; }
 /* ⚡ Tez ochilish: oxirgi holat telefonda saqlanadi — darhol ko'rsatiladi, orqada yangilanadi */
 const lsK = () => 'mh' + ((tg && tg.initDataUnsafe && tg.initDataUnsafe.user && tg.initDataUnsafe.user.id) || '');
 const lsOl = () => { try { return JSON.parse(localStorage.getItem(lsK()) || 'null'); } catch (e) { return null; } };
 const lsQoy = v => { try { localStorage.setItem(lsK(), JSON.stringify(v)); } catch (e) {} };
 const ekranBosh = () => !$('orq');
 async function yukla() {
-  if (!tg || !tg.initData) return xato('Ilovani Telegram\'dagi Halowatt botidan oching.');
+  if (!tg || !tg.initData) return xato('Ilovani Telegram\'dagi Halowatt botidan oçing.');
   const c = lsOl();
   if (c && c.ok && c.ruxsat) { S = c; if (S.sayt) SAYT = S.sayt; bosh(); }
   else royxat();   // ⚡ yangi mijoz kutmaydi: ro'yxatdan o'tish ekrani darhol; ro'yxatdan o'tgan bo'lsa — server javobi bilan bosh ekranga o'tadi
@@ -90,27 +92,27 @@ async function yukla() {
     S = r; if (S.sayt) SAYT = S.sayt;
     if (!c || !c.ruxsat) { if (S.ruxsat && $('tel') && !$('tel').disabled) bosh(); return; }
     if (ozgardi && ekranBosh()) bosh();
-  } catch (e) { chiziq(false); if (!c) xato('Internet bilan muammo. Qayta urinib ko\'ring.'); }
+  } catch (e) { chiziq(false); if (!c) xato('Internet bilan muammo. Qayta urinib köring.'); }
 }
 /* 1 — ro'yxatdan o'tish */
 function royxat(ismKerak) {
-  $('sub').textContent = 'Xush kelibsiz!';
-  $('main').innerHTML = '<div class="card hello" style="margin-top:12px"><b>Assalomu alaykum!</b><div class="small" style="margin-top:6px">Halowatt servis xizmatiga xush kelibsiz. Sizni tanishimiz uchun telefon raqamingizni yuboring — bir marta.</div></div>' +
-    (ismKerak ? '<label class="f">Ismingiz</label><input class="in" id="ism" placeholder="Masalan: Aziz aka" maxlength="60" value="" autocomplete="name">' + '<div class="small muted" style="margin:6px 4px 0">Usta sizga shu ism bilan murojaat qiladi.</div>' : '') +
-    '<button class="btn" id="tel">📞 Raqamni yuborish</button><p class="muted small" style="margin:12px 4px">Raqamingiz faqat xizmat uchun ishlatiladi: usta chaqirish, ish holati va kafolat haqida xabarlar.</p>';
+  $('sub').textContent = 'Xuş kelibsiz!';
+  $('main').innerHTML = '<div class="card hello" style="margin-top:12px"><b>Assalomu alaykum!</b><div class="small" style="margin-top:6px">Halowatt servis xizmatiga xuş kelibsiz. Sizni tanişimiz uçun telefon raqamingizni yuboring — bir marta.</div></div>' +
+    (ismKerak ? '<label class="f">Ismingiz</label><input class="in" id="ism" placeholder="Masalan: Aziz aka" maxlength="60" value="" autocomplete="name">' + '<div class="small muted" style="margin:6px 4px 0">Usta sizga şu ism bilan murojaat qiladi.</div>' : '') +
+    '<button class="btn" id="tel">📞 Raqamni yuboriş</button><p class="muted small" style="margin:12px 4px">Raqamingiz faqat xizmat uçun işlatiladi: usta çaqiriş, iş holati va kafolat haqida xabarlar.</p>';
   $('tel').onclick = () => {
     hap();
     if (ismKerak && !$('ism').value.trim()) { $('ism').focus(); return; }
     if (!tg.requestContact) return xato('Telegram ilovangizni yangilang.');
     tg.requestContact(async (ok, res) => {
       if (!ok || !res || !res.response) return;
-      yuk($('tel'), '⏳ Tekshirilmoqda…');
+      yuk($('tel'), '⏳ Tekşirilmoqda…');
       try {
         const r = await api({ mapi: 'royxat', kontakt: res.response, ism: ismKerak ? $('ism').value.trim() : '' });
         if (!r.ok) return xato(r.xato);
         if (r.ismKerak) return royxat(true);
         S = r; lsQoy(r); hap('ok'); bosh();
-      } catch (e) { xato('Internet bilan muammo. Qayta urinib ko\'ring.'); }
+      } catch (e) { xato('Internet bilan muammo. Qayta urinib köring.'); }
     });
   };
 }
@@ -120,11 +122,11 @@ function bosh() {
   $('sub').textContent = m.ism || 'Halowatt mijozi';
   const yil = S.birinchi ? S.birinchi.slice(0, 4) : '';
   let h = '<div class="card hello" style="margin-top:12px"><div class="row" style="align-items:flex-start"><b>Assalomu alaykum, ' + esc(m.ism) + '!</b><button class="chip" id="ismT" style="flex:none;margin:0 0 0 8px;padding:6px 10px">✏️ Ism</button></div><div class="small" style="margin-top:6px">' +
-    (S.tarix && S.ishlar && S.ishlar.length ? 'Siz bilan ' + yil + '-yildan beri ishlaymiz. Oxirgi xizmat: ' + esc(S.ishlar[0].sana) + '.' : 'Biror muammo bo\'lsa — bir tugma bilan usta chaqiring.') + '</div></div>';
-  if (S.arizalar && S.arizalar.length) h += '<h2>Ko\'rib chiqilayotgan arizalar</h2>' + S.arizalar.map(a => '<div class="card"><div class="row"><b>№ ' + esc(a.n) + '</b><span class="pill' + (a.holat === 'Kutilmoqda' ? ' wait' : '') + '">' + (a.holat === 'Kutilmoqda' ? '⏳ Ko\'rib chiqilmoqda' : a.usta ? '👷 ' + esc(a.usta) : '✅ Qabul qilindi') + '</span></div><div class="small muted" style="margin-top:6px">🛠 ' + esc(a.muammo) + ' · ' + esc(a.vaqt) + '</div></div>').join('');
-  h += '<div class="grid" style="margin-top:12px"><button class="tile big" id="t_usta"><div class="e">🛠</div><b>Usta chaqirish</b><span>Muammoni tanlang — 30 soniya</span></button>' +
-    (S.tarix ? '<button class="tile big" id="t_ish"><div class="e">📋</div><b>Mening ishlarim</b><span>' + (S.ishlar || []).filter(j => j.holat !== 'otkaz').length + ' ta bajarilgan xizmat</span></button>' : '') + '</div>' +
-    '<button class="btn ghost" id="t_sav">💬 Savol berish</button>';
+    (S.tarix && S.ishlar && S.ishlar.length ? 'Siz bilan ' + yil + '-yildan beri işlaymiz. Oxirgi xizmat: ' + esc(S.ishlar[0].sana) + '.' : 'Biror muammo bölsa — bir tugma bilan usta çaqiring.') + '</div></div>';
+  if (S.arizalar && S.arizalar.length) h += '<h2>Körib çiqilayotgan arizalar</h2>' + S.arizalar.map(a => '<div class="card"><div class="row"><b>№ ' + esc(a.n) + '</b><span class="pill' + (a.holat === 'Kutilmoqda' ? ' wait' : '') + '">' + (a.holat === 'Kutilmoqda' ? '⏳ Körib çiqilmoqda' : a.usta ? '👷 ' + esc(a.usta) : '✅ Qabul qilindi') + '</span></div><div class="small muted" style="margin-top:6px">🛠 ' + esc(a.muammo) + ' · ' + esc(a.vaqt) + '</div></div>').join('');
+  h += '<div class="grid" style="margin-top:12px"><button class="tile big" id="t_usta"><div class="e">🛠</div><b>Usta çaqiriş</b><span>Muammoni tanlang — 30 soniya</span></button>' +
+    (S.tarix ? '<button class="tile big" id="t_ish"><div class="e">📋</div><b>Mening işlarim</b><span>' + (S.ishlar || []).filter(j => j.holat !== 'otkaz').length + ' ta bajarilgan xizmat</span></button>' : '') + '</div>' +
+    '<button class="btn ghost" id="t_sav">💬 Savol beriş</button>';
   $('main').innerHTML = h;
   $('t_usta').onclick = () => { hap(); F = {}; ariza(); };
   $('ismT').onclick = () => { hap(); ismOyna(); };
@@ -137,11 +139,11 @@ const orqaga = () => '<button class="back" id="orq">‹ Orqaga</button>';
 function ismOyna() {
   const m = S.mijoz || {};
   $('main').innerHTML = orqaga() + '<h2>Ismingiz</h2><label class="f">Sizga qanday murojaat qilaylik?</label><input class="in" id="ismY" maxlength="60" placeholder="Masalan: Aziz aka" value="' + esc(m.ism || '') + '">' +
-    '<button class="btn" id="ismS">💾 Saqlash</button><div id="xb"></div>';
+    '<button class="btn" id="ismS">💾 Saqlaş</button><div id="xb"></div>';
   orqUlash(); const i = $('ismY'); i.focus(); i.select();
   $('ismS').onclick = async () => {
     const v = i.value.replace(/\s+/g, ' ').trim();
-    if (v.length < 2) return $('xb').innerHTML = '<div class="err">Ismingizni to\'liq yozing.</div>';
+    if (v.length < 2) return $('xb').innerHTML = '<div class="err">Ismingizni töliq yozing.</div>';
     yuk($('ismS'), '⏳ Saqlanmoqda…');
     try { const r = await api({ mapi: 'ism', ism: v });
       if (!r.ok) { yukTugadi($('ismS')); return $('xb').innerHTML = '<div class="err">' + esc(r.xato) + '</div>'; }
@@ -153,12 +155,12 @@ function orqUlash() { $('orq').onclick = () => { hap(); bosh(); window.scrollTo(
 /* 3 — usta chaqirish */
 function ariza() {
   const V = ['Bugun', 'Ertaga', 'Kelishamiz'];
-  let h = orqaga() + '<h2>Usta chaqirish</h2><label class="f">Muammo nima?</label><div class="chips">' + (S.muammolar || []).map((x, i) => '<button class="chip' + (F.muammo === x ? ' on' : '') + '" data-m="' + i + '">' + esc(x) + '</button>').join('') + '</div>' +
+  let h = orqaga() + '<h2>Usta çaqiriş</h2><label class="f">Muammo nima?</label><div class="chips">' + (S.muammolar || []).map((x, i) => '<button class="chip' + (F.muammo === x ? ' on' : '') + '" data-m="' + i + '">' + esc(ya(x)) + '</button>').join('') + '</div>' +
     '<label class="f">Manzil</label><input class="in" id="manzil" maxlength="200" placeholder="Mahalla, ko\'cha, uy yoki mo\'ljal" value="' + esc(F.manzil || '') + '">' +
-    '<button class="chip" id="lok" style="margin-top:8px">' + (F.lat ? '✅ Lokatsiya olindi' : '📍 Lokatsiyani yuborish') + '</button>' +
-    '<label class="f">Qachon qulay?</label><div class="chips">' + V.map(x => '<button class="chip' + (F.qvaqt === x ? ' on' : '') + '" data-v="' + x + '">' + x + '</button>').join('') + '</div>' +
+    '<button class="chip" id="lok" style="margin-top:8px">' + (F.lat ? '✅ Lokatsiya olindi' : '📍 Lokatsiyani yuboriş') + '</button>' +
+    '<label class="f">Qaçon qulay?</label><div class="chips">' + V.map(x => '<button class="chip' + (F.qvaqt === x ? ' on' : '') + '" data-v="' + x + '">' + x + '</button>').join('') + '</div>' +
     '<label class="f">Izoh (ixtiyoriy)</label><textarea class="in" id="izoh" maxlength="500" placeholder="Masalan: 2 ta kamera tunda ko\'rsatmayapti">' + esc(F.izoh || '') + '</textarea>' +
-    '<button class="btn" id="yub">✅ Yuborish</button><div id="xb"></div>';
+    '<button class="btn" id="yub">✅ Yuboriş</button><div id="xb"></div>';
   $('main').innerHTML = h; orqUlash();
   const saqla = () => { F.manzil = $('manzil').value; F.izoh = $('izoh').value; };
   document.querySelectorAll('[data-m]').forEach(b => b.onclick = () => { hap(); saqla(); F.muammo = S.muammolar[+b.dataset.m]; ariza(); });
@@ -179,7 +181,7 @@ function ariza() {
       if (!r.ok) { yukTugadi($('yub')); return $('xb').innerHTML = '<div class="err">' + esc(r.xato) + '</div>'; }
       hap('ok');
       $('main').innerHTML = '<div class="card ok" style="margin-top:12px"><div class="e">✅</div><b>Arizangiz qabul qilindi</b><div>№ ' + esc(r.n) + '</div><p class="muted small" style="margin-top:10px">' +
-        (r.ishVaqti ? 'Xodimimiz tez orada qo\'ng\'iroq qiladi.' : 'Ertaga soat 09:00 da qo\'ng\'iroq qilamiz.') + ' Holat haqidagi xabarlar shu botga keladi.</p></div><button class="btn ghost" id="bb">Bosh sahifaga</button>';
+        (r.ishVaqti ? 'Xodimimiz tez orada qönğiroq qiladi.' : 'Ertaga soat 09:00 da qönğiroq qilamiz.') + ' Holat haqidagi xabarlar şu botga keladi.</p></div><button class="btn ghost" id="bb">Boş sahifaga</button>';
       $('bb').onclick = () => yukla();
     } catch (e) { yukTugadi($('yub')); $('xb').innerHTML = '<div class="err">Internet bilan muammo.</div>'; }
   };
@@ -187,15 +189,15 @@ function ariza() {
 /* 4 — mening ishlarim */
 function ishlar() {
   const L = (S.ishlar || []).filter(j => j.holat !== 'otkaz');
-  $('main').innerHTML = orqaga() + '<h2>Mening ishlarim</h2>' + (L.length ? L.map(j => '<div class="card"><div class="row"><b>' + esc(j.turlar || 'Xizmat') + '</b><span class="pill' + (j.holat === 'ochiq' ? ' wait' : '') + '">' + (j.holat === 'ochiq' ? '⏳ Jarayonda' : j.holat === 'otkaz' ? 'Bekor' : '✅ Bajarildi') + '</span></div><div class="small muted" style="margin-top:6px">📅 ' + esc(j.sana) + '</div></div>').join('')
-    : '<div class="card muted">Hali bizda xizmat olmagansiz. Birinchi ishingizni «🛠 Usta chaqirish» orqali bering.</div>');
+  $('main').innerHTML = orqaga() + '<h2>Mening işlarim</h2>' + (L.length ? L.map(j => '<div class="card"><div class="row"><b>' + esc(ya(j.turlar || 'Xizmat')) + '</b><span class="pill' + (j.holat === 'ochiq' ? ' wait' : '') + '">' + (j.holat === 'ochiq' ? '⏳ Jarayonda' : j.holat === 'otkaz' ? 'Bekor' : '✅ Bajarildi') + '</span></div><div class="small muted" style="margin-top:6px">📅 ' + esc(j.sana) + '</div></div>').join('')
+    : '<div class="card muted">Hali bizda xizmat olmagansiz. Birinçi işingizni «🛠 Usta çaqiriş» orqali bering.</div>');
   orqUlash(); window.scrollTo(0, 0);
 }
 /* 5 — mening tizimim */
 function tizim() {
   const T = S.turlar || [];
-  $('main').innerHTML = orqaga() + '<h2>Mening tizimim</h2>' + (T.length ? '<div class="card">' + T.map(x => '<div class="row" style="padding:6px 0"><span>' + esc(x.t) + '</span><b>' + x.n + ' marta</b></div>').join('') + '</div><p class="muted small" style="margin:8px 4px">Batafsil ma\'lumot va kafolat bo\'yicha savollar uchun — «💬 Savol berish».</p>'
-    : '<div class="card muted">Hozircha bizda o\'rnatilgan tizimingiz yo\'q.</div>');
+  $('main').innerHTML = orqaga() + '<h2>Mening tizimim</h2>' + (T.length ? '<div class="card">' + T.map(x => '<div class="row" style="padding:6px 0"><span>' + esc(x.t) + '</span><b>' + x.n + ' marta</b></div>').join('') + '</div><p class="muted small" style="margin:8px 4px">Batafsil maʼlumot va kafolat böyiça savollar uçun — «💬 Savol beriş».</p>'
+    : '<div class="card muted">Hozirça bizda örnatilgan tizimingiz yöq.</div>');
   orqUlash(); window.scrollTo(0, 0);
 }
 yukla();
