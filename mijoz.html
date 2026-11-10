@@ -15,6 +15,11 @@
   body{font-family:Manrope,system-ui,sans-serif;background:var(--bg);color:var(--ink);font-size:15px;padding-bottom:28px}
   header{background:var(--teal);color:#fff;padding:14px 16px 16px}
   header .t{font-weight:800;font-size:19px} header .s{font-size:13px;opacity:.85;margin-top:2px}
+  header{position:sticky;top:0;z-index:20}
+  .hst{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:10px}
+  .hst div{background:rgba(255,255,255,.14);border-radius:10px;padding:6px 8px;line-height:1.15}
+  .hst b{display:block;font-size:16px;font-weight:800;letter-spacing:-.2px}
+  .hst span{font-size:10.5px;opacity:.85}
   .sayt{display:block;margin:12px 12px 0;padding:11px 14px;border-radius:14px;background:#fff;box-shadow:0 0 0 1px var(--line) inset;color:var(--teal);font-weight:800;font-size:14px;border:0;width:calc(100% - 24px);text-align:left;font-family:inherit}
   .sayt span{font-weight:600;color:var(--muted);font-size:12px;display:block}
   main{padding:4px 12px}
@@ -52,11 +57,19 @@
 </head>
 <body>
 <div id="yb"></div>
-<header><div class="t">Halowatt Servis</div><div class="s" id="sub">Xavfsizlik tizimlari xizmati</div></header>
+<header><div class="t">Halowatt Servis</div><div class="s" id="sub">Xavfsizlik tizimlari xizmati</div><div class="hst" id="hst" hidden></div></header>
 <button class="sayt" id="sayt">🌐 halowatt.uz — saytga ötiş<span>Katalog, narxlar va dökonlarimiz ›</span></button>
 <main id="main"><div class="spin"></div></main>
 <script>
 const API = 'https://script.google.com/macros/s/AKfycbytPwCL-MZPwtpr3swxDePb4oKkduTxQmbasS2ZC251Wr2sI0lDcvwIHyBYCd1LJEyeSg/exec';
+/* 📊 Tepada doim: Halowatt ustalari bajargan işlar (saytdagi bilan bir xil) */
+(function hst() {
+  const fm = n => String(n).replace(/\B(?=(\d{3})+$)/g, '\u00a0');
+  const chiz = d => { const el = document.getElementById('hst'); if (!el || !d || !d.ok || typeof d.jami !== 'number') return; el.hidden = false;
+    el.innerHTML = '<div><b>' + fm(d.jami) + '</b><span>bajarilgan iş</span></div><div><b>' + fm(d.qurilma) + '</b><span>örnatilgan qurilma</span></div><div><b>' + fm(d.servis) + '</b><span>servis iş</span></div>'; };
+  try { chiz(JSON.parse(localStorage.getItem('hw_hst') || 'null')); } catch (e) {}
+  fetch(API + '?sayt=stat').then(r => r.json()).then(d => { if (d && d.ok) { chiz(d); try { localStorage.setItem('hw_hst', JSON.stringify(d)); } catch (e) {} } }).catch(() => {});
+})();
 const tg = window.Telegram && Telegram.WebApp;
 if (tg) { tg.ready(); tg.expand(); try { tg.setHeaderColor('#01825F'); } catch (e) {} }
 const $ = id => document.getElementById(id);
