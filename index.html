@@ -477,34 +477,38 @@ function ekEslatma() {
   api({ api: 'mijozlar', tur, kun: mjKun }).then(r => { if (!r.ok) throw new Error(r.xato); MJ[kalit] = r; if (ekran === 'eslatma' && seg.mj === tur) chiz(); })
     .catch(e => { const el = $('mr'); if (el) el.innerHTML = '<div class="err">⚠️ ' + esc(e.message) + '</div>'; });
 }
-let arxUsta = null;
-async function ekArxivStat(sg) {
+let arxUsta = null, ARM = 'amo';   // ARM: 'amo' — amoCRM arxivi, 'eski' — eski Excel işlari (2022–2025)
+async function ekArxivStat(sg0) {
+  const sg = sg0 + '<div class="seg" id="arm">' + [['amo', '📦 amoCRM'], ['eski', '🗄 Eski işlar 2022–25']].map(x => '<button data-v="' + x[0] + '" class="' + (x[0] === ARM ? 'on' : '') + '">' + x[1] + '</button>').join('') + '</div>';
+  const armUlash = () => { const a = $('arm'); if (a) [...a.children].forEach(b => b.onclick = () => { if (ARM === b.dataset.v) return; ARM = b.dataset.v; arxUsta = null; hap('sel'); chiz(); }); };
+  const segUlash0 = window.segUlash; const segUlash = () => { segUlash0(); armUlash(); };
   if (arxUsta != null) {
-    const k = 'r:' + arxUsta;
+    const k = 'r:' + ARM + ':' + arxUsta;
     $('main').innerHTML = sg + '<button class="act" id="ax_b" style="margin:8px 0">← Arxiv statistikasi</button><h2>👷 ' + esc(arxUsta || 'Usta yöq') + '</h2><div id="axl"><div class="spin"></div></div>'; segUlash();
     $('ax_b').onclick = () => { arxUsta = null; chiz(); };
-    try { if (!ARXV[k]) { const r = await api({ api: 'arxiv', usta: arxUsta, n: 500 }); if (!r.ok) throw new Error(r.xato); ARXV[k] = r; }
+    try { if (!ARXV[k]) { const r = await api({ api: 'arxiv', usta: arxUsta, n: 500, manba: ARM }); if (!r.ok) throw new Error(r.xato); ARXV[k] = r; }
       const R = ARXV[k], el = $('axl'); if (!el) return;
-      el.innerHTML = '<p class="muted small" style="margin:4px">' + R.jami + ' ta iş · ' + R.rasm + ' ta rasm' + (R.jami > R.royxat.length ? ' (oxirgi ' + R.royxat.length + ' tasi)' : '') + '</p>' + R.royxat.map(x => arxKarta(x, false)).join('');
+      el.innerHTML = '<p class="muted small" style="margin:4px">' + R.jami + ' ta iş' + (R.rasm ? ' · ' + R.rasm + ' ta rasm' : '') + (R.jami > R.royxat.length ? ' (oxirgi ' + R.royxat.length + ' tasi)' : '') + '</p>' + R.royxat.map(x => arxKarta(x, false)).join('');
       arxRasmUlash(el, () => { $('ov') && $('ov').remove(); });
     } catch (e) { const el = $('axl'); if (el) el.innerHTML = '<div class="err">⚠️ ' + esc(e.message) + '</div>'; }
     return;
   }
-  if (!ARXV.stat) {
+  const SK = 'stat:' + ARM;
+  if (!ARXV[SK]) {
     $('main').innerHTML = sg + '<div class="spin"></div>'; segUlash();
-    try { const r = await api({ api: 'arxiv', tur: 'stat' }); if (!r.ok) throw new Error(r.xato); ARXV.stat = r; }
+    try { const r = await api({ api: 'arxiv', tur: 'stat', manba: ARM }); if (!r.ok) throw new Error(r.xato); ARXV[SK] = r; }
     catch (e) { $('main').innerHTML = sg + '<div class="err">⚠️ ' + esc(e.message) + '</div>'; segUlash(); return; }
     if (ekran !== 'eslatma' || seg.mj !== 'arxiv') return;
   }
-  const S = ARXV.stat, mx = Math.max(...S.ustalar.map(u => u[1]), 1);
+  const S = ARXV[SK], mx = Math.max(...S.ustalar.map(u => u[1]), 1);
   const bar = (L, bos) => L.map(u => '<div class="card" ' + (bos ? 'data-axu="' + esc(u[0].indexOf('—') === 0 ? '' : u[0]) + '" style="cursor:pointer;padding:10px 12px"' : 'style="padding:10px 12px"') + '><div class="row"><b>' + esc(u[0]) + (bos ? ' ›' : '') + '</b><b>' + u[1] + '</b></div>' +
     '<div style="height:7px;background:var(--line);border-radius:9px;margin-top:6px"><div style="height:7px;border-radius:9px;background:var(--teal);width:' + Math.max(2, Math.round(u[1] / mx * 100)) + '%"></div></div></div>').join('');
-  let h = sg + '<div class="kpis"><div class="kpi"><b>' + S.jami + '</b><span>iş</span></div><div class="kpi"><b>' + S.rasm + '</b><span>rasm</span></div>' +
+  let h = sg + '<div class="kpis"><div class="kpi"><b>' + S.jami + '</b><span>iş</span></div>' + (ARM === 'amo' ? '<div class="kpi"><b>' + S.rasm + '</b><span>rasm</span></div>' : '') +
     '<div class="kpi wide"><b>' + S.mijoz + '</b><span>mijoz (telefon böyiça)</span></div></div>';
   h += '<h2>👷 Ustalar böyiça</h2>' + bar(S.ustalar, true);
-  h += '<h2>📂 Bosqiç</h2><div class="card">' + S.bosqich.map(b => '<div class="mrow"><span>' + esc(b[0]) + '</span><b>' + b[1] + '</b></div>').join('') + '</div>';
+  h += '<h2>' + (ARM === 'amo' ? '📂 Bosqiç' : '📂 Holat') + '</h2><div class="card">' + S.bosqich.map(b => '<div class="mrow"><span>' + esc(b[0]) + '</span><b>' + b[1] + '</b></div>').join('') + '</div>';
   h += '<h2>📅 Yillar</h2><div class="card">' + S.yillar.map(b => '<div class="mrow"><span>' + esc(b[0]) + '</span><b>' + b[1] + '</b></div>').join('') + '</div>';
-  h += '<h2>📣 Reklama manbasi</h2><div class="card">' + S.reklama.map(b => '<div class="mrow"><span>' + esc(b[0]) + '</span><b>' + b[1] + '</b></div>').join('') + '</div>';
+  if (S.reklama.length) h += '<h2>📣 Reklama manbasi</h2><div class="card">' + S.reklama.map(b => '<div class="mrow"><span>' + esc(b[0]) + '</span><b>' + b[1] + '</b></div>').join('') + '</div>';
   h += '<p class="muted small" style="margin:12px 4px">Mijozni topiş uçun «🔎 Qidiriş» — arxivdagi mijozlar ham çiqadi.</p>';
   $('main').innerHTML = h; segUlash();
   document.querySelectorAll('[data-axu]').forEach(c => c.onclick = () => { hap('sel'); arxUsta = c.dataset.axu; chiz(); window.scrollTo(0, 0); });
@@ -543,7 +547,8 @@ function mijozKarta(q) {
           '<div class="line muted"><span class="i">👷</span><span>' + esc(j.usta || '—') + '</span>' + (j.summa ? '<span style="margin-left:auto"><b>' + pul(j.summa) + '</b></span>' : '') + '</div>' +
           (j.izoh ? '<div class="line small"><span class="i">📝</span><span>' + esc(j.izoh) + '</span></div>' : '') +
           (j.rasm && j.h ? '<div class="acts"><button class="act" data-mrk="' + esc(j.h) + '" data-n="' + j.rasm + '">📸 Rasmlar · ' + j.rasm + '</button></div>' : '') + '</div>').join('');
-      if (m.arxiv && m.arxiv.length) { el.insertAdjacentHTML('beforeend', '<h2 style="margin:14px 2px 6px">📦 Eski işlar (amoCRM) · ' + m.arxiv.length + '</h2>' + m.arxiv.map(x => arxKarta(Object.assign({}, x, { ism: null, tel: null }), true)).join('')); arxRasmUlash(el, () => mijozKarta(q)); }
+      if (m.arxiv && m.arxiv.length) { el.insertAdjacentHTML('beforeend', '<h2 style="margin:14px 2px 6px">📦 amoCRM arxivi · ' + m.arxiv.length + '</h2>' + m.arxiv.map(x => arxKarta(Object.assign({}, x, { ism: null, tel: null }), true)).join('')); arxRasmUlash(el, () => mijozKarta(q)); }
+      if (m.eski && m.eski.length) el.insertAdjacentHTML('beforeend', '<h2 style="margin:14px 2px 6px">🗄 Eski işlar (2022–2025) · ' + m.eski.length + '</h2>' + m.eski.map(x => arxKarta(Object.assign({}, x, { ism: null, tel: null }), true)).join(''));
       el.querySelectorAll('[data-mrk]').forEach(b => b.onclick = () => rasmKor(b.dataset.mrk, +b.dataset.n, esc(m.ism), () => mijozKarta(q)));
     } catch (e) { const el = $('mkb'); if (el) el.innerHTML = '<div class="err">⚠️ ' + esc(e.message) + '</div>'; }
   })();
@@ -696,19 +701,20 @@ function arxRasmKor(id, n, orqaga) {
   } })();
 }
 async function ekArxivUsta(sg) {
-  const kalit = 'u:' + (D.rol.usta || '');
-  if (!ARXV[kalit]) { const c = lsOl('AX'); if (c && c.ok && c.usta === D.rol.usta) ARXV[kalit] = c; }
+  const mb = seg.trx === 'eski' ? 'eski' : 'amo', LK = mb === 'eski' ? 'AXE' : 'AX';
+  const kalit = 'u:' + mb + ':' + (D.rol.usta || '');
+  if (!ARXV[kalit]) { const c = lsOl(LK); if (c && c.ok && c.usta === D.rol.usta) ARXV[kalit] = c; }
   if (!ARXV[kalit]) {
     $('main').innerHTML = sg + '<div class="spin"></div>'; segUlash();
-    try { const r = await api({ api: 'arxiv' }); if (!r.ok) throw new Error(r.xato); ARXV[kalit] = r; lsQoy('AX', r); }
+    try { const r = await api({ api: 'arxiv', manba: mb }); if (!r.ok) throw new Error(r.xato); ARXV[kalit] = r; lsQoy(LK, r); }
     catch (e) { if (ekran === 'bajarilgan') { $('main').innerHTML = sg + '<div class="err">⚠️ ' + esc(e.message) + '</div>'; segUlash(); } return; }
-    if (ekran !== 'bajarilgan' || seg.trx !== 'arxiv') return;
+    if (ekran !== 'bajarilgan' || (seg.trx || 'oy') === 'oy') return;
   }
   const R = ARXV[kalit];
   let h = sg + '<div class="kpis"><div class="kpi"><b>' + R.jami + '</b><span>arxivdagi işlar</span></div><div class="kpi"><b>' + esc(R.davr || '—') + '</b><span>davr</span></div>' +
-    '<div class="kpi wide"><b>' + R.rasm + '</b><span>rasm</span></div></div>';
+    (mb === 'amo' ? '<div class="kpi wide"><b>' + R.rasm + '</b><span>rasm</span></div>' : '') + '</div>';
   h += R.royxat.length ? R.royxat.map(x => arxKarta(x, false)).join('') : bosh('🗂', 'Arxivda sizning işingiz yöq');
-  h += '<p class="muted small" style="margin:12px 4px">🔒 Mijoz ismi va raqami yaşirilgan. Bu eski (amoCRM) işlar — balans va reytingga qöşilmaydi.</p>';
+  h += '<p class="muted small" style="margin:12px 4px">🔒 Mijoz ismi va raqami yaşirilgan. ' + (mb === 'amo' ? 'Bu amoCRM arxividagi işlar' : 'Bu 2022–2025 yillardagi eski Excel işlari') + ' — balans va reytingga qöşilmaydi.</p>';
   $('main').innerHTML = h; segUlash(); arxRasmUlash($('main'));
 }
 /* 📜 Ishlar tarixi — oy bo'yicha: yopilgan ishlar (mijoz yashirin) + depozitlar */
@@ -722,8 +728,8 @@ function trxYangi(oy) {
   }).catch(() => {});
 }
 async function ekBajarilgan() {
-  const sg = D.rol.usta ? segChiz('trx', [['oy', '📅 Oylar', ''], ['arxiv', '🗂 amoCRM arxiv', '']]) : '';
-  if (seg.trx === 'arxiv' && D.rol.usta) return ekArxivUsta(sg);
+  const sg = D.rol.usta ? segChiz('trx', [['oy', '📅 Oylar', ''], ['arxiv', '📦 amoCRM', ''], ['eski', '🗄 Eski işlar', '']]) : '';
+  if ((seg.trx === 'arxiv' || seg.trx === 'eski') && D.rol.usta) return ekArxivUsta(sg);
   if (!tarixOy) tarixOy = D.meta.bugun.slice(0, 7);
   const oy = tarixOy, bu = D.meta.bugun.slice(0, 7);
   let h = sg + '<div class="mon"><button id="t_p">‹</button><b>' + oyNomi(oy) + '</b><button id="t_n"' + (oy >= bu ? ' disabled style="opacity:.3"' : '') + '>›</button></div>';
