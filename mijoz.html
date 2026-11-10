@@ -80,7 +80,7 @@ const lsOl = () => { try { return JSON.parse(localStorage.getItem(lsK()) || 'nul
 const lsQoy = v => { try { localStorage.setItem(lsK(), JSON.stringify(v)); } catch (e) {} };
 const ekranBosh = () => !$('orq');
 async function yukla() {
-  if (!tg || !tg.initData) return xato('Ilovani Telegram\'dagi Halowatt botidan oçing.');
+  if (!tg || !tg.initData) return xato('Ilovani Telegramʼdagi Halowatt botidan oçing.');
   const c = lsOl();
   if (c && c.ok && c.ruxsat) { S = c; if (S.sayt) SAYT = S.sayt; bosh(); }
   else royxat();   // ⚡ yangi mijoz kutmaydi: ro'yxatdan o'tish ekrani darhol; ro'yxatdan o'tgan bo'lsa — server javobi bilan bosh ekranga o'tadi
@@ -156,10 +156,10 @@ function orqUlash() { $('orq').onclick = () => { hap(); bosh(); window.scrollTo(
 function ariza() {
   const V = ['Bugun', 'Ertaga', 'Kelishamiz'];
   let h = orqaga() + '<h2>Usta çaqiriş</h2><label class="f">Muammo nima?</label><div class="chips">' + (S.muammolar || []).map((x, i) => '<button class="chip' + (F.muammo === x ? ' on' : '') + '" data-m="' + i + '">' + esc(ya(x)) + '</button>').join('') + '</div>' +
-    '<label class="f">Manzil</label><input class="in" id="manzil" maxlength="200" placeholder="Mahalla, ko\'cha, uy yoki mo\'ljal" value="' + esc(F.manzil || '') + '">' +
+    '<label class="f">Manzil</label><input class="in" id="manzil" maxlength="200" placeholder="Mahalla, köça, uy yoki möljal" value="' + esc(F.manzil || '') + '">' +
     '<button class="chip" id="lok" style="margin-top:8px">' + (F.lat ? '✅ Lokatsiya olindi' : '📍 Lokatsiyani yuboriş') + '</button>' +
-    '<label class="f">Qaçon qulay?</label><div class="chips">' + V.map(x => '<button class="chip' + (F.qvaqt === x ? ' on' : '') + '" data-v="' + x + '">' + x + '</button>').join('') + '</div>' +
-    '<label class="f">Izoh (ixtiyoriy)</label><textarea class="in" id="izoh" maxlength="500" placeholder="Masalan: 2 ta kamera tunda ko\'rsatmayapti">' + esc(F.izoh || '') + '</textarea>' +
+    '<label class="f">Qaçon qulay?</label><div class="chips">' + V.map(x => '<button class="chip' + (F.qvaqt === x ? ' on' : '') + '" data-v="' + x + '">' + ya(x) + '</button>').join('') + '</div>' +
+    '<label class="f">Izoh (ixtiyoriy)</label><textarea class="in" id="izoh" maxlength="500" placeholder="Masalan: 2 ta kamera tunda körsatmayapti">' + esc(F.izoh || '') + '</textarea>' +
     '<button class="btn" id="yub">✅ Yuboriş</button><div id="xb"></div>';
   $('main').innerHTML = h; orqUlash();
   const saqla = () => { F.manzil = $('manzil').value; F.izoh = $('izoh').value; };

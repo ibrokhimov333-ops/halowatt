@@ -216,9 +216,9 @@ async function yukla(jim) {
 /* ---------- Rol va menyu ---------- */
 function menyu() {
   const r = D.rol;
-  if (r.admin) return [['stat', '📊', 'Statistika'], ['ishlar', '📋', 'Ishlar'], ['ustalar', '👷', 'Ustalar'], ['moliya', '💰', 'Moliya'], ['eslatma', '👥', 'Mijozlar'], ['yangi', '➕', 'Yangi']];
+  if (r.admin) return [['stat', '📊', 'Statistika'], ['ishlar', '📋', 'Işlar'], ['ustalar', '👷', 'Ustalar'], ['moliya', '💰', 'Moliya'], ['eslatma', '👥', 'Mijozlar'], ['yangi', '➕', 'Yangi']];
   if (r.xodim) return [['yangi', '➕', 'Yangi iş'], ['mening', '📋', 'Bergan işlarim'], ['ustalar', '👷', 'Ustalar'], ['eslatma', '👥', 'Mijozlar']].concat(r.usta ? [['usta', '🔧', 'Usta işlarim'], ['bosh', '🆓', 'Böş işlar'], ['bajarilgan', '📜', 'Tarix'], ['natija', '📈', 'Natijam']] : []);
-  return [['usta', '🔧', 'Ishlarim'], ['bosh', '🆓', 'Böş işlar'], ['bajarilgan', '📜', 'Tarix'], ['natija', '📈', 'Natijam'], ['moliya', '💰', 'Balans']];
+  return [['usta', '🔧', 'Işlarim'], ['bosh', '🆓', 'Böş işlar'], ['bajarilgan', '📜', 'Tarix'], ['natija', '📈', 'Natijam'], ['moliya', '💰', 'Balans']];
 }
 function chiz() {
   const r = D.rol;
@@ -322,8 +322,8 @@ function amalBos(act, h) {
     });
   }
   if (act === 'tahrir') {
-    oyna('Tahrirlash', '<p class="muted small" style="margin:0 2px">' + esc(i.mijoz) + '</p>' +
-      i.ishlar.map((x, k) => '<label class="f">💰 ' + esc(x.turi) + ' × ' + x.soni + '</label><input class="in" inputmode="numeric" data-ts="' + k + '" value="' + (x.summa == null ? '' : String(x.summa).replace(/\B(?=(\d{3})+(?!\d))/g, ' ')) + '" placeholder="Summa, so\'m">').join('') +
+    oyna('Tahrirlaş', '<p class="muted small" style="margin:0 2px">' + esc(i.mijoz) + '</p>' +
+      i.ishlar.map((x, k) => '<label class="f">💰 ' + esc(x.turi) + ' × ' + x.soni + '</label><input class="in" inputmode="numeric" data-ts="' + k + '" value="' + (x.summa == null ? '' : String(x.summa).replace(/\B(?=(\d{3})+(?!\d))/g, ' ')) + '" placeholder="Summa, söm">').join('') +
       '<label class="f">📍 Manzil</label><input class="in" id="t_manzil" value="' + esc(i.manzil) + '">' +
       '<label class="f">📝 Izoh</label><textarea class="in" id="t_izoh">' + esc(i.izoh) + '</textarea>' +
       '<button class="btn" id="t_saq">💾 Saqlaş</button>');
@@ -499,7 +499,7 @@ async function ekArxivStat(sg) {
   const S = ARXV.stat, mx = Math.max(...S.ustalar.map(u => u[1]), 1);
   const bar = (L, bos) => L.map(u => '<div class="card" ' + (bos ? 'data-axu="' + esc(u[0].indexOf('—') === 0 ? '' : u[0]) + '" style="cursor:pointer;padding:10px 12px"' : 'style="padding:10px 12px"') + '><div class="row"><b>' + esc(u[0]) + (bos ? ' ›' : '') + '</b><b>' + u[1] + '</b></div>' +
     '<div style="height:7px;background:var(--line);border-radius:9px;margin-top:6px"><div style="height:7px;border-radius:9px;background:var(--teal);width:' + Math.max(2, Math.round(u[1] / mx * 100)) + '%"></div></div></div>').join('');
-  let h = sg + '<div class="kpis"><div class="kpi"><b>' + S.jami + '</b><span>ish</span></div><div class="kpi"><b>' + S.rasm + '</b><span>rasm</span></div>' +
+  let h = sg + '<div class="kpis"><div class="kpi"><b>' + S.jami + '</b><span>iş</span></div><div class="kpi"><b>' + S.rasm + '</b><span>rasm</span></div>' +
     '<div class="kpi wide"><b>' + S.mijoz + '</b><span>mijoz (telefon böyiça)</span></div></div>';
   h += '<h2>👷 Ustalar böyiça</h2>' + bar(S.ustalar, true);
   h += '<h2>📂 Bosqiç</h2><div class="card">' + S.bosqich.map(b => '<div class="mrow"><span>' + esc(b[0]) + '</span><b>' + b[1] + '</b></div>').join('') + '</div>';
@@ -576,7 +576,7 @@ async function ekQongiroq(sg) {
         amal({ api: 'eslatmaTel', row: +b.dataset.st, tel: v }, $('st_ok'), 'Saqlanmoqda…').then(() => { ES = null; if (ekran === 'eslatma') chiz(); }); };
     });
     document.querySelectorAll('[data-sq]').forEach(b => b.onclick = () => {
-      oyna('✅ Qönğiroq natijasi', '<label class="f">📝 Izoh (ixtiyoriy)</label><input class="in" id="sq_iz" placeholder="Masalan: servisga yozildi, keyinroq qo\'ng\'iroq…">' +
+      oyna('✅ Qönğiroq natijasi', '<label class="f">📝 Izoh (ixtiyoriy)</label><input class="in" id="sq_iz" placeholder="Masalan: servisga yozildi, keyinroq qönğiroq…">' +
         '<button class="btn" id="sq_ok">💾 Saqlaş</button>');
       $('sq_ok').onclick = () => hal(+b.dataset.sq, 'qilindi', $('sq_ok'), $('sq_iz').value);
     });
@@ -587,7 +587,7 @@ let TU = '';
 const fmtSon = v => { const r = String(v == null ? '' : v).replace(/\D/g, ''); return r ? r.replace(/\B(?=(\d{3})+(?!\d))/g, ' ') : ''; };
 function tolovMaydon(i) {
   TU = '';
-  return i.ishlar.map((x, k) => '<label class="f">💰 ' + esc(x.turi) + ' × ' + x.soni + ' — mijozdan olingan</label><input class="in" inputmode="numeric" data-tsm="' + k + '" value="' + fmtSon(x.summa) + '" placeholder="Summa, so\'m">').join('') +
+  return i.ishlar.map((x, k) => '<label class="f">💰 ' + esc(x.turi) + ' × ' + x.soni + ' — mijozdan olingan</label><input class="in" inputmode="numeric" data-tsm="' + k + '" value="' + fmtSon(x.summa) + '" placeholder="Summa, söm">').join('') +
     '<label class="f">Tölov usuli *</label><div class="chips"><button class="chip" data-tu="naqd">💵 Naqd</button><button class="chip" data-tu="karta">💳 Karta</button></div>';
 }
 function tolovUlash() {
@@ -795,14 +795,31 @@ function ekBosh() {
 }
 
 /* ---------- Ustalar holati ---------- */
+let GR = null;   // 👥 usta guruhlari («Usta guruhlari» varag'i)
 function ekUstalar() {
   const U = D.ustalar, b = U.filter(u => !u.band).length;
-  $('main').innerHTML = '<div class="kpis"><div class="kpi"><b style="color:var(--green)">' + b + '</b><span>bo\'sh</span></div><div class="kpi"><b style="color:var(--orange)">' + (U.length - b) + '</b><span>band</span></div></div>' +
-    '<div class="card">' + U.map(u => '<div class="u"><div><div style="font-weight:700">' + esc(u.nom) + '</div>' +
+  if (!GR) api({ api: 'guruhlar' }).then(r => { if (r.ok) { GR = r.G; if (ekran === 'ustalar' && !$('ov')) ekUstalar(); } }).catch(() => {});
+  const gr = n => (GR && GR[n]) || null;
+  $('main').innerHTML = '<div class="kpis"><div class="kpi"><b style="color:var(--green)">' + b + '</b><span>böş</span></div><div class="kpi"><b style="color:var(--orange)">' + (U.length - b) + '</b><span>band</span></div></div>' +
+    '<p class="muted small" style="margin:0 4px 8px">👆 Guruh ustiga bosing — tarkibi, masʼuli va telefonlari.</p>' +
+    '<div class="card">' + U.map((u, k) => { const g = gr(u.nom);
+      return '<div class="u" data-ug="' + k + '" style="cursor:pointer"><div><div style="font-weight:700">' + esc(u.nom) + (g && g.yangi ? ' <span class="muted small" style="font-weight:600">· ' + esc(g.yangi) + '</span>' : '') + '</div>' +
+      (g && g.azolar.length ? '<div class="muted small">👥 ' + g.azolar.length + ' kişi' + (g.azolar[0].masul ? ' · masʼul: ' + esc(g.azolar[0].ism) : '') + '</div>' : '') +
       (u.band ? '<div class="muted small">' + esc(u.mijoz) + ' · ' + esc(u.qachon) + ' dan</div>' : '') +
       (u.kechlar ? '<div class="small" style="color:var(--orange)">⏸ Keçiktirilgan: ' + esc(u.kechlar.join(', ')) + '</div>' : '') +
       (u.qarz != null ? '<div class="small" style="color:var(--red)">💸 Qarzdor: ' + pul(-u.qarz) + ' — iş berilmaydi</div>' : '') + '</div>' +
-      '<div class="st ' + (u.band ? 'busy">🔒 Band' : 'free">🟢 Böş') + '</div></div>').join('') + '</div>';
+      '<div class="st ' + (u.band ? 'busy">🔒 Band' : 'free">🟢 Böş') + '</div></div>'; }).join('') + '</div>';
+  document.querySelectorAll('[data-ug]').forEach(el => el.onclick = () => { hap('sel'); guruhOyna(U[+el.dataset.ug]); });
+}
+function guruhOyna(u) {
+  const g = GR && GR[u.nom], A = g ? g.azolar : [], m = A.find(x => x.masul);
+  const tel = t => t ? '<a class="tel" style="white-space:nowrap" href="tel:' + esc(String(t).replace(/[^\d+]/g, '')) + '">📞 ' + esc(t) + '</a>' : '<span class="muted">📞 —</span>';
+  oyna('👷 ' + u.nom, (g && g.yangi ? '<p style="margin:0 2px 10px">🏷 Yangi nom: <b>' + esc(g.yangi) + '</b></p>' : '') +
+    '<div class="kpis"><div class="kpi"><b>' + A.length + '</b><span>kişi</span></div><div class="kpi"><b style="color:' + (u.band ? 'var(--orange)">🔒' : 'var(--green)">🟢') + '</b><span>' + (u.band ? 'band' : 'böş') + '</span></div></div>' +
+    (m ? '<div class="card" style="padding:12px"><div class="muted small">⭐ Masʼul</div><div style="font-weight:700;margin:2px 0 6px">' + esc(m.ism) + '</div>' + tel(m.tel) + '</div>' : '') +
+    (A.length ? '<div class="card" style="padding:4px 12px">' + A.map((x, i) => '<div class="u"><div><div style="font-weight:600">' + (i + 1) + '. ' + esc(x.ism) + (x.masul ? ' ⭐' : '') + '</div>' + (x.izoh ? '<div class="muted small">' + esc(x.izoh) + '</div>' : '') + '</div><div class="small">' + tel(x.tel) + '</div></div>').join('') + '</div>'
+      : '<div class="card muted">' + (GR ? 'Bu guruh aʼzolari hali kiritilmagan. Ularni «Usta guruhlari» varağida yozing.' : '⏳ Yuklanmoqda… birozdan keyin qayta oçing.') + '</div>') +
+    (u.band ? '<p class="muted small" style="margin:8px 2px">Hozir: ' + esc(u.mijoz) + ' · ' + esc(u.qachon) + ' dan</p>' : ''));
 }
 
 /* ---------- Rahbar: statistika ---------- */
@@ -843,13 +860,13 @@ function ekStat() {
     barlar('🛠 Iş turlari', (() => { const m = {}; T.filter(i => !i.otkaz).forEach(i => i.ishlar.forEach(x => m[x.turi] = (m[x.turi] || 0) + 1)); return m; })());
   const otk = T.filter(i => i.otkaz);
   if (otk.length) h += barlar('❌ Otkaz sabablari', sana(otk, i => !i.sabab || /ko.rsatilmagan/i.test(i.sabab) ? 'Belgilanmagan' : i.sabab));
-  h += '<button class="btn ghost" id="exp">📄 Şu davrni Excel\'ga yuklaş</button>';
+  h += '<button class="btn ghost" id="exp">📄 Şu davrni Excelʼga yuklaş</button>';
   h += '<p class="muted small" style="margin:14px 4px">Hisob «Yangi Işlar» varağidagi işlardan. Davr: tuşgan işlar — tuşgan sanasi böyiça, yopilganlar — yopilgan sanasi böyiça.</p>';
   $('main').innerHTML = h;
   [...$('dv').children].forEach(b => b.onclick = () => { davr = b.dataset.v; hap('sel'); if (davr === 'hammasi' && D.arxivN && !ARX) { ARX = true; return yukla(); } chiz(); });
   $('exp').onclick = async () => { const b = $('exp'); b.disabled = true; b.textContent = 'Tayyorlanmoqda…';
     try { const r = await api({ api: 'export', dan: chegara === '0000' ? '' : chegara }); if (!r.ok) throw new Error(r.xato); hap('success'); xabar(r.natija.join('\n')); }
-    catch (e) { xabar('⚠️ ' + e.message); } b.disabled = false; b.textContent = '📄 Şu davrni Excel\'ga yuklaş'; };
+    catch (e) { xabar('⚠️ ' + e.message); } b.disabled = false; b.textContent = '📄 Şu davrni Excelʼga yuklaş'; };
 }
 const pr = (a, b) => a == null || !b ? 0 : Math.max(3, Math.round(a / b * 100));
 const sana = (L, f) => { const m = {}; L.forEach(i => { const k = f(i) || '—'; m[k] = (m[k] || 0) + 1; }); return m; };
@@ -912,7 +929,7 @@ async function ekMoliya() {
     });
     if ($('dp_yangi')) $('dp_yangi').onclick = () => {
       TU = '';
-      oyna('🏦 Depozit kiritiş', '<label class="f">💰 Summa *</label><input class="in" inputmode="numeric" id="dp_s" placeholder="Summa, so\'m">' +
+      oyna('🏦 Depozit kiritiş', '<label class="f">💰 Summa *</label><input class="in" inputmode="numeric" id="dp_s" placeholder="Summa, söm">' +
         '<label class="f">Tölov usuli *</label><div class="chips"><button class="chip" data-tu="naqd">💵 Naqd</button><button class="chip" data-tu="karta">💳 Karta</button></div>' +
         '<label class="f">📝 Izoh</label><input class="in" id="dp_i" placeholder="Kimga topşirildi va h.k.">' +
         '<button class="btn" id="dp_ok">💾 Yuboriş</button><p class="muted small" style="margin:8px 2px">Rahbar tasdiqlagaç balansga qöşiladi.</p>');
@@ -944,13 +961,13 @@ function ekYangi() {
   h += '<label class="f">📅 Sana</label><input class="in" type="date" id="f_sana" value="' + esc(F.sana) + '">';
   h += '<label class="f">👤 Mijoz ismi *</label><input class="in" id="f_mijoz" placeholder="Masalan: Abdulloh aka" value="' + esc(F.mijoz) + '">';
   h += '<label class="f">📞 Telefon</label><input class="in" id="f_tel" type="tel" inputmode="tel" placeholder="90 123 45 67" value="' + esc(F.tel) + '"><div id="f_tarix">' + (F.tarixHtml || '') + '</div>';
-  h += '<label class="f">📍 Manzil</label><input class="in" id="f_manzil" placeholder="Mahalla, ko\'cha, mo\'ljal" value="' + esc(F.manzil) + '">';
+  h += '<label class="f">📍 Manzil</label><input class="in" id="f_manzil" placeholder="Mahalla, köça, möljal" value="' + esc(F.manzil) + '">';
   h += '<label class="f">🛠 Iş turi * — bir neçtasini tanlaş mumkin</label><div class="chips">' +
     m.turlar.map(t => '<button class="chip' + (F.turlar.includes(t) ? ' on' : '') + '" data-tur="' + esc(t) + '">' + esc(ya(t)) + '</button>').join('') + '</div>';
   F.turlar.forEach(t => {
     h += '<div class="tur"><div class="tn">' + esc(t) + '</div><div class="g">' +
       '<div class="step"><button data-m="' + esc(t) + '">−</button><span>' + (F.soni[t] || 1) + '</span><button data-p="' + esc(t) + '">+</button></div>' +
-      '<input class="in" inputmode="numeric" placeholder="Summa, so\'m" data-sm="' + esc(t) + '" value="' + esc(F.summa[t] || '') + '"></div></div>';
+      '<input class="in" inputmode="numeric" placeholder="Summa, söm" data-sm="' + esc(t) + '" value="' + esc(F.summa[t] || '') + '"></div></div>';
   });
   h += '<label class="f">👷 Usta (ixtiyoriy)</label><div class="chips">' +
     '<button class="chip' + (!F.usta ? ' on' : '') + '" data-usta="">⏳ Keyin tanlanadi</button>' +
@@ -1024,7 +1041,7 @@ function mijozFormaHtml(r) {
 /* ---------- Ishni tugatdim ---------- */
 /* ⭐ Mijoz bahosi — usta ishni yopgach telefonni mijozga beradi */
 const BAHO_S = ['⏰ Usta vaqtida keldimi?', '🛠 Iş sifati sizni qoniqtirdimi?', '🧹 Usta işdan keyin joyni toza qoldirdimi?', '🤝 Ustaning muomalasi qanday böldi?', '📱 Usta tizimdan foydalanişni tuşuntirib berdimi?'];
-const BAHO_T = [[1, '😞', 'Qoniqarsiz'], [3, '🙂', 'Qoniqarli'], [5, '🤩', 'A\'lo']];
+const BAHO_T = [[1, '😞', 'Qoniqarsiz'], [3, '🙂', 'Qoniqarli'], [5, '🤩', 'Aʼlo']];
 function bahoSorov(h, keyin) {
   const J = BAHO_S.map(() => 0);
   const i = ishTop(h);
