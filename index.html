@@ -856,7 +856,8 @@ function ekStat() {
     else if (t && t.holat === 'Kutilmoqda') kutS += Number(t.summa) || 0;
     else if (ishS(i)) tasd += ishS(i); else yoqN++; });
   const summa = tasd + kutS;
-  const kutO = ort(Y.map(i => i.kutishMin).filter(x => x != null)), ustO = ort(Y.map(i => i.ustaMin).filter(x => x != null)), jamO = ort(Y.map(i => i.jamiMin).filter(x => x != null));
+  const IS = (i, k) => i[k + 'Is'] != null ? i[k + 'Is'] : i[k + 'Min'];   /* v67: faqat iş soati 08:00–20:00 */
+  const kutO = ort(Y.map(i => IS(i, 'kutish')).filter(x => x != null)), ustO = ort(Y.map(i => IS(i, 'usta')).filter(x => x != null)), jamO = ort(Y.map(i => IS(i, 'jami')).filter(x => x != null));
   let h = '<div class="seg" id="dv">' + [['bugun', 'Bugun'], ['hafta', '7 kun'], ['oy', 'Bu oy'], ['hammasi', 'Hammasi']].map(x => '<button data-v="' + x[0] + '" class="' + (x[0] === davr ? 'on' : '') + '">' + x[1] + '</button>').join('') + '</div>';
   h += '<div class="kpis">' +
     '<div class="kpi"><b>' + T.length + '</b><span>tuşgan iş</span></div>' +
@@ -864,14 +865,14 @@ function ekStat() {
     '<div class="kpi"><b style="color:var(--orange)">' + ochiq.length + '</b><span>hozir oçiq · ' + kut.length + ' tasi ustasiz</span></div>' +
     '<div class="kpi"><b style="color:var(--red)">' + T.filter(i => i.otkaz).length + '</b><span>otkaz</span></div>' +
     '<div class="kpi wide"><b>' + mln(summa) + '</b><span>işga olingan summa · yopilgan işlar' + (kutS ? '<br>⏳ ' + mln(kutS) + ' — tölov tasdiği kutilmoqda' : '') + (yoqN ? '<br>📝 ' + yoqN + ' ta yopilgan işda summa kiritilmagan' : '') + '</span></div></div>';
-  h += '<h2>⏱ Vaqt qayerda ketyapti</h2><div class="card">' +
+  h += '<h2>⏱ Vaqt qayerda ketyapti</h2><div class="card"><div class="muted small" style="margin-bottom:6px">Faqat iş soati hisoblanadi (08:00–20:00), tun kirmaydi</div>' +
     '<div class="bar"><span>⏳ Ustaga berilgunça</span><div class="tr"><div class="fl" style="background:var(--orange);width:' + pr(kutO, jamO) + '%"></div></div><span class="v">' + dav(kutO) + '</span></div>' +
     '<div class="bar"><span>🔧 Usta işladi</span><div class="tr"><div class="fl" style="width:' + pr(ustO, jamO) + '%"></div></div><span class="v">' + dav(ustO) + '</span></div>' +
     '<div class="bar"><span><b>⏱ Jami</b></span><div class="tr"><div class="fl" style="background:var(--charcoal);width:' + (jamO ? 100 : 0) + '%"></div></div><span class="v">' + dav(jamO) + '</span></div></div>';
   // ustalar
   const us = {};
   L.forEach(i => { if (!i.usta || i.otkaz) return; const x = us[i.usta] || (us[i.usta] = { y: 0, t: [], o: 0 });
-    if (i.yopildi && ichida(i.y)) { x.y++; if (i.ustaMin != null) x.t.push(i.ustaMin); } if (!i.yopildi) x.o++; });
+    if (i.yopildi && ichida(i.y)) { x.y++; if (IS(i, 'usta') != null) x.t.push(IS(i, 'usta')); } if (!i.yopildi) x.o++; });
   const ul = Object.keys(us).sort((a, b) => us[b].y - us[a].y);
   h += '<h2>👷 Ustalar</h2><div class="card">' + (ul.length ? '<table class="tbl"><tr><th>Usta</th><th>Yopgan</th><th>Ört. vaqt</th><th>Hozir</th></tr>' +
     ul.map(u => '<tr><td>' + esc(u) + '</td><td>' + us[u].y + '</td><td>' + dav(ort(us[u].t)) + '</td><td>' + (us[u].o ? '🔒 ' + us[u].o : '🟢') + '</td></tr>').join('') + '</table>' : '<div class="muted">Maʼlumot yöq</div>') + '</div>';
