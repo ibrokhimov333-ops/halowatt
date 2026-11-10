@@ -1051,14 +1051,35 @@ function tugat(h, btn) {
   oyna('✅ Ishni tugatish', '<p class="muted small" style="margin:0 2px 10px">📸 O\'rnatilgan <b>har bir joyning</b> rasmini yuklang (20 tagacha). <b>Rasmsiz ish yopilmaydi.</b></p>' +
     '<div id="rp" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px"></div>' +
     '<label class="btn ghost" id="rl" style="display:block;text-align:center;cursor:pointer">📷 Rasm qo\'shish<input type="file" accept="image/*" multiple id="rf" style="display:none"></label>' +
+    '<div id="stk"><div class="card muted small" style="padding:12px">🏷 Stiker tekshirilmoqda…</div></div>' +
     (ishTop(h) ? tolovMaydon(ishTop(h)) : '') +
     '<button class="btn" id="r_ok" disabled>✅ Ishni yopish</button>');
   tolovUlash();
+  /* 🏷 Stiker: mijozda hali bo'lmasa — yopishtirilgan stiker rasmi yoki sabab majburiy */
+  const S = { kerak: null, rasm: '', sabab: '' };
+  const tayyor = () => !!R.length && S.kerak !== null && (!S.kerak || !!S.rasm || !!S.sabab);
+  const tugmaYangila = () => { if ($('r_ok') && !$('r_ok').textContent.includes('…')) $('r_ok').disabled = !tayyor(); };
+  const chizS = (sabablar) => {
+    const el = $('stk'); if (!el) return;
+    if (!S.kerak) { el.innerHTML = '<div class="card small" style="padding:12px">🏷 Bu mijozda Halowatt stikeri bor ✅</div>'; return tugmaYangila(); }
+    el.innerHTML = '<div class="card" style="padding:12px"><div style="font-weight:700;margin-bottom:6px">🏷 Stiker</div>' +
+      '<p class="muted small" style="margin:0 0 10px">Mijozning NVR / kamera yoniga yangi Halowatt stikerini yopishtiring (eski stiker bo\'lsa — ustidan) va <b>rasmini</b> yuklang.</p>' +
+      (S.rasm ? '<div style="position:relative;margin-bottom:8px"><img src="' + S.rasm + '" style="width:100%;max-height:220px;object-fit:cover;border-radius:10px;display:block"><button id="sx" style="position:absolute;top:6px;right:6px;border:0;border-radius:50%;width:26px;height:26px;background:rgba(0,0,0,.6);color:#fff">✕</button></div>' :
+        S.sabab ? '' : '<label class="btn ghost" style="display:block;text-align:center;cursor:pointer;margin-bottom:8px">📷 Stiker rasmi<input type="file" accept="image/*" capture="environment" id="sf" style="display:none"></label>') +
+      (S.rasm ? '' : '<div class="muted small" style="margin:4px 2px 6px">Yopishtira olmadingizmi? Sababini tanlang:</div><div style="display:flex;flex-wrap:wrap;gap:6px">' +
+        sabablar.map(x => '<button class="chip' + (S.sabab === x ? ' on' : '') + '" data-ss="' + esc(x) + '">' + esc(x) + '</button>').join('') + '</div>') + '</div>';
+    if ($('sx')) $('sx').onclick = () => { S.rasm = ''; chizS(sabablar); };
+    if ($('sf')) $('sf').onchange = async e => { const f = e.target.files[0]; if (!f) return; try { S.rasm = await kichrayt(f); S.sabab = ''; hap('sel'); } catch (x) { xabar('⚠️ ' + x.message); } chizS(sabablar); };
+    document.querySelectorAll('[data-ss]').forEach(b => b.onclick = () => { S.sabab = S.sabab === b.dataset.ss ? '' : b.dataset.ss; hap('sel'); chizS(sabablar); });
+    tugmaYangila();
+  };
+  api({ api: 'stikerHolat', h }).then(r => { S.kerak = r.ok ? !!r.kerak : false; chizS((r && r.sabablar) || []); })
+    .catch(() => { S.kerak = false; chizS([]); });
   const chizR = () => {
     $('rp').innerHTML = R.map((d, k) => '<div style="position:relative"><img src="' + d + '" style="width:100%;aspect-ratio:1;object-fit:cover;border-radius:10px;display:block">' +
       '<button data-rx="' + k + '" style="position:absolute;top:4px;right:4px;border:0;border-radius:50%;width:24px;height:24px;background:rgba(0,0,0,.6);color:#fff">✕</button></div>').join('');
     document.querySelectorAll('[data-rx]').forEach(b => b.onclick = () => { R.splice(+b.dataset.rx, 1); chizR(); });
-    $('r_ok').disabled = !R.length; $('rl').style.display = R.length >= 20 ? 'none' : 'block'; $('rl').firstChild.textContent = R.length ? '📷 Yana rasm qo\'shish (' + R.length + ' / 20)' : '📷 Rasm qo\'shish';
+    $('r_ok').disabled = !tayyor(); $('rl').style.display = R.length >= 20 ? 'none' : 'block'; $('rl').firstChild.textContent = R.length ? '📷 Yana rasm qo\'shish (' + R.length + ' / 20)' : '📷 Rasm qo\'shish';
   };
   const kichrayt = f => new Promise((ok, no) => {
     const u = URL.createObjectURL(f), im = new Image();
@@ -1074,21 +1095,22 @@ function tugat(h, btn) {
   };
   $('r_ok').onclick = async () => {
     if (!R.length) return xabar('📸 Kamida 1 ta rasm yuklang.');
+    if (S.kerak && !S.rasm && !S.sabab) return xabar('🏷 Stiker rasmini yuklang yoki sababini tanlang.');
     const tl = ishTop(h) ? tolovOl() : {}; if (!tl) return;
     const b = $('r_ok'); b.disabled = true; b.textContent = 'Yuklanmoqda…';
     try {
       if (R.length > 10) b.textContent = 'Yuklanmoqda… 10 / ' + R.length;
-      const r = await api(Object.assign({ api: 'tugatdim', h, rasmlar: R.slice(0, 10) }, tl));
+      const r = await api(Object.assign({ api: 'tugatdim', h, rasmlar: R.slice(0, 10) }, S.kerak ? (S.rasm ? { stiker: S.rasm } : { stikerSabab: S.sabab }) : {}, tl));
       if (!r.ok) throw new Error(r.xato);
       if (!r.oldin) for (let i = 10; i < R.length; i += 10) {
         b.textContent = 'Yuklanmoqda… ' + Math.min(i + 10, R.length) + ' / ' + R.length;
         try { const q = await api({ api: 'rasmQosh', h, rasmlar: R.slice(i, i + 10) }); if (q.ok) r.rasm = q.jami; } catch (x) {}
       }
       hap('success'); yop(); if (btn) { btn.disabled = true; btn.textContent = '✅ Yopildi'; }
-      const m = r.oldin ? '✅ Bu ish allaqachon yopilgan.' : '✅ Ish yopildi — ' + r.vaqt + '\n📸 ' + r.rasm + ' ta rasm saqlandi.' + (r.tolov ? '\n💵 To\'lov rahbar tasdig\'iga yuborildi.' : r.tolovXato ? '\n⚠️ To\'lov: ' + r.tolovXato : '');
+      const m = r.oldin ? '✅ Bu ish allaqachon yopilgan.' : '✅ Ish yopildi — ' + r.vaqt + '\n📸 ' + r.rasm + ' ta rasm saqlandi.' + (r.stiker === 'Yopishtirildi' ? '\n🏷 Stiker rasmi saqlandi.' : r.stiker ? '\n🏷 Stiker o\'tkazildi (sabab rahbarga yuborildi).' : '') + (r.tolov ? '\n💵 To\'lov rahbar tasdig\'iga yuborildi.' : r.tolovXato ? '\n⚠️ To\'lov: ' + r.tolovXato : '');
       if (r.oldin) { xabar(m); molTozala(); await yukla(true); }
       else bahoSorov(h, t => { xabar((t ? t + '\n\n' : '') + m); molTozala(); yukla(true); });
-    } catch (x) { b.disabled = false; b.textContent = '✅ Ishni yopish'; hap('error'); xabar('⚠️ ' + x.message); }
+    } catch (x) { b.textContent = '✅ Ishni yopish'; b.disabled = !tayyor(); hap('error'); xabar('⚠️ ' + x.message); }
   };
 }
 
