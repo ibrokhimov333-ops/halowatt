@@ -1092,7 +1092,7 @@ function tugat(h, btn) {
     document.querySelectorAll('[data-ss]').forEach(b => b.onclick = () => { S.sabab = S.sabab === b.dataset.ss ? '' : b.dataset.ss; hap('sel'); chizS(sabablar); });
     tugmaYangila();
   };
-  api({ api: 'stikerHolat', h }).then(r => { S.kerak = r.ok ? !!r.kerak : false; chizS((r && r.sabablar) || []); })
+  api({ api: 'stikerHolat', h }).then(r => { S.kerak = r.ok ? !!r.kerak : false; if (r.ok && r.ochiq === false) { if ($('stk')) $('stk').innerHTML = ''; return tugmaYangila(); } chizS((r && r.sabablar) || []); })
     .catch(() => { S.kerak = false; chizS([]); });
   const chizR = () => {
     $('rp').innerHTML = R.map((d, k) => '<div style="position:relative"><img src="' + d + '" style="width:100%;aspect-ratio:1;object-fit:cover;border-radius:10px;display:block">' +
