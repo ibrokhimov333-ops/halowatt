@@ -870,12 +870,16 @@ function ekStat() {
     '<div class="bar"><span>🔧 Usta işladi</span><div class="tr"><div class="fl" style="width:' + pr(ustO, jamO) + '%"></div></div><span class="v">' + dav(ustO) + '</span></div>' +
     '<div class="bar"><span><b>⏱ Jami</b></span><div class="tr"><div class="fl" style="background:var(--charcoal);width:' + (jamO ? 100 : 0) + '%"></div></div><span class="v">' + dav(jamO) + '</span></div></div>';
   // ustalar
+  /* v68: oçiq işning hozirgaça ötgan iş vaqti (08:00–20:00) */
+  const isMin = iso => { if (!iso) return null; const a = new Date(iso), b = new Date(); if (isNaN(a) || b <= a) return null; let m = 0; const d = new Date(a); d.setHours(0, 0, 0, 0);
+    for (let k = 0; d < b && k < 400; k++, d.setDate(d.getDate() + 1)) { const s0 = new Date(d); s0.setHours(8, 0, 0, 0); const e0 = new Date(d); e0.setHours(20, 0, 0, 0); const x = Math.max(s0, a), y = Math.min(e0, b); if (y > x) m += (y - x) / 60000; }
+    return Math.round(m); };
   const us = {};
   L.forEach(i => { if (!i.usta || i.otkaz) return; const x = us[i.usta] || (us[i.usta] = { y: 0, t: [], o: 0 });
-    if (i.yopildi && ichida(i.y)) { x.y++; if (IS(i, 'usta') != null) x.t.push(IS(i, 'usta')); } if (!i.yopildi) x.o++; });
+    if (i.yopildi && ichida(i.y)) { x.y++; if (IS(i, 'usta') != null) x.t.push(IS(i, 'usta')); } if (!i.yopildi) { x.o++; const m = isMin(i.b); if (m != null && (x.j == null || m > x.j)) x.j = m; } });
   const ul = Object.keys(us).sort((a, b) => us[b].y - us[a].y);
   h += '<h2>👷 Ustalar</h2><div class="card">' + (ul.length ? '<table class="tbl"><tr><th>Usta</th><th>Yopgan</th><th>Ört. vaqt</th><th>Hozir</th></tr>' +
-    ul.map(u => '<tr><td>' + esc(u) + '</td><td>' + us[u].y + '</td><td>' + dav(ort(us[u].t)) + '</td><td>' + (us[u].o ? '🔒 ' + us[u].o : '🟢') + '</td></tr>').join('') + '</table>' : '<div class="muted">Maʼlumot yöq</div>') + '</div>';
+    ul.map(u => '<tr><td>' + esc(u) + '</td><td>' + us[u].y + '</td><td>' + (us[u].t.length ? dav(ort(us[u].t)) : us[u].j != null ? '⏳ ' + dav(us[u].j) : '—') + '</td><td>' + (us[u].o ? '🔒 ' + us[u].o : '🟢') + '</td></tr>').join('') + '</table>' : '<div class="muted">Maʼlumot yöq</div>') + '</div>';
   h += barlar('🏢 Filiallar', sana(T, i => i.filial)) + barlar('🙋 Iş bergan xodimlar', sana(T, i => i.shaxs)) +
     barlar('🛠 Iş turlari', (() => { const m = {}; T.filter(i => !i.otkaz).forEach(i => i.ishlar.forEach(x => m[x.turi] = (m[x.turi] || 0) + 1)); return m; })());
   const otk = T.filter(i => i.otkaz);
