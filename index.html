@@ -972,7 +972,9 @@ async function ekMoliya() {
 }
 
 /* ---------- Yangi ish formasi ---------- */
-function yangiForma() { return { sana: D.meta.bugun, mijoz: '', tel: '', manzil: '', turlar: [], soni: {}, summa: {}, izoh: '', usta: '', shaxs: '', filial: '' }; }
+/* v69: sana qurilmaning o'z kunidan olinadi — eski keshdagi D.meta.bugun ishlatilmaydi */
+function bugunISO() { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+function yangiForma() { return { sana: bugunISO(), mijoz: '', tel: '', manzil: '', turlar: [], soni: {}, summa: {}, izoh: '', usta: '', shaxs: '', filial: '' }; }
 function ekYangi() {
   if (!F) F = yangiForma();
   if (natija) {
@@ -982,7 +984,8 @@ function ekYangi() {
   }
   const m = D.meta, band = {}; (D.ustalar || []).forEach(u => band[u.nom] = u.band || u.qarz != null);
   let h = '';
-  h += '<label class="f">📅 Sana</label><input class="in" type="date" id="f_sana" value="' + esc(F.sana) + '">';
+  h += '<label class="f">📅 Sana</label><input class="in" type="date" id="f_sana" value="' + esc(F.sana) + '" max="' + bugunISO() + '">' +
+    (F.sana !== bugunISO() ? '<p class="small" style="margin:4px 2px;color:var(--orange)">⚠️ Sana bugungi emas — tekşirib köring</p>' : '');
   h += '<label class="f">👤 Mijoz ismi *</label><input class="in" id="f_mijoz" placeholder="Masalan: Abdulloh aka" value="' + esc(F.mijoz) + '">';
   h += '<label class="f">📞 Telefon</label><input class="in" id="f_tel" type="tel" inputmode="tel" placeholder="90 123 45 67" value="' + esc(F.tel) + '"><div id="f_tarix">' + (F.tarixHtml || '') + '</div>';
   h += '<label class="f">📍 Manzil</label><input class="in" id="f_manzil" placeholder="Mahalla, köça, möljal" value="' + esc(F.manzil) + '">';
@@ -1099,8 +1102,9 @@ function tugat(h, btn) {
     '<button class="btn" id="r_ok" disabled>✅ Işni yopiş</button>');
   tolovUlash();
   /* 🏷 Stiker: mijozda hali bo'lmasa — yopishtirilgan stiker rasmi yoki sabab majburiy */
-  const S = { kerak: null, rasm: '', sabab: '' };
-  const tayyor = () => !!R.length && S.kerak !== null && (!S.kerak || !!S.rasm || !!S.sabab);
+  /* v70: stiker majburiy — rasm, yoki rahbar bergan ruxsat */
+  const S = { kerak: null, rasm: '', sabab: '', sorov: '' };
+  const tayyor = () => !!R.length && S.kerak !== null && (!S.kerak || !!S.rasm || S.sorov === 'Ruxsat');
   const tugmaYangila = () => { if ($('r_ok') && !$('r_ok').textContent.includes('…')) $('r_ok').disabled = !tayyor(); };
   const chizS = (sabablar) => {
     const el = $('stk'); if (!el) return;
@@ -1109,14 +1113,23 @@ function tugat(h, btn) {
       '<p class="muted small" style="margin:0 0 10px">Mijozning NVR / kamera yoniga yangi Halowatt stikerini yopiştiring (eski stiker bölsa — ustidan) va <b>rasmini</b> yuklang.</p>' +
       (S.rasm ? '<div style="position:relative;margin-bottom:8px"><img src="' + S.rasm + '" style="width:100%;max-height:220px;object-fit:cover;border-radius:10px;display:block"><button id="sx" style="position:absolute;top:6px;right:6px;border:0;border-radius:50%;width:26px;height:26px;background:rgba(0,0,0,.6);color:#fff">✕</button></div>' :
         S.sabab ? '' : '<label class="btn ghost" style="display:block;text-align:center;cursor:pointer;margin-bottom:8px">📷 Stiker rasmi<input type="file" accept="image/*" capture="environment" id="sf" style="display:none"></label>') +
-      (S.rasm ? '' : '<div class="muted small" style="margin:4px 2px 6px">Yopiştira olmadingizmi? Sababini tanlang:</div><div style="display:flex;flex-wrap:wrap;gap:6px">' +
-        sabablar.map(x => '<button class="chip' + (S.sabab === x ? ' on' : '') + '" data-ss="' + esc(x) + '">' + esc(ya(x)) + '</button>').join('') + '</div>') + '</div>';
+      (S.rasm ? '' : S.sorov === 'Ruxsat' ? '<div class="small" style="margin:4px 2px;color:var(--teal)">✅ Rahbar stikersiz yopishga ruxsat berdi — işni yopişingiz mumkin</div>'
+        : S.sorov === 'Kutilmoqda' ? '<div class="small" style="margin:4px 2px;color:var(--orange)">⏳ Ruxsat söralgan — rahbar javobini kuting. Javob botga keladi.</div>'
+        : (S.sorov === 'Rad' ? '<div class="small" style="margin:4px 2px;color:var(--red)">❌ Rahbar ruxsat bermadi — stiker rasmi kerak</div>' : '') +
+          '<div class="muted small" style="margin:4px 2px 6px">Yopiştira olmadingizmi? Sababini tanlab, rahbardan ruxsat sörang:</div>' +
+          '<div style="display:flex;flex-wrap:wrap;gap:6px">' +
+          sabablar.map(x => '<button class="chip' + (S.sabab === x ? ' on' : '') + '" data-ss="' + esc(x) + '">' + esc(ya(x)) + '</button>').join('') + '</div>' +
+          '<button class="btn ghost" id="sq" style="margin-top:8px"' + (S.sabab ? '' : ' disabled') + '>🙋 Ruxsat söraş</button>') + '</div>';
     if ($('sx')) $('sx').onclick = () => { S.rasm = ''; chizS(sabablar); };
     if ($('sf')) $('sf').onchange = async e => { const f = e.target.files[0]; if (!f) return; try { S.rasm = await kichrayt(f); S.sabab = ''; hap('sel'); } catch (x) { xabar('⚠️ ' + x.message); } chizS(sabablar); };
     document.querySelectorAll('[data-ss]').forEach(b => b.onclick = () => { S.sabab = S.sabab === b.dataset.ss ? '' : b.dataset.ss; hap('sel'); chizS(sabablar); });
+    if ($('sq')) $('sq').onclick = async () => { if (!S.sabab) return; const btn = $('sq'); btn.disabled = true; btn.textContent = 'Yuborilmoqda…';
+      try { const r = await api({ api: 'stikerSorov', h, sabab: S.sabab }); if (!r.ok) throw new Error(r.xato);
+        S.sorov = r.holat || 'Kutilmoqda'; xabar((r.natija || ['✓'])[0]); } catch (x) { xabar('⚠️ ' + x.message); }
+      chizS(sabablar); };
     tugmaYangila();
   };
-  api({ api: 'stikerHolat', h }).then(r => { S.kerak = r.ok ? !!r.kerak : false; if (r.ok && r.ochiq === false) { if ($('stk')) $('stk').innerHTML = ''; return tugmaYangila(); } chizS((r && r.sabablar) || []); })
+  api({ api: 'stikerHolat', h }).then(r => { S.kerak = r.ok ? !!r.kerak : false; S.sorov = (r && r.sorov) || ''; S.sabab = (r && r.sorovSabab) || ''; if (r.ok && r.ochiq === false) { if ($('stk')) $('stk').innerHTML = ''; return tugmaYangila(); } chizS((r && r.sabablar) || []); })
     .catch(() => { S.kerak = false; chizS([]); });
   const chizR = () => {
     $('rp').innerHTML = R.map((d, k) => '<div style="position:relative"><img src="' + d + '" style="width:100%;aspect-ratio:1;object-fit:cover;border-radius:10px;display:block">' +
@@ -1143,7 +1156,7 @@ function tugat(h, btn) {
     const b = $('r_ok'); b.disabled = true; b.textContent = 'Yuklanmoqda…';
     try {
       if (R.length > 10) b.textContent = 'Yuklanmoqda… 10 / ' + R.length;
-      const r = await api(Object.assign({ api: 'tugatdim', h, rasmlar: R.slice(0, 10) }, S.kerak ? (S.rasm ? { stiker: S.rasm } : { stikerSabab: S.sabab }) : {}, tl));
+      const r = await api(Object.assign({ api: 'tugatdim', h, rasmlar: R.slice(0, 10) }, S.kerak && S.rasm ? { stiker: S.rasm } : {}, tl));
       if (!r.ok) throw new Error(r.xato);
       if (!r.oldin) for (let i = 10; i < R.length; i += 10) {
         b.textContent = 'Yuklanmoqda… ' + Math.min(i + 10, R.length) + ' / ' + R.length;
